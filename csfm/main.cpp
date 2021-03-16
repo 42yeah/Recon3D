@@ -6,9 +6,15 @@
 //
 
 #include <iostream>
+#include <SfM.hpp>
+
 
 int main(int argc, const char * argv[]) {
-    // insert code here...
-    std::cout << "Hello, World!\n";
+    SfM sfm;
+    
+    sfm.set_image_dir("assets/");
+    sfm.run_sfm();
+    sfm.export_to_ply("res.ply");
+    
     return 0;
 }

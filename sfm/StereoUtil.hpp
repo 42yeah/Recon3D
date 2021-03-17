@@ -11,6 +11,7 @@
 #include "sfm_common.hpp"
 #define RANSAC_THRESHOLD 10.0f
 #define MIN_PROJECTION_ERROR 10.0f
+#define POSE_INLIERS_MINIMAL_RATIO 0.5f
 
 
 class StereoUtil {
@@ -92,6 +93,15 @@ public:
                                        IN const Matches &matches,
                                        OUT Features &aligned_left,
                                        OUT Features &aligned_right);
+    
+    
+    /// Retrieve camera pose from 2d3d matches.
+    /// @param intrinsics camera intrinsics.
+    /// @param match_2d3d the 2D3D match in the view.
+    /// @param camera_pose camera extrinsics (R, t).
+    bool find_camera_pose_from_2d3d_match(IN const Intrinsics &intrinsics,
+                                          IN const Image2D3DMatch &match_2d3d,
+                                          OUT cv::Matx34f &camera_pose);
 };
 
 #endif /* StereoUtil_hpp */

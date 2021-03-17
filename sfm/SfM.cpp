@@ -36,6 +36,7 @@ Result SfM::run_sfm() {
     extract_features();
     create_feature_match_matrix();
     find_baseline_triangulation();
+    add_more_views_to_reconstruction();
     
     return OK;
 }
@@ -137,7 +138,7 @@ void SfM::find_baseline_triangulation() {
         
         float pose_inlier_ratio = (float) pruned_matches.size() / feature_match_mat[left][right].size();
         LOG("Pruned inlier ratio of (%d, %d): %f", left, right, pose_inlier_ratio);
-        if (pose_inlier_ratio < POSE_INLIER_MINIMAL_RATIO) {
+        if (pose_inlier_ratio < POSE_INLIERS_MINIMAL_RATIO) {
             LOG("Insufficient pose inliers. Skipping.");
             continue;
         }
@@ -222,6 +223,132 @@ void SfM::export_to_ply(std::string path) {
     }
     
     ofs.close();
+}
+
+void SfM::add_more_views_to_reconstruction() { 
+    LOG("Adding more views to reconstruction...");
+    
+    while (done_views.size() != images.size()) {
+        Image2D3DMatches matches_2d3d = find_2d_3d_matches();
+        
+        int best_view = -1;
+        int best_num_matches = 0;
+        for (const auto &match_2d3d : matches_2d3d) {
+            int num_matches = (int) match_2d3d.second.points_2d.size();
+            if (num_matches > best_num_matches) {
+                best_view = match_2d3d.first;
+                best_num_matches = num_matches;
+            }
+        }
+        if (best_view == -1) {
+            LOG("ERR! No 2D-3D matches has any legitimate match.");
+            break;
+        }
+        LOG("Best view: %d has %d matches", best_view, best_num_matches);
+        LOG("Trying to add %d to existing good views.", best_view);
+        
+        done_views.insert(best_view);
+        
+        // Retrieve new camera pose
+        cv::Matx34f camera_pose;
+        bool success = stereo_util.find_camera_pose_from_2d3d_match(intrinsics, matches_2d3d[best_view], camera_pose);
+        if (!success) {
+            LOG("Cannot retrieve camera pose for view: %d", best_view);
+            continue;
+        }
+
+        camera_poses[best_view] = camera_pose;
+        LOG("Camera pose for view %d located.", best_view);
+        
+        // Time to triangulate more points!
+        bool any_view_success = false;
+        for (int good_view : good_views) {
+            int left = good_view < best_view ? good_view : best_view;
+            int right = good_view < best_view ? best_view : good_view;
+            Matches pruned_matches;
+            
+            cv::Matx34f p_left, p_right;
+            bool success = stereo_util.find_camera_matrices_from_match(intrinsics, feature_match_mat[left][right], features[left], features[right], pruned_matches, p_left, p_right);
+            feature_match_mat[left][right] = pruned_matches;
+            if (!success) {
+                LOG("EPIC FAIL: failde to get pruned matches");
+                continue;
+            }
+            
+            PointCloud cloud;
+            success = stereo_util.triangulate_views(intrinsics, { left, right }, pruned_matches, features[left], features[right], camera_poses[left], camera_poses[right], cloud);
+            if (!success) {
+                LOG("Failed to trianglulate view %d and %d. Skipping...", left, right);
+                continue;
+            }
+            
+            LOG("Merging triangulation between %d and %d. Matches: #%lu", left, right, feature_match_mat[left][right].size());
+            merge_new_pointclouds(cloud);
+            any_view_success = true;
+        }
+        
+        good_views.insert(best_view);
+    }
+}
+
+SfM::Image2D3DMatches SfM::find_2d_3d_matches() { 
+    Image2D3DMatches matches_2d3d;
+    
+    for (int view_idx = 0; view_idx < images.size(); view_idx++) {
+        // If the view is done...
+        if (done_views.find(view_idx) != done_views.end()) {
+            // Skip it
+            continue;
+        }
+        // Otherwise, for each point in the PC...
+        Image2D3DMatch match_2d3d;
+        for (const Point3DInMap &point : reconstruction_cloud) {
+            bool found_point = false;
+            
+            // Find its originating view and view keypoint index
+            for (const std::pair<int, int> view_and_idx : point.originating_views) {
+                const int originating_view_idx = view_and_idx.first;
+                const int keypoint_idx = view_and_idx.second;
+                
+                // Just kinda sort them, so it could be used by the feature matching matrix later
+                const int left = (originating_view_idx < view_idx ? originating_view_idx : view_idx);
+                const int right = (originating_view_idx < view_idx ? view_idx : originating_view_idx);
+                
+                for (const cv::DMatch &match : feature_match_mat[left][right]) {
+                    int matched_2d_point_in_new_view = -1;
+                    
+                    // Is originating view "left"?
+                    if (originating_view_idx < view_idx) {
+                        if (match.queryIdx == keypoint_idx) {
+                            matched_2d_point_in_new_view = match.trainIdx;
+                        }
+                    } else {
+                        if (match.trainIdx == keypoint_idx) {
+                            matched_2d_point_in_new_view = match.queryIdx;
+                        }
+                    }
+                    // Is there such a point in this view?
+                    if (matched_2d_point_in_new_view >= 0) {
+                        const Features &view_features = features[view_idx];
+                        match_2d3d.points_2d.push_back(view_features.points[matched_2d_point_in_new_view]);
+                        match_2d3d.points_3d.push_back(point.point);
+                        found_point = true;
+                        break;
+                    }
+                } // for (const cv::DMatch &match : feature_match_mat[left][right])
+                if (found_point) {
+                    break;
+                }
+            } // for (const std::pair<int, int> &view_and_idx : point.originating_views)
+        } // for (const Point3DInMap &point : reconstruction_cloud)
+        matches_2d3d[view_idx] = match_2d3d;
+    } // for (int view_idx = 0; view_idx < images.size(); view_idx++)
+    return matches_2d3d;
+}
+
+void SfM::merge_new_pointclouds(const PointCloud &cloud) {
+    // The more points there are, the better! Yay!
+    reconstruction_cloud.insert(reconstruction_cloud.end(), cloud.begin(), cloud.end());
 }
 
 

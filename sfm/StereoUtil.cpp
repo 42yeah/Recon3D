@@ -44,7 +44,7 @@ void StereoUtil::get_aligned_points_from_match(const Features &left, const Featu
         // ... And do the same for the right
         aligned_right.keypoints.push_back(right.keypoints[matches[i].trainIdx]);
         aligned_right.descriptors.push_back(right.descriptors.row(matches[i].trainIdx));
-        
+        // Finally, record the keypoint index from oringinating view in back references
         left_back_ref.push_back(matches[i].queryIdx);
         right_back_ref.push_back(matches[i].trainIdx);
     }
@@ -149,4 +149,33 @@ bool StereoUtil::triangulate_views(const Intrinsics &intrinsics, const ImagePair
     
     return true;
 }
+
+bool StereoUtil::find_camera_pose_from_2d3d_match(const Intrinsics &intrinsics, const Image2D3DMatch &match_2d3d, cv::Matx34f &camera_pose) { 
+    cv::Mat rvec, tvec;
+    cv::Mat inliers;
+    
+    cv::solvePnPRansac(match_2d3d.points_3d,
+                       match_2d3d.points_2d,
+                       intrinsics.k,
+                       intrinsics.distortion,
+                       rvec,
+                       tvec,
+                       false,
+                       100,
+                       RANSAC_THRESHOLD,
+                       0.99,
+                       inliers);
+    const float inliers_ratio = (float) cv::countNonZero(inliers) / match_2d3d.points_2d.size();
+    if (inliers_ratio < POSE_INLIERS_MINIMAL_RATIO) {
+        LOG("WARNING! inliers ratio too small, at %f", inliers_ratio);
+        return false;
+    }
+    cv::Mat R;
+    cv::Rodrigues(rvec, R);
+    
+    R.copyTo(cv::Mat(3, 4, CV_32FC1, camera_pose.val)(cv::Rect(0, 0, 3, 3)));
+    tvec.copyTo(cv::Mat(3, 4, CV_32FC1, camera_pose.val)(cv::Rect(3, 0, 1, 3)));
+    return true;
+}
+
 

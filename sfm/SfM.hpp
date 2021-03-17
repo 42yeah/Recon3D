@@ -17,7 +17,6 @@
 #include "StereoUtil.hpp"
 
 #define MIN_POINT_COUNT_FOR_HOMOGRAPHY 100
-#define POSE_INLIER_MINIMAL_RATIO 0.5f
 
 
 enum Result {
@@ -52,9 +51,9 @@ private:
     
     void adjust_current_bundle();
     
-    std::map<float, ImagePair> sort_views_for_baseline();
-    
     void add_more_views_to_reconstruction();
+    
+    std::map<float, ImagePair> sort_views_for_baseline();
     
     Image2D3DMatches find_2d_3d_matches();
     

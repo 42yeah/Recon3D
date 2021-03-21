@@ -17,17 +17,18 @@
 		1839AC662606E3C10080F75A /* libopencv_highgui.4.5.2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 18E9AC6A25FEE81F00DEAE8F /* libopencv_highgui.4.5.2.dylib */; };
 		1839AC682606E3C10080F75A /* libopencv_imgcodecs.4.5.2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 18E9AC6725FEE81F00DEAE8F /* libopencv_imgcodecs.4.5.2.dylib */; };
 		1839AC6A2606E3C10080F75A /* libopencv_imgproc.4.5.2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 18E9AC6B25FEE81F00DEAE8F /* libopencv_imgproc.4.5.2.dylib */; };
-		1839AC702606E4100080F75A /* libopencv_calib3d.4.5.2.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 18E9AC6825FEE81F00DEAE8F /* libopencv_calib3d.4.5.2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1839AC712606E4100080F75A /* libopencv_core.4.5.2.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 18E9AC6625FEE81F00DEAE8F /* libopencv_core.4.5.2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1839AC722606E4100080F75A /* libopencv_features2d.4.5.2.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 18E9AC6925FEE81F00DEAE8F /* libopencv_features2d.4.5.2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1839AC732606E4100080F75A /* libopencv_flann.4.5.2.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 18E9AC6C25FEE81F00DEAE8F /* libopencv_flann.4.5.2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1839AC742606E4100080F75A /* libopencv_highgui.4.5.2.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 18E9AC6A25FEE81F00DEAE8F /* libopencv_highgui.4.5.2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1839AC752606E4100080F75A /* libopencv_imgcodecs.4.5.2.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 18E9AC6725FEE81F00DEAE8F /* libopencv_imgcodecs.4.5.2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1839AC762606E4100080F75A /* libopencv_imgproc.4.5.2.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 18E9AC6B25FEE81F00DEAE8F /* libopencv_imgproc.4.5.2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1839AC7B2606E5880080F75A /* algebra.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1839AC792606E5880080F75A /* algebra.cpp */; };
 		1839AC7C2606E5880080F75A /* algebra.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 1839AC7A2606E5880080F75A /* algebra.hpp */; };
 		1839AC802606EB7A0080F75A /* libopencv_flann.4.5.2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 18E9AC6C25FEE81F00DEAE8F /* libopencv_flann.4.5.2.dylib */; };
 		1839AC832606EBE10080F75A /* libopencv_core.4.5.2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 18E9AC6625FEE81F00DEAE8F /* libopencv_core.4.5.2.dylib */; };
+		186668512606F9EA00891CC2 /* libopencv_core.4.5.2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 18E9AC6625FEE81F00DEAE8F /* libopencv_core.4.5.2.dylib */; };
+		186668542606FA3900891CC2 /* libopencv_calib3d.4.5.2.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 18E9AC6825FEE81F00DEAE8F /* libopencv_calib3d.4.5.2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		186668552606FA3900891CC2 /* libopencv_core.4.5.2.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 18E9AC6625FEE81F00DEAE8F /* libopencv_core.4.5.2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		186668562606FA3900891CC2 /* libopencv_features2d.4.5.2.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 18E9AC6925FEE81F00DEAE8F /* libopencv_features2d.4.5.2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		186668572606FA3900891CC2 /* libopencv_flann.4.5.2.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 18E9AC6C25FEE81F00DEAE8F /* libopencv_flann.4.5.2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		186668582606FA3900891CC2 /* libopencv_highgui.4.5.2.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 18E9AC6A25FEE81F00DEAE8F /* libopencv_highgui.4.5.2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		186668592606FA3A00891CC2 /* libopencv_imgcodecs.4.5.2.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 18E9AC6725FEE81F00DEAE8F /* libopencv_imgcodecs.4.5.2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1866685A2606FA3A00891CC2 /* libopencv_imgproc.4.5.2.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 18E9AC6B25FEE81F00DEAE8F /* libopencv_imgproc.4.5.2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		18BE81282606E08500FF7F9E /* Hoppe.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 18BE81272606E08500FF7F9E /* Hoppe.hpp */; };
 		18BE812C2606E08500FF7F9E /* Hoppe.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18BE812B2606E08500FF7F9E /* Hoppe.cpp */; };
 		18BE81392606E0F600FF7F9E /* tiny_obj_loader.h in Headers */ = {isa = PBXBuildFile; fileRef = 18BE81362606E0F600FF7F9E /* tiny_obj_loader.h */; };
@@ -67,13 +68,16 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				1839AC702606E4100080F75A /* libopencv_calib3d.4.5.2.dylib in Embed Libraries */,
-				1839AC712606E4100080F75A /* libopencv_core.4.5.2.dylib in Embed Libraries */,
-				1839AC722606E4100080F75A /* libopencv_features2d.4.5.2.dylib in Embed Libraries */,
-				1839AC732606E4100080F75A /* libopencv_flann.4.5.2.dylib in Embed Libraries */,
-				1839AC742606E4100080F75A /* libopencv_highgui.4.5.2.dylib in Embed Libraries */,
-				1839AC752606E4100080F75A /* libopencv_imgcodecs.4.5.2.dylib in Embed Libraries */,
-				1839AC762606E4100080F75A /* libopencv_imgproc.4.5.2.dylib in Embed Libraries */,
+			);
+			name = "Embed Libraries";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		186668532606F9EB00891CC2 /* Embed Libraries */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
 			);
 			name = "Embed Libraries";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -93,6 +97,13 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				186668542606FA3900891CC2 /* libopencv_calib3d.4.5.2.dylib in Embed Libraries */,
+				186668552606FA3900891CC2 /* libopencv_core.4.5.2.dylib in Embed Libraries */,
+				186668562606FA3900891CC2 /* libopencv_features2d.4.5.2.dylib in Embed Libraries */,
+				186668572606FA3900891CC2 /* libopencv_flann.4.5.2.dylib in Embed Libraries */,
+				186668582606FA3900891CC2 /* libopencv_highgui.4.5.2.dylib in Embed Libraries */,
+				186668592606FA3A00891CC2 /* libopencv_imgcodecs.4.5.2.dylib in Embed Libraries */,
+				1866685A2606FA3A00891CC2 /* libopencv_imgproc.4.5.2.dylib in Embed Libraries */,
 				18BE813E2606E15F00FF7F9E /* libhoppe.dylib in Embed Libraries */,
 				18E9AC5225FEE6FB00DEAE8F /* libsfm.dylib in Embed Libraries */,
 			);
@@ -149,6 +160,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				186668512606F9EA00891CC2 /* libopencv_core.4.5.2.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -303,6 +315,7 @@
 				18BE81212606E08400FF7F9E /* Headers */,
 				18BE81222606E08400FF7F9E /* Sources */,
 				18BE81232606E08400FF7F9E /* Frameworks */,
+				186668532606F9EB00891CC2 /* Embed Libraries */,
 			);
 			buildRules = (
 			);
@@ -468,7 +481,11 @@
 				GCC_ENABLE_CPP_EXCEPTIONS = YES;
 				GCC_ENABLE_CPP_RTTI = YES;
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
-				HEADER_SEARCH_PATHS = "$(SRCROOT)/dep/tinyobjloader/include";
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/dep/tinyobjloader/include",
+					/usr/local/include/opencv4,
+				);
+				LIBRARY_SEARCH_PATHS = /usr/local/lib/;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 			};
@@ -485,7 +502,11 @@
 				GCC_ENABLE_CPP_EXCEPTIONS = YES;
 				GCC_ENABLE_CPP_RTTI = YES;
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
-				HEADER_SEARCH_PATHS = "$(SRCROOT)/dep/tinyobjloader/include";
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/dep/tinyobjloader/include",
+					/usr/local/include/opencv4,
+				);
+				LIBRARY_SEARCH_PATHS = /usr/local/lib/;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 			};

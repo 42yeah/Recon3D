@@ -24,7 +24,9 @@
 #endif
 
 #include <vector>
+#include <opencv2/core.hpp>
 #include "algebra.hpp"
+
 
 
 class Hoppe {
@@ -52,10 +54,10 @@ private:
     /// @param hood the point's K-neighborhood
     /// @param idx the index of p (the host)
     /// @param n number of neighborhood
-    Vec3<float> calculate_centroid(int idx, Neighborhood hood, int n);
+    cv::Vec3f calculate_centroid(int idx, Neighborhood hood, int n);
 
-    std::vector<Vec3<float> > pointcloud;
-    std::vector<Plane> tangent_plane;
+    std::vector<cv::Vec3f> pointcloud;
+    std::vector<Plane> tangent_planes;
     
     // TODO: Add variables hoppe needs
 };

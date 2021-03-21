@@ -61,7 +61,7 @@ void StereoUtil::get_aligned_points_from_match(const Features &left, const Featu
 
 bool StereoUtil::find_camera_matrices_from_match(const Intrinsics &intrinsics, const Matches &matches, const Features &left, const Features &right, Matches &pruned_matches, cv::Matx34f &p_left, cv::Matx34f &p_right) {
     if (intrinsics.k.empty()) {
-        LOG("Must initialize K!");
+        SFM_LOG("Must initialize K!");
         return false;
     }
     
@@ -91,7 +91,7 @@ bool StereoUtil::find_camera_matrices_from_match(const Intrinsics &intrinsics, c
                           R.at<double>(2, 0), R.at<double>(2, 1), R.at<double>(2, 2), t.at<double>(2));
     
     pruned_matches.clear();
-    
+
     for (int i = 0; i < mask.rows; i++) {
         if (mask.at<unsigned char>(i)) {
             pruned_matches.push_back(matches[i]);
@@ -167,7 +167,7 @@ bool StereoUtil::find_camera_pose_from_2d3d_match(const Intrinsics &intrinsics, 
                        inliers);
     const float inliers_ratio = (float) cv::countNonZero(inliers) / match_2d3d.points_2d.size();
     if (inliers_ratio < POSE_INLIERS_MINIMAL_RATIO) {
-        LOG("WARNING! inliers ratio too small, at %f", inliers_ratio);
+        SFM_LOG("WARNING! inliers ratio too small, at %f", inliers_ratio);
         return false;
     }
     cv::Mat R;

@@ -16,7 +16,7 @@
 
 Result SfM::run_sfm() {
     if (images.empty()) {
-        LOG("There is no image to work on.");
+        SFM_LOG("There is no image to work on.");
         return ERR;
     }
     
@@ -42,35 +42,35 @@ Result SfM::run_sfm() {
 }
 
 bool SfM::set_image_dir(std::string path) {
-    LOG("Setting image directory as %s", path.c_str());
+    SFM_LOG("Setting image directory as %s", path.c_str());
     try {
         for (const auto &entry : std::filesystem::directory_iterator(path)) {
             cv::Mat img = cv::imread(entry.path());
             if (img.rows == 0 || img.cols == 0) {
-                LOG("WARNING! Invalid image: %s. Skipping...", entry.path().c_str());
+                SFM_LOG("WARNING! Invalid image: %s. Skipping...", entry.path().c_str());
                 continue;
             }
             images.push_back(std::move(img));
         }
     } catch (std::exception &e) {
-        LOG("Failed to load image directory.");
+        SFM_LOG("Failed to load image directory.");
         return false;
     }
     return true;
 }
 
 void SfM::extract_features() { 
-    LOG("Extracting features...");
+    SFM_LOG("Extracting features...");
     
     features.resize(images.size());
     for (int i = 0; i < images.size(); i++) {
         features[i] = feature_util.extract_features(images[i]);
-        LOG("Image %d has %ld keypoints", i, features[i].points.size());
+        SFM_LOG("Image %d has %ld keypoints", i, features[i].points.size());
     }
 }
 
 void SfM::create_feature_match_matrix() {
-    LOG("Creating feature match matrix...");
+    SFM_LOG("Creating feature match matrix...");
     
     int num_images = (int) images.size();
     feature_match_mat.resize(num_images, std::vector<Matches>(num_images));
@@ -88,7 +88,7 @@ void SfM::create_feature_match_matrix() {
         (int) ceilf((float) pairs.size() / num_threads);
     
     std::mutex write_mutex;
-    LOG("Launching %d threads with %d pairs per thread...", num_threads, num_pairs_for_thread);
+    SFM_LOG("Launching %d threads with %d pairs per thread...", num_threads, num_pairs_for_thread);
     for (int thread_id = 0; thread_id < std::min(num_threads, (int) pairs.size()); thread_id++) {
         threads.push_back(std::thread([&, thread_id] () {
             const int starting_pair = num_pairs_for_thread * thread_id;
@@ -101,7 +101,7 @@ void SfM::create_feature_match_matrix() {
                 feature_match_mat[pair.left][pair.right] = feature_util.match_features(features[pair.left], features[pair.right]);
                 
                 write_mutex.lock();
-                LOG("Thread %d -> pair %d: %ld matches", thread_id, pair_id, feature_match_mat[pair.left][pair.right].size());
+                SFM_LOG("Thread %d -> pair %d: %ld matches", thread_id, pair_id, feature_match_mat[pair.left][pair.right].size());
                 write_mutex.unlock();
             }
         }));
@@ -113,15 +113,15 @@ void SfM::create_feature_match_matrix() {
 }
 
 void SfM::find_baseline_triangulation() { 
-    LOG("Finding baseline triangulation...");
+    SFM_LOG("Finding baseline triangulation...");
 
     std::map<float, ImagePair> homography_inliers = sort_views_for_baseline();
     
     PointCloud cloud;
     
-    LOG("Trying views in triangulation...");
+    SFM_LOG("Trying views in triangulation...");
     for (auto &pair : homography_inliers) {
-        LOG("Trying (%d, %d) ratio: %f", pair.second.left, pair.second.right, pair.first);
+        SFM_LOG("Trying (%d, %d) ratio: %f", pair.second.left, pair.second.right, pair.first);
         
         cv::Matx34f p_left = cv::Matx34f::eye();
         cv::Matx34f p_right = cv::Matx34f::eye();
@@ -130,16 +130,16 @@ void SfM::find_baseline_triangulation() {
 
         Matches pruned_matches;
         
-        LOG("Finding camera matrices...");
+        SFM_LOG("Finding camera matrices...");
         bool success = stereo_util.find_camera_matrices_from_match(intrinsics, feature_match_mat[left][right], features[left], features[right], pruned_matches, p_left, p_right);
         if (!success) {
-            LOG("WARNING! Camera matrix recovery failed.");
+            SFM_LOG("WARNING! Camera matrix recovery failed.");
         }
         
         float pose_inlier_ratio = (float) pruned_matches.size() / feature_match_mat[left][right].size();
-        LOG("Pruned inlier ratio of (%d, %d): %f", left, right, pose_inlier_ratio);
+        SFM_LOG("Pruned inlier ratio of (%d, %d): %f", left, right, pose_inlier_ratio);
         if (pose_inlier_ratio < POSE_INLIERS_MINIMAL_RATIO) {
-            LOG("Insufficient pose inliers. Skipping.");
+            SFM_LOG("Insufficient pose inliers. Skipping.");
             continue;
         }
         
@@ -154,10 +154,10 @@ void SfM::find_baseline_triangulation() {
         
         feature_match_mat[left][right] = pruned_matches;
         
-        LOG("Triangulating from stereo views (%d, %d)...", left, right);
+        SFM_LOG("Triangulating from stereo views (%d, %d)...", left, right);
         success = stereo_util.triangulate_views(intrinsics, pair.second, feature_match_mat[left][right], features[left], features[right], p_left, p_right, cloud);
         if (!success) {
-            LOG("Could not triangulate: (%d, %d).", left, right);
+            SFM_LOG("Could not triangulate: (%d, %d).", left, right);
             continue;
         }
 
@@ -174,7 +174,7 @@ void SfM::find_baseline_triangulation() {
 }
 
 std::map<float, ImagePair> SfM::sort_views_for_baseline() {
-    LOG("Finding views homography inliers...");
+    SFM_LOG("Finding views homography inliers...");
     
     std::map<float, ImagePair> matches_sizes;
     int num_images = (int) images.size();
@@ -190,14 +190,14 @@ std::map<float, ImagePair> SfM::sort_views_for_baseline() {
             const int num_inliers = stereo_util.find_homography_inliers(features[i], features[j], feature_match_mat[i][j]);
             float inliers_ratio = (float) num_inliers / feature_match_mat[i][j].size();
             matches_sizes[inliers_ratio] = { i, j };
-            LOG("Homography inlier ratio: %d %d %f", i, j, inliers_ratio);
+            SFM_LOG("Homography inlier ratio: %d %d %f", i, j, inliers_ratio);
         }
     }
     return matches_sizes;
 }
 
 void SfM::export_to_ply(std::string path) { 
-    LOG("Saving point cloud to %s", path.c_str());
+    SFM_LOG("Saving point cloud to %s", path.c_str());
     
     std::ofstream ofs(path);
     ofs << "ply" << std::endl
@@ -226,7 +226,7 @@ void SfM::export_to_ply(std::string path) {
 }
 
 void SfM::add_more_views_to_reconstruction() { 
-    LOG("Adding more views to reconstruction...");
+    SFM_LOG("Adding more views to reconstruction...");
     
     while (done_views.size() != images.size()) {
         Image2D3DMatches matches_2d3d = find_2d_3d_matches();
@@ -241,11 +241,11 @@ void SfM::add_more_views_to_reconstruction() {
             }
         }
         if (best_view == -1) {
-            LOG("ERR! No 2D-3D matches has any legitimate match.");
+            SFM_LOG("ERR! No 2D-3D matches has any legitimate match.");
             break;
         }
-        LOG("Best view: %d has %d matches", best_view, best_num_matches);
-        LOG("Trying to add %d to existing good views.", best_view);
+        SFM_LOG("Best view: %d has %d matches", best_view, best_num_matches);
+        SFM_LOG("Trying to add %d to existing good views.", best_view);
         
         done_views.insert(best_view);
         
@@ -253,12 +253,12 @@ void SfM::add_more_views_to_reconstruction() {
         cv::Matx34f camera_pose;
         bool success = stereo_util.find_camera_pose_from_2d3d_match(intrinsics, matches_2d3d[best_view], camera_pose);
         if (!success) {
-            LOG("Cannot retrieve camera pose for view: %d", best_view);
+            SFM_LOG("Cannot retrieve camera pose for view: %d", best_view);
             continue;
         }
 
         camera_poses[best_view] = camera_pose;
-        LOG("Camera pose for view %d located.", best_view);
+        SFM_LOG("Camera pose for view %d located.", best_view);
         
         // Time to triangulate more points!
         bool any_view_success = false;
@@ -271,18 +271,18 @@ void SfM::add_more_views_to_reconstruction() {
             bool success = stereo_util.find_camera_matrices_from_match(intrinsics, feature_match_mat[left][right], features[left], features[right], pruned_matches, p_left, p_right);
             feature_match_mat[left][right] = pruned_matches;
             if (!success) {
-                LOG("EPIC FAIL: failde to get pruned matches");
+                SFM_LOG("EPIC FAIL: failde to get pruned matches");
                 continue;
             }
             
             PointCloud cloud;
             success = stereo_util.triangulate_views(intrinsics, { left, right }, pruned_matches, features[left], features[right], camera_poses[left], camera_poses[right], cloud);
             if (!success) {
-                LOG("Failed to trianglulate view %d and %d. Skipping...", left, right);
+                SFM_LOG("Failed to trianglulate view %d and %d. Skipping...", left, right);
                 continue;
             }
             
-            LOG("Merging triangulation between %d and %d. Matches: #%lu", left, right, feature_match_mat[left][right].size());
+            SFM_LOG("Merging triangulation between %d and %d. Matches: #%lu", left, right, feature_match_mat[left][right].size());
             merge_new_pointclouds(cloud);
             any_view_success = true;
         }

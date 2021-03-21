@@ -14,16 +14,16 @@
 #include <opencv2/core.hpp>
 #include <opencv2/features2d.hpp>
 
-#define LOG_LEVEL 2
+#define SFM_LOG_LEVEL 2
 #define IN
 #define OUT
 
-#if LOG_LEVEL == 0
-#define LOG(...)
-#elif LOG_LEVEL == 1
-#define LOG(fmt, ...) printf(fmt "\n", ##__VA_ARGS__)
-#elif LOG_LEVEL == 2
-#define LOG(fmt, ...) printf("%s:%d: " fmt "\n", __FILE__, __LINE__, ##__VA_ARGS__)
+#if SFM_LOG_LEVEL == 0
+#define SFM_LOG(...)
+#elif SFM_LOG_LEVEL == 1
+#define SFM_LOG(fmt, ...) printf(fmt "\n", ##__VA_ARGS__)
+#elif SFM_LOG_LEVEL == 2
+#define SFM_LOG(fmt, ...) printf("%s:%d: " fmt "\n", __FILE__, __LINE__, ##__VA_ARGS__)
 #endif
 
 

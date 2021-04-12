@@ -13,7 +13,7 @@ auto get_log_stream(std::string type) -> std::ostream & {
     if (log_stream.tellp() != log_stream.beg) {
         log_stream << std::endl;
     }
-    log_stream << type << ": ";
+    log_stream << type << " | ";
     return log_stream;
 }
 

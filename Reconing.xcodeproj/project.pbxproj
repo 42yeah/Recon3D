@@ -20,6 +20,39 @@
 		18EFFB7326246E75002011A2 /* imgui_demo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18EFFB6026246E4F002011A2 /* imgui_demo.cpp */; };
 		18EFFB7426246E75002011A2 /* imgui_draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18EFFB6126246E4F002011A2 /* imgui_draw.cpp */; };
 		18EFFB7C26247162002011A2 /* common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18EFFB7A26247162002011A2 /* common.cpp */; };
+		18EFFB8A26247DB8002011A2 /* Module.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18EFFB8826247DB8002011A2 /* Module.cpp */; };
+		18EFFB8E26247EF8002011A2 /* ImGuiDemoWindow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18EFFB8C26247EF8002011A2 /* ImGuiDemoWindow.cpp */; };
+		18EFFB91262482BD002011A2 /* Pipeline.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18EFFB8F262482BD002011A2 /* Pipeline.cpp */; };
+		18EFFB9226248438002011A2 /* ImGuiFileDialog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18EFFB7E26247D99002011A2 /* ImGuiFileDialog.cpp */; };
+		18EFFBB126249A97002011A2 /* libdomset.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 18EFFB9F26249A87002011A2 /* libdomset.a */; };
+		18EFFBB226249A97002011A2 /* liblib_clp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 18EFFB9B26249A87002011A2 /* liblib_clp.a */; };
+		18EFFBB326249A97002011A2 /* liblib_CoinUtils.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 18EFFBAC26249A87002011A2 /* liblib_CoinUtils.a */; };
+		18EFFBB426249A97002011A2 /* liblib_Osi.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 18EFFB9426249A87002011A2 /* liblib_Osi.a */; };
+		18EFFBB526249A97002011A2 /* liblib_OsiClpSolver.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 18EFFBAB26249A87002011A2 /* liblib_OsiClpSolver.a */; };
+		18EFFBB626249A97002011A2 /* libopenMVG_easyexif.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 18EFFB9C26249A87002011A2 /* libopenMVG_easyexif.a */; };
+		18EFFBB726249A97002011A2 /* libopenMVG_exif.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 18EFFBA826249A87002011A2 /* libopenMVG_exif.a */; };
+		18EFFBB826249A97002011A2 /* libopenMVG_fast.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 18EFFBA326249A87002011A2 /* libopenMVG_fast.a */; };
+		18EFFBB926249A97002011A2 /* libopenMVG_features.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 18EFFBA426249A87002011A2 /* libopenMVG_features.a */; };
+		18EFFBBA26249A97002011A2 /* libopenMVG_geometry.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 18EFFBA726249A87002011A2 /* libopenMVG_geometry.a */; };
+		18EFFBBB26249A97002011A2 /* libopenMVG_image.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 18EFFB9826249A87002011A2 /* libopenMVG_image.a */; };
+		18EFFBBC26249A97002011A2 /* libopenMVG_jpeg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 18EFFB9A26249A87002011A2 /* libopenMVG_jpeg.a */; };
+		18EFFBBD26249A97002011A2 /* libopenMVG_kvld.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 18EFFBAE26249A87002011A2 /* libopenMVG_kvld.a */; };
+		18EFFBBE26249A97002011A2 /* libopenMVG_lemon.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 18EFFBAA26249A87002011A2 /* libopenMVG_lemon.a */; };
+		18EFFBBF26249A97002011A2 /* libopenMVG_linearProgramming.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 18EFFBA026249A87002011A2 /* libopenMVG_linearProgramming.a */; };
+		18EFFBC026249A97002011A2 /* libopenMVG_lInftyComputerVision.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 18EFFBA526249A87002011A2 /* libopenMVG_lInftyComputerVision.a */; };
+		18EFFBC126249A97002011A2 /* libopenMVG_matching_image_collection.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 18EFFBA926249A87002011A2 /* libopenMVG_matching_image_collection.a */; };
+		18EFFBC226249A97002011A2 /* libopenMVG_matching.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 18EFFB9D26249A87002011A2 /* libopenMVG_matching.a */; };
+		18EFFBC326249A97002011A2 /* libopenMVG_multiview_test_data.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 18EFFBAD26249A87002011A2 /* libopenMVG_multiview_test_data.a */; };
+		18EFFBC426249A97002011A2 /* libopenMVG_multiview.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 18EFFBA226249A87002011A2 /* libopenMVG_multiview.a */; };
+		18EFFBC526249A97002011A2 /* libopenMVG_numeric.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 18EFFBA626249A87002011A2 /* libopenMVG_numeric.a */; };
+		18EFFBC626249A97002011A2 /* libopenMVG_png.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 18EFFB9626249A87002011A2 /* libopenMVG_png.a */; };
+		18EFFBC726249A97002011A2 /* libopenMVG_robust_estimation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 18EFFB9926249A87002011A2 /* libopenMVG_robust_estimation.a */; };
+		18EFFBC826249A97002011A2 /* libopenMVG_sfm.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 18EFFBA126249A87002011A2 /* libopenMVG_sfm.a */; };
+		18EFFBC926249A97002011A2 /* libopenMVG_stlplus.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 18EFFB9E26249A87002011A2 /* libopenMVG_stlplus.a */; };
+		18EFFBCA26249A97002011A2 /* libopenMVG_system.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 18EFFB9726249A87002011A2 /* libopenMVG_system.a */; };
+		18EFFBCB26249A97002011A2 /* libopenMVG_tiff.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 18EFFBAF26249A87002011A2 /* libopenMVG_tiff.a */; };
+		18EFFBCC26249A97002011A2 /* libopenMVG_zlib.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 18EFFB9526249A87002011A2 /* libopenMVG_zlib.a */; };
+		18EFFBCD26249A97002011A2 /* libvlsift.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 18EFFBB026249A87002011A2 /* libvlsift.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -274,6 +307,51 @@
 		18EFFB782624713A002011A2 /* assets */ = {isa = PBXFileReference; lastKnownFileType = folder; path = assets; sourceTree = "<group>"; };
 		18EFFB7A26247162002011A2 /* common.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = common.cpp; sourceTree = "<group>"; };
 		18EFFB7B26247162002011A2 /* common.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = common.hpp; sourceTree = "<group>"; };
+		18EFFB7E26247D99002011A2 /* ImGuiFileDialog.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ImGuiFileDialog.cpp; sourceTree = "<group>"; };
+		18EFFB7F26247D99002011A2 /* ImGuiFileDialog.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ImGuiFileDialog.h; sourceTree = "<group>"; };
+		18EFFB8026247D99002011A2 /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
+		18EFFB8226247D99002011A2 /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
+		18EFFB8326247D99002011A2 /* ChangeLog */ = {isa = PBXFileReference; lastKnownFileType = text; path = ChangeLog; sourceTree = "<group>"; };
+		18EFFB8426247D99002011A2 /* dirent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = dirent.h; sourceTree = "<group>"; };
+		18EFFB8526247D99002011A2 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		18EFFB8626247D99002011A2 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		18EFFB8726247D99002011A2 /* ImGuiFileDialogConfig.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ImGuiFileDialogConfig.h; sourceTree = "<group>"; };
+		18EFFB8826247DB8002011A2 /* Module.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Module.cpp; sourceTree = "<group>"; };
+		18EFFB8926247DB8002011A2 /* Module.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Module.hpp; sourceTree = "<group>"; };
+		18EFFB8C26247EF8002011A2 /* ImGuiDemoWindow.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ImGuiDemoWindow.cpp; sourceTree = "<group>"; };
+		18EFFB8D26247EF8002011A2 /* ImGuiDemoWindow.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ImGuiDemoWindow.hpp; sourceTree = "<group>"; };
+		18EFFB8F262482BD002011A2 /* Pipeline.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Pipeline.cpp; sourceTree = "<group>"; };
+		18EFFB90262482BD002011A2 /* Pipeline.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Pipeline.hpp; sourceTree = "<group>"; };
+		18EFFB9326249018002011A2 /* samples */ = {isa = PBXFileReference; lastKnownFileType = folder; path = samples; sourceTree = "<group>"; };
+		18EFFB9426249A87002011A2 /* liblib_Osi.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = liblib_Osi.a; path = "../openMVG/build/Darwin-x86_64-RELEASE/liblib_Osi.a"; sourceTree = "<group>"; };
+		18EFFB9526249A87002011A2 /* libopenMVG_zlib.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopenMVG_zlib.a; path = "../openMVG/build/Darwin-x86_64-RELEASE/libopenMVG_zlib.a"; sourceTree = "<group>"; };
+		18EFFB9626249A87002011A2 /* libopenMVG_png.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopenMVG_png.a; path = "../openMVG/build/Darwin-x86_64-RELEASE/libopenMVG_png.a"; sourceTree = "<group>"; };
+		18EFFB9726249A87002011A2 /* libopenMVG_system.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopenMVG_system.a; path = "../openMVG/build/Darwin-x86_64-RELEASE/libopenMVG_system.a"; sourceTree = "<group>"; };
+		18EFFB9826249A87002011A2 /* libopenMVG_image.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopenMVG_image.a; path = "../openMVG/build/Darwin-x86_64-RELEASE/libopenMVG_image.a"; sourceTree = "<group>"; };
+		18EFFB9926249A87002011A2 /* libopenMVG_robust_estimation.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopenMVG_robust_estimation.a; path = "../openMVG/build/Darwin-x86_64-RELEASE/libopenMVG_robust_estimation.a"; sourceTree = "<group>"; };
+		18EFFB9A26249A87002011A2 /* libopenMVG_jpeg.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopenMVG_jpeg.a; path = "../openMVG/build/Darwin-x86_64-RELEASE/libopenMVG_jpeg.a"; sourceTree = "<group>"; };
+		18EFFB9B26249A87002011A2 /* liblib_clp.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = liblib_clp.a; path = "../openMVG/build/Darwin-x86_64-RELEASE/liblib_clp.a"; sourceTree = "<group>"; };
+		18EFFB9C26249A87002011A2 /* libopenMVG_easyexif.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopenMVG_easyexif.a; path = "../openMVG/build/Darwin-x86_64-RELEASE/libopenMVG_easyexif.a"; sourceTree = "<group>"; };
+		18EFFB9D26249A87002011A2 /* libopenMVG_matching.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopenMVG_matching.a; path = "../openMVG/build/Darwin-x86_64-RELEASE/libopenMVG_matching.a"; sourceTree = "<group>"; };
+		18EFFB9E26249A87002011A2 /* libopenMVG_stlplus.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopenMVG_stlplus.a; path = "../openMVG/build/Darwin-x86_64-RELEASE/libopenMVG_stlplus.a"; sourceTree = "<group>"; };
+		18EFFB9F26249A87002011A2 /* libdomset.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libdomset.a; path = "../openMVG/build/Darwin-x86_64-RELEASE/libdomset.a"; sourceTree = "<group>"; };
+		18EFFBA026249A87002011A2 /* libopenMVG_linearProgramming.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopenMVG_linearProgramming.a; path = "../openMVG/build/Darwin-x86_64-RELEASE/libopenMVG_linearProgramming.a"; sourceTree = "<group>"; };
+		18EFFBA126249A87002011A2 /* libopenMVG_sfm.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopenMVG_sfm.a; path = "../openMVG/build/Darwin-x86_64-RELEASE/libopenMVG_sfm.a"; sourceTree = "<group>"; };
+		18EFFBA226249A87002011A2 /* libopenMVG_multiview.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopenMVG_multiview.a; path = "../openMVG/build/Darwin-x86_64-RELEASE/libopenMVG_multiview.a"; sourceTree = "<group>"; };
+		18EFFBA326249A87002011A2 /* libopenMVG_fast.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopenMVG_fast.a; path = "../openMVG/build/Darwin-x86_64-RELEASE/libopenMVG_fast.a"; sourceTree = "<group>"; };
+		18EFFBA426249A87002011A2 /* libopenMVG_features.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopenMVG_features.a; path = "../openMVG/build/Darwin-x86_64-RELEASE/libopenMVG_features.a"; sourceTree = "<group>"; };
+		18EFFBA526249A87002011A2 /* libopenMVG_lInftyComputerVision.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopenMVG_lInftyComputerVision.a; path = "../openMVG/build/Darwin-x86_64-RELEASE/libopenMVG_lInftyComputerVision.a"; sourceTree = "<group>"; };
+		18EFFBA626249A87002011A2 /* libopenMVG_numeric.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopenMVG_numeric.a; path = "../openMVG/build/Darwin-x86_64-RELEASE/libopenMVG_numeric.a"; sourceTree = "<group>"; };
+		18EFFBA726249A87002011A2 /* libopenMVG_geometry.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopenMVG_geometry.a; path = "../openMVG/build/Darwin-x86_64-RELEASE/libopenMVG_geometry.a"; sourceTree = "<group>"; };
+		18EFFBA826249A87002011A2 /* libopenMVG_exif.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopenMVG_exif.a; path = "../openMVG/build/Darwin-x86_64-RELEASE/libopenMVG_exif.a"; sourceTree = "<group>"; };
+		18EFFBA926249A87002011A2 /* libopenMVG_matching_image_collection.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopenMVG_matching_image_collection.a; path = "../openMVG/build/Darwin-x86_64-RELEASE/libopenMVG_matching_image_collection.a"; sourceTree = "<group>"; };
+		18EFFBAA26249A87002011A2 /* libopenMVG_lemon.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopenMVG_lemon.a; path = "../openMVG/build/Darwin-x86_64-RELEASE/libopenMVG_lemon.a"; sourceTree = "<group>"; };
+		18EFFBAB26249A87002011A2 /* liblib_OsiClpSolver.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = liblib_OsiClpSolver.a; path = "../openMVG/build/Darwin-x86_64-RELEASE/liblib_OsiClpSolver.a"; sourceTree = "<group>"; };
+		18EFFBAC26249A87002011A2 /* liblib_CoinUtils.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = liblib_CoinUtils.a; path = "../openMVG/build/Darwin-x86_64-RELEASE/liblib_CoinUtils.a"; sourceTree = "<group>"; };
+		18EFFBAD26249A87002011A2 /* libopenMVG_multiview_test_data.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopenMVG_multiview_test_data.a; path = "../openMVG/build/Darwin-x86_64-RELEASE/libopenMVG_multiview_test_data.a"; sourceTree = "<group>"; };
+		18EFFBAE26249A87002011A2 /* libopenMVG_kvld.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopenMVG_kvld.a; path = "../openMVG/build/Darwin-x86_64-RELEASE/libopenMVG_kvld.a"; sourceTree = "<group>"; };
+		18EFFBAF26249A87002011A2 /* libopenMVG_tiff.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopenMVG_tiff.a; path = "../openMVG/build/Darwin-x86_64-RELEASE/libopenMVG_tiff.a"; sourceTree = "<group>"; };
+		18EFFBB026249A87002011A2 /* libvlsift.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libvlsift.a; path = "../openMVG/build/Darwin-x86_64-RELEASE/libvlsift.a"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -281,7 +359,36 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				18EFFBC426249A97002011A2 /* libopenMVG_multiview.a in Frameworks */,
+				18EFFBBA26249A97002011A2 /* libopenMVG_geometry.a in Frameworks */,
+				18EFFBC726249A97002011A2 /* libopenMVG_robust_estimation.a in Frameworks */,
+				18EFFBC226249A97002011A2 /* libopenMVG_matching.a in Frameworks */,
+				18EFFBB826249A97002011A2 /* libopenMVG_fast.a in Frameworks */,
+				18EFFBBB26249A97002011A2 /* libopenMVG_image.a in Frameworks */,
+				18EFFBCA26249A97002011A2 /* libopenMVG_system.a in Frameworks */,
+				18EFFBCB26249A97002011A2 /* libopenMVG_tiff.a in Frameworks */,
+				18EFFBB526249A97002011A2 /* liblib_OsiClpSolver.a in Frameworks */,
+				18EFFBCD26249A97002011A2 /* libvlsift.a in Frameworks */,
+				18EFFBB326249A97002011A2 /* liblib_CoinUtils.a in Frameworks */,
+				18EFFBB426249A97002011A2 /* liblib_Osi.a in Frameworks */,
+				18EFFBB626249A97002011A2 /* libopenMVG_easyexif.a in Frameworks */,
+				18EFFBB226249A97002011A2 /* liblib_clp.a in Frameworks */,
+				18EFFBC526249A97002011A2 /* libopenMVG_numeric.a in Frameworks */,
 				18EFFA57261DA7C3002011A2 /* libglfw.3.3.dylib in Frameworks */,
+				18EFFBC026249A97002011A2 /* libopenMVG_lInftyComputerVision.a in Frameworks */,
+				18EFFBB726249A97002011A2 /* libopenMVG_exif.a in Frameworks */,
+				18EFFBCC26249A97002011A2 /* libopenMVG_zlib.a in Frameworks */,
+				18EFFBBC26249A97002011A2 /* libopenMVG_jpeg.a in Frameworks */,
+				18EFFBB126249A97002011A2 /* libdomset.a in Frameworks */,
+				18EFFBC826249A97002011A2 /* libopenMVG_sfm.a in Frameworks */,
+				18EFFBC126249A97002011A2 /* libopenMVG_matching_image_collection.a in Frameworks */,
+				18EFFBB926249A97002011A2 /* libopenMVG_features.a in Frameworks */,
+				18EFFBBF26249A97002011A2 /* libopenMVG_linearProgramming.a in Frameworks */,
+				18EFFBBD26249A97002011A2 /* libopenMVG_kvld.a in Frameworks */,
+				18EFFBC926249A97002011A2 /* libopenMVG_stlplus.a in Frameworks */,
+				18EFFBC326249A97002011A2 /* libopenMVG_multiview_test_data.a in Frameworks */,
+				18EFFBBE26249A97002011A2 /* libopenMVG_lemon.a in Frameworks */,
+				18EFFBC626249A97002011A2 /* libopenMVG_png.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -291,6 +398,7 @@
 		18EFFA41261DA7A8002011A2 = {
 			isa = PBXGroup;
 			children = (
+				18EFFB9326249018002011A2 /* samples */,
 				18EFFB782624713A002011A2 /* assets */,
 				18EFFA5A261DA7DE002011A2 /* deps */,
 				18EFFA4C261DA7A8002011A2 /* Reconing */,
@@ -310,11 +418,14 @@
 		18EFFA4C261DA7A8002011A2 /* Reconing */ = {
 			isa = PBXGroup;
 			children = (
+				18EFFB8B26247EDE002011A2 /* Modules */,
 				18EFFA4D261DA7A8002011A2 /* main.cpp */,
 				18EFFA64261DA987002011A2 /* Engine.cpp */,
 				18EFFA65261DA987002011A2 /* Engine.hpp */,
 				18EFFB7A26247162002011A2 /* common.cpp */,
 				18EFFB7B26247162002011A2 /* common.hpp */,
+				18EFFB8826247DB8002011A2 /* Module.cpp */,
+				18EFFB8926247DB8002011A2 /* Module.hpp */,
 			);
 			path = Reconing;
 			sourceTree = "<group>";
@@ -322,6 +433,35 @@
 		18EFFA55261DA7C3002011A2 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				18EFFB9F26249A87002011A2 /* libdomset.a */,
+				18EFFB9B26249A87002011A2 /* liblib_clp.a */,
+				18EFFBAC26249A87002011A2 /* liblib_CoinUtils.a */,
+				18EFFB9426249A87002011A2 /* liblib_Osi.a */,
+				18EFFBAB26249A87002011A2 /* liblib_OsiClpSolver.a */,
+				18EFFB9C26249A87002011A2 /* libopenMVG_easyexif.a */,
+				18EFFBA826249A87002011A2 /* libopenMVG_exif.a */,
+				18EFFBA326249A87002011A2 /* libopenMVG_fast.a */,
+				18EFFBA426249A87002011A2 /* libopenMVG_features.a */,
+				18EFFBA726249A87002011A2 /* libopenMVG_geometry.a */,
+				18EFFB9826249A87002011A2 /* libopenMVG_image.a */,
+				18EFFB9A26249A87002011A2 /* libopenMVG_jpeg.a */,
+				18EFFBAE26249A87002011A2 /* libopenMVG_kvld.a */,
+				18EFFBAA26249A87002011A2 /* libopenMVG_lemon.a */,
+				18EFFBA026249A87002011A2 /* libopenMVG_linearProgramming.a */,
+				18EFFBA526249A87002011A2 /* libopenMVG_lInftyComputerVision.a */,
+				18EFFBA926249A87002011A2 /* libopenMVG_matching_image_collection.a */,
+				18EFFB9D26249A87002011A2 /* libopenMVG_matching.a */,
+				18EFFBAD26249A87002011A2 /* libopenMVG_multiview_test_data.a */,
+				18EFFBA226249A87002011A2 /* libopenMVG_multiview.a */,
+				18EFFBA626249A87002011A2 /* libopenMVG_numeric.a */,
+				18EFFB9626249A87002011A2 /* libopenMVG_png.a */,
+				18EFFB9926249A87002011A2 /* libopenMVG_robust_estimation.a */,
+				18EFFBA126249A87002011A2 /* libopenMVG_sfm.a */,
+				18EFFB9E26249A87002011A2 /* libopenMVG_stlplus.a */,
+				18EFFB9726249A87002011A2 /* libopenMVG_system.a */,
+				18EFFBAF26249A87002011A2 /* libopenMVG_tiff.a */,
+				18EFFB9526249A87002011A2 /* libopenMVG_zlib.a */,
+				18EFFBB026249A87002011A2 /* libvlsift.a */,
 				18EFFA56261DA7C3002011A2 /* libglfw.3.3.dylib */,
 			);
 			name = Frameworks;
@@ -330,6 +470,7 @@
 		18EFFA5A261DA7DE002011A2 /* deps */ = {
 			isa = PBXGroup;
 			children = (
+				18EFFB7D26247D99002011A2 /* ImGuiFileDialog */,
 				18EFFA6726246E4E002011A2 /* imgui */,
 				18EFFA5B261DA7DE002011A2 /* glad */,
 			);
@@ -1011,6 +1152,41 @@
 			path = workflows;
 			sourceTree = "<group>";
 		};
+		18EFFB7D26247D99002011A2 /* ImGuiFileDialog */ = {
+			isa = PBXGroup;
+			children = (
+				18EFFB7E26247D99002011A2 /* ImGuiFileDialog.cpp */,
+				18EFFB7F26247D99002011A2 /* ImGuiFileDialog.h */,
+				18EFFB8026247D99002011A2 /* LICENSE */,
+				18EFFB8126247D99002011A2 /* dirent */,
+				18EFFB8626247D99002011A2 /* README.md */,
+				18EFFB8726247D99002011A2 /* ImGuiFileDialogConfig.h */,
+			);
+			path = ImGuiFileDialog;
+			sourceTree = "<group>";
+		};
+		18EFFB8126247D99002011A2 /* dirent */ = {
+			isa = PBXGroup;
+			children = (
+				18EFFB8226247D99002011A2 /* LICENSE */,
+				18EFFB8326247D99002011A2 /* ChangeLog */,
+				18EFFB8426247D99002011A2 /* dirent.h */,
+				18EFFB8526247D99002011A2 /* README.md */,
+			);
+			path = dirent;
+			sourceTree = "<group>";
+		};
+		18EFFB8B26247EDE002011A2 /* Modules */ = {
+			isa = PBXGroup;
+			children = (
+				18EFFB8C26247EF8002011A2 /* ImGuiDemoWindow.cpp */,
+				18EFFB8D26247EF8002011A2 /* ImGuiDemoWindow.hpp */,
+				18EFFB8F262482BD002011A2 /* Pipeline.cpp */,
+				18EFFB90262482BD002011A2 /* Pipeline.hpp */,
+			);
+			path = Modules;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -1114,7 +1290,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "cp -r ${SRCROOT}/assets ${BUILT_PRODUCTS_DIR}\n";
+			shellScript = "cp -r ${SRCROOT}/assets ${BUILT_PRODUCTS_DIR}\ncp -r ${SRCROOT}/samples ${BUILT_PRODUCTS_DIR}\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -1123,10 +1299,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				18EFFB9226248438002011A2 /* ImGuiFileDialog.cpp in Sources */,
 				18EFFB6E26246E75002011A2 /* imgui_widgets.cpp in Sources */,
+				18EFFB8A26247DB8002011A2 /* Module.cpp in Sources */,
 				18EFFB6F26246E75002011A2 /* imgui_impl_opengl3.cpp in Sources */,
 				18EFFB7026246E75002011A2 /* imgui_impl_glfw.cpp in Sources */,
 				18EFFB7126246E75002011A2 /* imgui.cpp in Sources */,
+				18EFFB91262482BD002011A2 /* Pipeline.cpp in Sources */,
 				18EFFB7C26247162002011A2 /* common.cpp in Sources */,
 				18EFFB7226246E75002011A2 /* imgui_tables.cpp in Sources */,
 				18EFFB7326246E75002011A2 /* imgui_demo.cpp in Sources */,
@@ -1134,6 +1313,7 @@
 				18EFFA4E261DA7A8002011A2 /* main.cpp in Sources */,
 				18EFFA66261DA987002011A2 /* Engine.cpp in Sources */,
 				18EFFA63261DA7DE002011A2 /* glad.c in Sources */,
+				18EFFB8E26247EF8002011A2 /* ImGuiDemoWindow.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1254,6 +1434,7 @@
 		18EFFA52261DA7A8002011A2 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = KL2JALR869;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -1262,10 +1443,16 @@
 					"$(SRCROOT)/deps/glad/include",
 					"$(SRCROOT)/deps/imgui",
 					/usr/local/include,
+					"$(SRCROOT)/deps/ImGuiFileDialog",
+					/Users/apple/Projects/openMVG/src,
+					/Users/apple/Projects/openMVS/libs,
+					/usr/local/include/eigen3,
+					/Users/apple/Projects/openMVG/src/dependencies/cereal/include/,
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					/usr/local/Cellar/glfw/3.3.2/lib,
+					"/Users/apple/Projects/openMVG/build/Darwin-x86_64-RELEASE/",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -1274,6 +1461,7 @@
 		18EFFA53261DA7A8002011A2 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = KL2JALR869;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -1282,10 +1470,16 @@
 					"$(SRCROOT)/deps/glad/include",
 					"$(SRCROOT)/deps/imgui",
 					/usr/local/include,
+					"$(SRCROOT)/deps/ImGuiFileDialog",
+					/Users/apple/Projects/openMVG/src,
+					/Users/apple/Projects/openMVS/libs,
+					/usr/local/include/eigen3,
+					/Users/apple/Projects/openMVG/src/dependencies/cereal/include/,
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					/usr/local/Cellar/glfw/3.3.2/lib,
+					"/Users/apple/Projects/openMVG/build/Darwin-x86_64-RELEASE/",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};

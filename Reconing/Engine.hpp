@@ -8,9 +8,14 @@
 #ifndef Engine_hpp
 #define Engine_hpp
 
+#include <vector>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
+#include <memory>
+#include "Module.hpp"
+
+#define ENGINE "引擎"
 
 /// Engine is the class which drives this thing.
 class Engine {
@@ -19,12 +24,15 @@ public:
     
     auto run() -> int;
     
+    auto register_module(Module *module) -> bool;
+    
     ~Engine();
     
 private:
     GLFWwindow *window;
     glm::ivec2 window_size;
     bool log_autoscroll;
+    std::vector<Module *> modules;
 };
 
 #endif /* Engine_hpp */

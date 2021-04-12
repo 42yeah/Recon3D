@@ -17,8 +17,5 @@ auto get_log() -> const std::stringstream &;
 
 #define LOG(MODULE) get_log_stream(MODULE)
 
-#define ENGINE "引擎"
-
-
 
 #endif /* common_hpp */

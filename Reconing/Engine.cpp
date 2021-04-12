@@ -44,6 +44,9 @@ auto Engine::run() -> int {
     while (!glfwWindowShouldClose(window)) {
         // E V E N T S ///////////////////////////////
         glfwPollEvents();
+        for (auto &m : modules) {
+            m->update();
+        }
         
         // R E N D E R S /////////////////////////////
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -57,20 +60,16 @@ auto Engine::run() -> int {
         ImGui::SetNextWindowSize({ 300, 200 }, ImGuiCond_FirstUseEver);
         if (ImGui::Begin("记录")) {
             auto str = get_log().str();
-            ImGui::Checkbox("自动滚动", &log_autoscroll);
             ImGui::TextWrapped("%s", str.c_str());
+            ImGui::Checkbox("自动滚动", &log_autoscroll);
             if (log_autoscroll) {
                 ImGui::SetScrollHereY(1.0f);
             }
             ImGui::End();
         }
-        ImGui::SetNextWindowPos({ 10, 220 }, ImGuiCond_FirstUseEver);
-        ImGui::SetNextWindowSize({ 300, 200 }, ImGuiCond_FirstUseEver);
-        if (ImGui::Begin("启动向导")) {
-            ImGui::Button("选择输入文件夹...");
-            ImGui::End();
+        for (auto &m : modules) {
+            m->update_ui();
         }
-        ImGui::ShowDemoWindow();
         ImGui::Render();
 
         glfwGetFramebufferSize(window, &window_size.x, &window_size.y);
@@ -82,6 +81,15 @@ auto Engine::run() -> int {
     return 0;
 }
 
-Engine::~Engine() { 
+Engine::~Engine() {
+    for (auto &m : modules) {
+        m->destroy();
+    }
     glfwDestroyWindow(window);
+}
+
+auto Engine::register_module(Module *module) -> bool {
+    modules.push_back(module);
+    LOG(ENGINE) << "模块已注册：" << module->name;
+    return true;
 }

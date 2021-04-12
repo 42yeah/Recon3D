@@ -38,9 +38,9 @@ auto run_pipeline(Pipeline *pipeline_ptr) -> void {
 }
 
 auto Pipeline::run() -> bool {
-    if (!std::filesystem::exists("products")) {
-        std::filesystem::create_directory("products");
-    }
+    mkdir_if_not_exists("products");
+    mkdir_if_not_exists("products/features");
+    mkdir_if_not_exists("products/matches");
     if (!intrinsics_analysis()) {
         mutex.lock();
         LOG(PIPELINE) << "相机内部参数提取错误。";
@@ -143,8 +143,15 @@ auto Pipeline::feature_detection() -> bool {
 }
 
 auto Pipeline::path_of_view(const openMVG::sfm::View &view) -> std::filesystem::path { 
-    return std::filesystem::path("products") / std::to_string(view.id_view);
+    return std::filesystem::path("products/features") / std::to_string(view.id_view);
 }
+
+auto Pipeline::mkdir_if_not_exists(std::filesystem::path path) -> void { 
+    if (!std::filesystem::exists(path)) {
+        std::filesystem::create_directory(path);
+    }
+}
+
 
 
 

@@ -71,6 +71,8 @@ private:
     std::filesystem::path base_path;
     std::map<int, Image<unsigned char> > images;
     
+    auto mkdir_if_not_exists(std::filesystem::path path) -> void;
+    
     SfM_Data sfm_data;
 };
 

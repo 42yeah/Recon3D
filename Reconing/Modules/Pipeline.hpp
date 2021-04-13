@@ -42,6 +42,16 @@ enum class PipelineState {
     FINISHED_SUCCESS = 0,
     INTRINSICS_ANALYSIS = 1,
     FEATURE_DETECTION = 2,
+    MATCHING_FEATURES = 3,
+};
+
+enum class PairMode {
+    EXHAUSITIVE = 0
+};
+
+enum class GeometricModel {
+    FUNDAMENTAL_MATRIX = 0,
+    ESSENTIAL_MATRIX = 1
 };
 
 class Pipeline {
@@ -61,6 +71,8 @@ public:
     auto intrinsics_analysis() -> bool;
     
     auto feature_detection() -> bool;
+    
+    auto match_features() -> bool;
     
 
     PipelineState state;

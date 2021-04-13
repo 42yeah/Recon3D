@@ -21,11 +21,37 @@
 #include <openMVG/sfm/sfm_view_priors.hpp>
 #include <openMVG/types.hpp>
 #include <nonFree/sift/SIFT_describer_io.hpp>
+#include <openMVG/graph/graph.hpp>
+#include <openMVG/graph/graph_stats.hpp>
+#include <openMVG/features/descriptor.hpp>
+#include <openMVG/features/feature.hpp>
+#include <openMVG/matching/indMatch.hpp>
+#include <openMVG/matching/indMatch_utils.hpp>
+#include <openMVG/matching_image_collection/Matcher_Regions.hpp>
+#include <openMVG/matching_image_collection/Cascade_Hashing_Matcher_Regions.hpp>
+#include <openMVG/matching_image_collection/GeometricFilter.hpp>
+#include <openMVG/sfm/pipelines/sfm_features_provider.hpp>
+#include <openMVG/sfm/pipelines/sfm_regions_provider.hpp>
+#include <openMVG/sfm/pipelines/sfm_regions_provider_cache.hpp>
+#include <openMVG/matching_image_collection/F_ACRobust.hpp>
+#include <openMVG/matching_image_collection/E_ACRobust.hpp>
+#include <openMVG/matching_image_collection/E_ACRobust_Angular.hpp>
+#include <openMVG/matching_image_collection/Eo_Robust.hpp>
+#include <openMVG/matching_image_collection/H_ACRobust.hpp>
+#include <openMVG/matching_image_collection/Pair_Builder.hpp>
+#include <openMVG/matching/pairwiseAdjacencyDisplay.hpp>
+#include <openMVG/stl/stl.hpp>
 
 using namespace openMVG::exif;
 using namespace openMVG::geodesy;
 using namespace openMVG::features;
+using namespace openMVG::matching;
+using namespace openMVG::robust;
+using namespace openMVG::matching_image_collection;
 
+
+// P I P E L I N E ///////////////////////////
+#include <glm/glm.hpp>
 
 using namespace PipelineNS;
 
@@ -41,27 +67,24 @@ auto Pipeline::run() -> bool {
     mkdir_if_not_exists("products");
     mkdir_if_not_exists("products/features");
     mkdir_if_not_exists("products/matches");
-    if (!intrinsics_analysis()) {
-        mutex.lock();
-        LOG(PIPELINE) << "相机内部参数提取错误。";
-        mutex.unlock();
-        state = PipelineState::FINISHED_ERR;
-        return false;
+    if (intrinsics_analysis() &&
+        feature_detection() &&
+        match_features()) {
+        return true;
     }
-    if (!feature_detection()) {
-        mutex.lock();
-        LOG(PIPELINE) << "图片特征提取错误。";
-        mutex.unlock();
-        state = PipelineState::FINISHED_ERR;
-        return false;
-    }
-    return true;
+    mutex.lock();
+    LOG(PIPELINE) << "管线运行错误。";
+    mutex.unlock();
+    state = PipelineState::FINISHED_ERR;
+    return false;
 }
 
 auto Pipeline::intrinsics_analysis() -> bool {
     progress = 0.0f;
     state = PipelineState::INTRINSICS_ANALYSIS;
+    mutex.lock();
     LOG(PIPELINE) << "相机内部参数提取开始。";
+    mutex.unlock();
     sfm_data.s_root_path = base_path.string();
     Views &views = sfm_data.views;
     Intrinsics &intrinsics = sfm_data.intrinsics;
@@ -103,6 +126,9 @@ auto Pipeline::intrinsics_analysis() -> bool {
 auto Pipeline::feature_detection() -> bool {
     progress = 0.0f;
     state = PipelineState::FEATURE_DETECTION;
+    mutex.lock();
+    LOG(PIPELINE) << "开始特征提取...";
+    mutex.unlock();
     auto image_describer = new SIFT_Image_describer(SIFT_Image_describer::Params());
     
     for (auto i = 0; i < sfm_data.views.size(); i++) {
@@ -119,16 +145,12 @@ auto Pipeline::feature_detection() -> bool {
         }
         Image<unsigned char> *mask = nullptr;
         images[view->id_view] = image;
-        auto region = image_describer->Describe(image, mask);
-        
-        auto pov = path_of_view(*view);
-        if (!std::filesystem::exists(pov)) {
-            std::filesystem::create_directory(pov);
-        }
+        auto regions = image_describer->Describe(image, mask);
 
-        if (region && !image_describer->Save(region.get(),
-                                             pov / "features",
-                                             pov / "descriptors")) {
+        auto pov = path_of_view(*view).replace_extension("");
+        if (regions && !image_describer->Save(regions.get(),
+                                                     pov.string() + ".feat",
+                                                     pov.string() + ".desc")) {
             mutex.lock();
             LOG(PIPELINE) << "无法为图片提取特征点：" << image_listing[i] << "。管线任务失败。";
             progress = 0.0f;
@@ -142,8 +164,110 @@ auto Pipeline::feature_detection() -> bool {
     return true;
 }
 
-auto Pipeline::path_of_view(const openMVG::sfm::View &view) -> std::filesystem::path { 
-    return std::filesystem::path("products/features") / std::to_string(view.id_view);
+auto Pipeline::match_features() -> bool {
+    progress = 0.0f;
+    state = PipelineState::MATCHING_FEATURES;
+    mutex.lock();
+    LOG(PIPELINE) << "开始特征匹配，使用方法：HNSWL2，距离比：0.8，几何模型：基础矩阵。";
+    mutex.unlock();
+
+    const auto dist_ratio = 0.8f;
+    const auto method = HNSW_L2;
+    const auto pair_mode = PairMode::EXHAUSITIVE;
+    const auto geometric_model = GeometricModel::FUNDAMENTAL_MATRIX;
+    std::string file_name = "";
+    switch (geometric_model) {
+        case GeometricModel::FUNDAMENTAL_MATRIX:
+            file_name = "matches.f.bin";
+            break;
+            
+        case GeometricModel::ESSENTIAL_MATRIX:
+            file_name = "matches.e.bin";
+            break;
+    }
+    
+    std::unique_ptr<Regions> regions;
+    regions.reset(new SIFT_Regions());
+    auto regions_provider = std::make_shared<Regions_Provider>();
+    if (!regions_provider->load(sfm_data, "products/features", regions, nullptr)) {
+        LOG(PIPELINE) << "区间错误。";
+        return false;
+    }
+    
+    PairWiseMatches putative_matches;
+    std::vector<glm::ivec2> image_sizes;
+    image_sizes.resize(images.size());
+    
+    const auto views = sfm_data.GetViews();
+    for (auto it = views.begin(); it != views.end(); it++) {
+        const auto *view = it->second.get();
+        image_sizes.emplace_back(view->ui_width, view->ui_height);
+    }
+
+    mutex.lock();
+    LOG(PIPELINE) << "正在开始进行推断匹配...";
+    mutex.unlock();
+    
+    std::unique_ptr<Matcher> collection_matcher;
+    collection_matcher.reset(new Matcher_Regions(dist_ratio, method));
+    
+    Pair_Set pairs;
+    switch (pair_mode) {
+        case PairMode::EXHAUSITIVE:
+            pairs = exhaustivePairs(images.size());
+            break;
+    }
+    collection_matcher->Match(regions_provider, pairs, putative_matches);
+    
+//    PairWiseMatchingToAdjacencyMatrixSVG(images.size(), putative_matches, "products/matches/putative_adjacency_mat.svg");
+    
+    // F I L T E R ///////////////////////////////////////////////////
+    std::unique_ptr<ImageCollectionGeometricFilter> filterer(new ImageCollectionGeometricFilter(&sfm_data, regions_provider));
+    const double d_distance_ratio = 0.6;
+    PairWiseMatches geometric_matches;
+    switch (geometric_model) {
+        case GeometricModel::FUNDAMENTAL_MATRIX:
+            filterer->Robust_model_estimation(GeometricFilter_FMatrix_AC(4.0, 2048),
+                                              putative_matches,
+                                              false, // Guided matching
+                                              d_distance_ratio);
+            geometric_matches = filterer->Get_geometric_matches();
+            break;
+            
+        case GeometricModel::ESSENTIAL_MATRIX:
+            filterer->Robust_model_estimation(GeometricFilter_EMatrix_AC(4.0, 2048),
+                                              putative_matches,
+                                              false,
+                                              d_distance_ratio);
+            geometric_matches = filterer->Get_geometric_matches();
+            std::vector<PairWiseMatches::key_type> to_remove;
+            for (const auto &match : geometric_matches) {
+                const auto putative_photometric_count = putative_matches.find(match.first)->second.size();
+                const auto putative_geometric_count = match.second.size();
+                const auto ratio = (float) putative_geometric_count / putative_photometric_count;
+                if (putative_geometric_count < 50 || ratio < 0.3f) {
+                    to_remove.push_back(match.first);
+                }
+            }
+            for (const auto &k : to_remove) {
+                geometric_matches.erase(k);
+            }
+            break;
+    }
+    mutex.lock();
+    LOG(PIPELINE) << "匹配结束，正在保存...";
+    if (!Save(geometric_matches, std::string("products/matches/") + file_name)) {
+        LOG(PIPELINE) << "保存失败：" << (std::string("products/matches/") + file_name);
+        mutex.unlock();
+        return false;
+    }
+    mutex.unlock();
+    return true;
+}
+
+auto Pipeline::path_of_view(const openMVG::sfm::View &view) -> std::filesystem::path {
+    std::filesystem::path img_path = view.s_Img_path;
+    return std::filesystem::path("products/features") / img_path.filename();
 }
 
 auto Pipeline::mkdir_if_not_exists(std::filesystem::path path) -> void { 
@@ -154,8 +278,7 @@ auto Pipeline::mkdir_if_not_exists(std::filesystem::path path) -> void {
 
 
 
-
-
+// M O D U L E ///////////////////////////
 auto PipelineModule::update_ui() -> void { 
     ImGui::SetNextWindowPos({ 10, 220 }, ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowSize({ 300, 200 }, ImGuiCond_FirstUseEver);
@@ -203,6 +326,10 @@ auto PipelineModule::update_ui() -> void {
                         
                     case PipelineState::FEATURE_DETECTION:
                         ImGui::TextWrapped("正在进行特征提取...");
+                        break;
+                        
+                    case PipelineState::MATCHING_FEATURES:
+                        ImGui::TextWrapped("正在两两匹配特征点...");
                         break;
                 }
                 mutex.unlock();

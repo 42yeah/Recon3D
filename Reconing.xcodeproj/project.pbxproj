@@ -53,6 +53,8 @@
 		18EFFBCB26249A97002011A2 /* libopenMVG_tiff.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 18EFFBAF26249A87002011A2 /* libopenMVG_tiff.a */; };
 		18EFFBCC26249A97002011A2 /* libopenMVG_zlib.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 18EFFB9526249A87002011A2 /* libopenMVG_zlib.a */; };
 		18EFFBCD26249A97002011A2 /* libvlsift.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 18EFFBB026249A87002011A2 /* libvlsift.a */; };
+		18EFFBD826254286002011A2 /* libomp.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 18EFFBD726254286002011A2 /* libomp.dylib */; };
+		18EFFBD926254286002011A2 /* libomp.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 18EFFBD726254286002011A2 /* libomp.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -96,6 +98,7 @@
 			dstSubfolderSpec = 10;
 			files = (
 				18EFFA58261DA7C3002011A2 /* libglfw.3.3.dylib in Embed Libraries */,
+				18EFFBD926254286002011A2 /* libomp.dylib in Embed Libraries */,
 			);
 			name = "Embed Libraries";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -352,6 +355,7 @@
 		18EFFBAE26249A87002011A2 /* libopenMVG_kvld.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopenMVG_kvld.a; path = "../openMVG/build/Darwin-x86_64-RELEASE/libopenMVG_kvld.a"; sourceTree = "<group>"; };
 		18EFFBAF26249A87002011A2 /* libopenMVG_tiff.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopenMVG_tiff.a; path = "../openMVG/build/Darwin-x86_64-RELEASE/libopenMVG_tiff.a"; sourceTree = "<group>"; };
 		18EFFBB026249A87002011A2 /* libvlsift.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libvlsift.a; path = "../openMVG/build/Darwin-x86_64-RELEASE/libvlsift.a"; sourceTree = "<group>"; };
+		18EFFBD726254286002011A2 /* libomp.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libomp.dylib; path = ../../../../usr/local/Cellar/libomp/11.1.0/lib/libomp.dylib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -372,6 +376,7 @@
 				18EFFBB326249A97002011A2 /* liblib_CoinUtils.a in Frameworks */,
 				18EFFBB426249A97002011A2 /* liblib_Osi.a in Frameworks */,
 				18EFFBB626249A97002011A2 /* libopenMVG_easyexif.a in Frameworks */,
+				18EFFBD826254286002011A2 /* libomp.dylib in Frameworks */,
 				18EFFBB226249A97002011A2 /* liblib_clp.a in Frameworks */,
 				18EFFBC526249A97002011A2 /* libopenMVG_numeric.a in Frameworks */,
 				18EFFA57261DA7C3002011A2 /* libglfw.3.3.dylib in Frameworks */,
@@ -433,6 +438,7 @@
 		18EFFA55261DA7C3002011A2 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				18EFFBD726254286002011A2 /* libomp.dylib */,
 				18EFFB9F26249A87002011A2 /* libdomset.a */,
 				18EFFB9B26249A87002011A2 /* liblib_clp.a */,
 				18EFFBAC26249A87002011A2 /* liblib_CoinUtils.a */,
@@ -1448,11 +1454,14 @@
 					/Users/apple/Projects/openMVS/libs,
 					/usr/local/include/eigen3,
 					/Users/apple/Projects/openMVG/src/dependencies/cereal/include/,
+					/Users/apple/Projects/openMVG/build/third_party/lemon,
+					/Users/apple/Projects/openMVG/src/third_party/lemon,
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					/usr/local/Cellar/glfw/3.3.2/lib,
 					"/Users/apple/Projects/openMVG/build/Darwin-x86_64-RELEASE/",
+					/usr/local/Cellar/libomp/11.1.0/lib,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -1475,11 +1484,14 @@
 					/Users/apple/Projects/openMVS/libs,
 					/usr/local/include/eigen3,
 					/Users/apple/Projects/openMVG/src/dependencies/cereal/include/,
+					/Users/apple/Projects/openMVG/build/third_party/lemon,
+					/Users/apple/Projects/openMVG/src/third_party/lemon,
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					/usr/local/Cellar/glfw/3.3.2/lib,
 					"/Users/apple/Projects/openMVG/build/Darwin-x86_64-RELEASE/",
+					/usr/local/Cellar/libomp/11.1.0/lib,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};

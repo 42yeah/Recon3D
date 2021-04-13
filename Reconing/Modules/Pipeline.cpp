@@ -29,10 +29,11 @@
 #include <openMVG/matching_image_collection/Matcher_Regions.hpp>
 #include <openMVG/matching_image_collection/Cascade_Hashing_Matcher_Regions.hpp>
 #include <openMVG/matching_image_collection/GeometricFilter.hpp>
-#include <openMVG/sfm/pipelines/sfm_features_provider.hpp>
-#include <openMVG/sfm/pipelines/sfm_matches_provider.hpp>
 #include <openMVG/sfm/pipelines/sfm_regions_provider.hpp>
 #include <openMVG/sfm/pipelines/sfm_regions_provider_cache.hpp>
+#include <openMVG/sfm/pipelines/global/GlobalSfM_rotation_averaging.hpp>
+#include <openMVG/sfm/pipelines/global/GlobalSfM_translation_averaging.hpp>
+#include <openMVG/sfm/pipelines/global/sfm_global_engine_relative_motions.hpp>
 #include <openMVG/sfm/pipelines/sequential/sequential_SfM.hpp>
 #include <openMVG/matching_image_collection/F_ACRobust.hpp>
 #include <openMVG/matching_image_collection/E_ACRobust.hpp>
@@ -45,7 +46,6 @@
 
 using namespace openMVG::exif;
 using namespace openMVG::geodesy;
-using namespace openMVG::features;
 using namespace openMVG::robust;
 using namespace openMVG::matching_image_collection;
 
@@ -304,7 +304,7 @@ auto Pipeline::incremental_sfm() -> bool {
         cameras::Intrinsic_Parameter_Type::ADJUST_DISTORTION;
     
     std::unique_ptr<Regions> regions(new SIFT_Regions());
-    std::shared_ptr<Features_Provider> features_provider(new Features_Provider());
+    features_provider = std::make_shared<Features_Provider>();
     
     progress = 0.1f;
     if (!features_provider->load(sfm_data, "products/features", regions)) {
@@ -315,7 +315,7 @@ auto Pipeline::incremental_sfm() -> bool {
     }
     
     progress = 0.2f;
-    std::shared_ptr<Matches_Provider> matches_provider = std::make_shared<Matches_Provider>();
+    matches_provider = std::make_shared<Matches_Provider>();
     if (!matches_provider->load(sfm_data, "products/matches/matches.f.bin")) {
         mutex.lock();
         LOG(PIPELINE) << "匹配读取失败。";
@@ -360,8 +360,35 @@ auto Pipeline::global_sfm() -> bool {
     LOG(PIPELINE) << "开始进行全局 SfM。";
     mutex.unlock();
     
+    const auto intrinsic_refinement_options = cameras::Intrinsic_Parameter_Type::ADJUST_FOCAL_LENGTH |
+        cameras::Intrinsic_Parameter_Type::ADJUST_PRINCIPAL_POINT |
+        cameras::Intrinsic_Parameter_Type::ADJUST_DISTORTION;
     
+    GlobalSfMReconstructionEngine_RelativeMotions sfm_engine(sfm_data, "products/sfm", "products/sfm/global_report.html");
+    sfm_engine.SetFeaturesProvider(features_provider.get());
+    sfm_engine.SetMatchesProvider(matches_provider.get());
+    sfm_engine.Set_Intrinsics_Refinement_Type(intrinsic_refinement_options);
+    sfm_engine.Set_Use_Motion_Prior(false);
+    sfm_engine.SetRotationAveragingMethod(ERotationAveragingMethod(ROTATION_AVERAGING_L2));
+    sfm_engine.SetTranslationAveragingMethod(ETranslationAveragingMethod(TRANSLATION_AVERAGING_SOFTL1));
     
+    progress = 0.5f;
+    if (!sfm_engine.Process()) {
+        mutex.lock();
+        LOG(PIPELINE) << "SfM 全局引擎处理失败。";
+        mutex.unlock();
+        return false;
+    }
+    
+    progress = 0.9f;
+    mutex.lock();
+    LOG(PIPELINE) << "SfM 引擎处理完毕。正在导出数据...";
+    mutex.unlock();
+    
+    Save(sfm_engine.Get_SfM_Data(), "products/sfm/sfm_engine_data.bin", ESfM_Data(ALL));
+    Save(sfm_engine.Get_SfM_Data(), "products/sfm/clouds_and_poses.ply", ESfM_Data(ALL));
+    
+    progress = 1.0f;
     mutex.lock();
     LOG(PIPELINE) << "全局 SfM 结束。";
     mutex.unlock();

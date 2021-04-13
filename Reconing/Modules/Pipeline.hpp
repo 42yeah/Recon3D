@@ -28,12 +28,15 @@
 #include <openMVG/image/image_io.hpp>
 #include <Eigen/Geometry>
 #include <openMVG/matching/indMatch.hpp>
+#include <openMVG/sfm/pipelines/sfm_features_provider.hpp>
+#include <openMVG/sfm/pipelines/sfm_matches_provider.hpp>
 
 using namespace openMVG;
 using namespace openMVG::cameras;
 using namespace openMVG::sfm;
 using namespace openMVG::image;
 using namespace openMVG::matching;
+using namespace openMVG::features;
 
 
 namespace PipelineNS {
@@ -95,6 +98,10 @@ public:
 
 private:
     auto mkdir_if_not_exists(std::filesystem::path path) -> void;
+    
+    // P R O V I D E R S //////////////////////////////
+    std::shared_ptr<Features_Provider> features_provider;
+    std::shared_ptr<Matches_Provider> matches_provider;
     
     // D A T A ////////////////////////////////////////
     std::vector<std::string> image_listing;

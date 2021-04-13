@@ -18,6 +18,7 @@
 #include <map>
 
 // O P E N M V G (S) ///////////////////////////
+#define OPENMVG_STD_UNORDERED_MAP
 #include <openMVG/sfm/sfm_data.hpp>
 #include <openMVG/image/image_io.hpp>
 #include <Eigen/Geometry>
@@ -66,6 +67,8 @@ public:
     auto run() -> bool;
     
     auto path_of_view(const View &view) -> std::filesystem::path;
+    
+    auto save_sfm(const std::string path) -> bool;
 
     // P I P E L I N E ///////////////////////////////
     auto intrinsics_analysis() -> bool;

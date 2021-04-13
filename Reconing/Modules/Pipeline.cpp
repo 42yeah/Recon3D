@@ -225,6 +225,7 @@ auto Pipeline::match_features() -> bool {
     std::unique_ptr<ImageCollectionGeometricFilter> filterer(new ImageCollectionGeometricFilter(&sfm_data, regions_provider));
     const double d_distance_ratio = 0.6;
     PairWiseMatches geometric_matches;
+    progress = 0.5f;
     switch (geometric_model) {
         case GeometricModel::FUNDAMENTAL_MATRIX:
             filterer->Robust_model_estimation(GeometricFilter_FMatrix_AC(4.0, 2048),
@@ -255,6 +256,7 @@ auto Pipeline::match_features() -> bool {
             break;
     }
     mutex.lock();
+    progress = 0.97f;
     LOG(PIPELINE) << "匹配结束，正在保存...";
     if (!Save(geometric_matches, std::string("products/matches/") + file_name)) {
         LOG(PIPELINE) << "保存失败：" << (std::string("products/matches/") + file_name);
@@ -275,6 +277,15 @@ auto Pipeline::mkdir_if_not_exists(std::filesystem::path path) -> void {
         std::filesystem::create_directory(path);
     }
 }
+
+auto Pipeline::save_sfm(const std::string path) -> bool {
+    mutex.lock();
+    LOG(PIPELINE) << "正在保存 SfM 数据到 " << path << "...";
+    auto success = Save(sfm_data, path, ESfM_Data(VIEWS | INTRINSICS));
+    mutex.unlock();
+    return success;
+}
+
 
 
 
@@ -333,10 +344,16 @@ auto PipelineModule::update_ui() -> void {
                         break;
                 }
                 mutex.unlock();
-                ImGui::ProgressBar(pipeline.progress);
+                if (pipeline.state != PipelineState::FINISHED_ERR ||
+                    pipeline.state != PipelineState::FINISHED_SUCCESS) {
+                    ImGui::ProgressBar(pipeline.progress);
+                }
                 break;
         }
         
+        if (ImGui::Button("导出 SfM 文件")) {
+            pipeline.save_sfm("sfm_data.json");
+        }
         ImGui::End();
     }
     if (state == State::CHOOSING_FILE) {

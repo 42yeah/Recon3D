@@ -51,7 +51,9 @@ using namespace openMVG::matching_image_collection;
 
 
 // P I P E L I N E ///////////////////////////
-#include <glm/glm.hpp>
+#define TINYPLY_IMPLEMENTATION
+#include <tinyply.h>
+#include <GLFW/glfw3.h>
 
 using namespace PipelineNS;
 
@@ -367,8 +369,6 @@ auto Pipeline::global_sfm() -> bool {
 }
 
 
-
-
 // M O D U L E ///////////////////////////
 auto PipelineModule::update_ui() -> void { 
     ImGui::SetNextWindowPos({ 10, 220 }, ImGuiCond_FirstUseEver);
@@ -461,28 +461,33 @@ auto PipelineModule::update_ui() -> void {
     }
 }
 
-auto PipelineModule::update() -> void { 
+auto PipelineModule::update(float delta_time) -> void { 
     if (!opengl_ready && pipeline.state == PipelineState::GLOBAL_SFM) {
         program = link(compile(GL_VERTEX_SHADER, "shaders/vertex.glsl"),
                        compile(GL_FRAGMENT_SHADER, "shaders/fragment.glsl"));
 
-        glGenVertexArrays(1, &VAO);
-        glGenBuffers(1, &VBO);
-        glBindVertexArray(VAO);
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        load_ply_as_pointcloud("products/sfm/clouds_and_poses.ply");
         
-        const float data[] = {
-            0.0f, 0.0f, 0.0f,
-            0.5f, 0.0f, 0.0f,
-            0.0f, 0.5f, 0.0f
-        };
-        glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW);
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, nullptr);
-        glBindVertexArray(GL_NONE);
+        eye = glm::vec3(0.0f, 0.0f, 5.0f);
+        center = glm::vec3(0.0f, 0.0f, 0.0f);
+        perspective_mat = glm::perspective(glm::radians(45.0f), (float) window_size.x / window_size.y, 0.01f, 200.0f);
         
         opengl_ready = true;
+        time = 0.0f;
     }
+    time += delta_time;
+    
+    if (glfwGetKey(window, GLFW_KEY_W)) {
+        radius += delta_time * 5.0f;
+    }
+    if (glfwGetKey(window, GLFW_KEY_S)) {
+        radius -= delta_time * 5.0f;
+    }
+    
+    eye = glm::vec3(sinf(time) * radius, 0.0f, cosf(time) * radius);
+    view_mat = glm::lookAt(eye, center, glm::vec3(0.0f, 1.0f, 0.0f));
+
+    
 }
 
 auto PipelineModule::list_images(std::filesystem::path path) -> int {
@@ -505,9 +510,63 @@ auto PipelineModule::render() -> void {
         return;
     }
     glUseProgram(program);
+    glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, glm::value_ptr(view_mat));
+    glUniformMatrix4fv(glGetUniformLocation(program, "perspective"), 1, GL_FALSE, glm::value_ptr(perspective_mat));
     glBindVertexArray(VAO);
-    glPointSize(10.0f);
-    glDrawArrays(GL_POINTS, 0, 3);
+    glPointSize(5.0f);
+    glDrawArrays(GL_POINTS, 0, num_vertices);
+    glBindVertexArray(GL_NONE);
 }
 
+auto PipelineModule::load_ply_as_pointcloud(std::string path) -> void {
+    tinyply::PlyFile file;
+    std::ifstream reader(path);
+    if (!reader.good()) {
+        LOG(PIPELINE) << "无法读取 ply 路径：" << path;
+        return;
+    }
+    file.parse_header(reader);
+    LOG(PIPELINE) << path << " 头部解析成功：是 " << (file.is_binary_file() ? "二进制" : "纯文本");
+    
+    std::shared_ptr<tinyply::PlyData> vertices, normals, colors, tex_coords, faces, tripstrip;
+    try { vertices = file.request_properties_from_element("vertex", { "x", "y", "z" }); }
+    catch (const std::exception & e) { LOG(PIPELINE) << "tinyply 错误: " << e.what() << std::endl; }
+    
+    file.read(reader);
+    reader.close();
 
+    LOG(PIPELINE) << "读取完毕。节点数量：" << vertices->count;
+    const auto num_bytes = vertices->buffer.size_bytes();
+    std::vector<glm::vec3> verts(vertices->count);
+    
+    if (vertices->t == tinyply::Type::FLOAT64) {
+        std::vector<glm::dvec3> verts64(vertices->count);
+        std::memcpy(verts64.data(), vertices->buffer.get(), num_bytes);
+
+        for (auto i = 0; i < vertices->count; i++) {
+            verts[i] = { verts64[i].x,
+                verts64[i].y,
+                verts64[i].z };
+        }
+    } else {
+        std::memcpy(verts.data(), vertices->buffer.get(), num_bytes);
+    }
+
+    if (VAO != GL_NONE) {
+        glDeleteVertexArrays(1, &VAO);
+    }
+    if (VBO != GL_NONE) {
+        glDeleteBuffers(1, &VBO);
+    }
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * verts.size(), &verts[0], GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, nullptr);
+    glBindVertexArray(GL_NONE);
+    
+    num_vertices = (int) verts.size();
+}

@@ -33,6 +33,7 @@ private:
     glm::ivec2 window_size;
     bool log_autoscroll;
     std::vector<Module *> modules;
+    float last_instant;
 };
 
 #endif /* Engine_hpp */

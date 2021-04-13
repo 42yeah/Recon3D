@@ -33,19 +33,33 @@ Engine::Engine() {
     io.Fonts->AddFontFromFileTTF("assets/noto_sans_sc.otf", 18, nullptr, io.Fonts->GetGlyphRangesChineseFull());
     log_autoscroll = true;
     
+    ImGuiStyle &style = ImGui::GetStyle();
+    style.FrameRounding = 7.0f;
+    style.WindowRounding = 7.0f;
+    
     // O P E N G L //////////////////////////////////
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    
+    // C H R O N O L O G Y //////////////////////////
+    last_instant = glfwGetTime();
     
     LOG(ENGINE) << "初始化完毕。";
 }
 
 auto Engine::run() -> int { 
     while (!glfwWindowShouldClose(window)) {
+        // C H R O N O L O G Y ///////////////////////
+        float this_instant = glfwGetTime();
+        auto delta_time = this_instant - last_instant;
+        last_instant = this_instant;
+        
         // E V E N T S ///////////////////////////////
         glfwPollEvents();
         for (auto &m : modules) {
-            m->update();
+            m->window_size = { window_size.x, window_size.y };
+            m->window = window;
+            m->update(delta_time);
         }
         
         // R E N D E R S /////////////////////////////

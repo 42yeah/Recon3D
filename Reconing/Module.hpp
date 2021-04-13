@@ -9,6 +9,8 @@
 #define Module_hpp
 
 #include <iostream>
+#include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
 
 
 class Module {
@@ -17,7 +19,7 @@ public:
     
     Module() : name("未知") {}
     
-    virtual auto update() -> void;
+    virtual auto update(float delta_time) -> void;
     
     virtual auto update_ui() -> void;
     
@@ -25,7 +27,9 @@ public:
     
     virtual auto render() -> void;
     
+    glm::ivec2 window_size;
     std::string name;
+    GLFWwindow *window;
 };
 
 #endif /* Module_hpp */

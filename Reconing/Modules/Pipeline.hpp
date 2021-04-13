@@ -10,10 +10,13 @@
 
 #define PIPELINE "管线"
 
-#include "Module.hpp"
 #include "common.hpp"
+#include "Module.hpp"
 #include <vector>
 #include <glad/glad.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <filesystem>
 #include <mutex>
 #include <map>
@@ -86,19 +89,18 @@ public:
     auto incremental_sfm() -> bool;
     
     auto global_sfm() -> bool;
-    
 
     PipelineState state;
     float progress;
 
 private:
+    auto mkdir_if_not_exists(std::filesystem::path path) -> void;
+    
+    // D A T A ////////////////////////////////////////
     std::vector<std::string> image_listing;
     std::filesystem::path base_path;
     std::map<int, Image<unsigned char> > images;
     PairWiseMatches matches;
-    
-    
-    auto mkdir_if_not_exists(std::filesystem::path path) -> void;
     
     SfM_Data sfm_data;
 };
@@ -113,9 +115,9 @@ public:
     PipelineModule() : Module(PIPELINE),
         state(PipelineNS::State::ASKING_FOR_INPUT),
         image_listing(std::vector<std::string>()),
-        VAO(0), VBO(0), program(0), opengl_ready(false) {}
+        VAO(0), VBO(0), program(0), opengl_ready(false), time(0.0f), radius(5.0f) {}
     
-    virtual auto update() -> void override;
+    virtual auto update(float delta_time) -> void override;
     
     virtual auto update_ui() -> void override;
     
@@ -124,6 +126,8 @@ public:
     virtual auto list_images(std::filesystem::path path) -> int;
     
 private:
+    auto load_ply_as_pointcloud(std::string path) -> void;
+
     PipelineNS::State state;
     PipelineNS::Pipeline pipeline;
     
@@ -132,7 +136,11 @@ private:
     
     // O P E N G L //////////////////////////////////
     bool opengl_ready;
+    int num_vertices;
     GLuint VAO, VBO, program;
+    glm::vec3 eye, center;
+    glm::mat4 view_mat, perspective_mat;
+    float time, radius;
 };
 
 #endif /* Pipeline_hpp */

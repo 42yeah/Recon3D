@@ -215,6 +215,7 @@
 		1819D487262574C300C53EF4 /* libglog.0.4.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libglog.0.4.0.dylib; path = ../../../../usr/local/Cellar/glog/0.4.0/lib/libglog.0.4.0.dylib; sourceTree = "<group>"; };
 		1819D48E262588D200C53EF4 /* vertex.glsl */ = {isa = PBXFileReference; lastKnownFileType = text; path = vertex.glsl; sourceTree = "<group>"; };
 		1819D48F262588E900C53EF4 /* fragment.glsl */ = {isa = PBXFileReference; lastKnownFileType = text; path = fragment.glsl; sourceTree = "<group>"; };
+		1819D4912625AC5100C53EF4 /* tinyply.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = tinyply.h; sourceTree = "<group>"; };
 		18EFFA4A261DA7A8002011A2 /* Reconing */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Reconing; sourceTree = BUILT_PRODUCTS_DIR; };
 		18EFFA4D261DA7A8002011A2 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		18EFFA56261DA7C3002011A2 /* libglfw.3.3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libglfw.3.3.dylib; path = ../../../../usr/local/Cellar/glfw/3.3.2/lib/libglfw.3.3.dylib; sourceTree = "<group>"; };
@@ -593,6 +594,14 @@
 			path = shaders;
 			sourceTree = "<group>";
 		};
+		1819D4902625AC5100C53EF4 /* tinyply */ = {
+			isa = PBXGroup;
+			children = (
+				1819D4912625AC5100C53EF4 /* tinyply.h */,
+			);
+			path = tinyply;
+			sourceTree = "<group>";
+		};
 		18EFFA41261DA7A8002011A2 = {
 			isa = PBXGroup;
 			children = (
@@ -698,6 +707,7 @@
 		18EFFA5A261DA7DE002011A2 /* deps */ = {
 			isa = PBXGroup;
 			children = (
+				1819D4902625AC5100C53EF4 /* tinyply */,
 				18EFFB7D26247D99002011A2 /* ImGuiFileDialog */,
 				18EFFA6726246E4E002011A2 /* imgui */,
 				18EFFA5B261DA7DE002011A2 /* glad */,
@@ -1678,6 +1688,7 @@
 					/Users/apple/Projects/openMVG/src/dependencies/cereal/include/,
 					/Users/apple/Projects/openMVG/build/third_party/lemon,
 					/Users/apple/Projects/openMVG/src/third_party/lemon,
+					"$(SRCROOT)/deps/tinyply",
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1710,6 +1721,7 @@
 					/Users/apple/Projects/openMVG/src/dependencies/cereal/include/,
 					/Users/apple/Projects/openMVG/build/third_party/lemon,
 					/Users/apple/Projects/openMVG/src/third_party/lemon,
+					"$(SRCROOT)/deps/tinyply",
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",

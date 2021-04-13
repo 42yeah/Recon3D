@@ -16,7 +16,7 @@ auto Module::update_ui() -> void {
 
 }
 
-auto Module::update() -> void { 
+auto Module::update(float delta_time) -> void { 
 
 }
 

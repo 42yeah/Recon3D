@@ -19,14 +19,17 @@
 
 // O P E N M V G (S) ///////////////////////////
 #define OPENMVG_STD_UNORDERED_MAP
+#define OPENMVG_USE_OPENMP
 #include <openMVG/sfm/sfm_data.hpp>
 #include <openMVG/image/image_io.hpp>
 #include <Eigen/Geometry>
+#include <openMVG/matching/indMatch.hpp>
 
 using namespace openMVG;
 using namespace openMVG::cameras;
 using namespace openMVG::sfm;
 using namespace openMVG::image;
+using namespace openMVG::matching;
 
 
 namespace PipelineNS {
@@ -44,6 +47,7 @@ enum class PipelineState {
     INTRINSICS_ANALYSIS = 1,
     FEATURE_DETECTION = 2,
     MATCHING_FEATURES = 3,
+    INCREMENTAL_SFM = 4
 };
 
 enum class PairMode {
@@ -77,6 +81,8 @@ public:
     
     auto match_features() -> bool;
     
+    auto incremental_sfm() -> bool;
+    
 
     PipelineState state;
     float progress;
@@ -85,6 +91,8 @@ private:
     std::vector<std::string> image_listing;
     std::filesystem::path base_path;
     std::map<int, Image<unsigned char> > images;
+    PairWiseMatches matches;
+    
     
     auto mkdir_if_not_exists(std::filesystem::path path) -> void;
     

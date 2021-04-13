@@ -25,14 +25,15 @@
 #include <openMVG/graph/graph_stats.hpp>
 #include <openMVG/features/descriptor.hpp>
 #include <openMVG/features/feature.hpp>
-#include <openMVG/matching/indMatch.hpp>
 #include <openMVG/matching/indMatch_utils.hpp>
 #include <openMVG/matching_image_collection/Matcher_Regions.hpp>
 #include <openMVG/matching_image_collection/Cascade_Hashing_Matcher_Regions.hpp>
 #include <openMVG/matching_image_collection/GeometricFilter.hpp>
 #include <openMVG/sfm/pipelines/sfm_features_provider.hpp>
+#include <openMVG/sfm/pipelines/sfm_matches_provider.hpp>
 #include <openMVG/sfm/pipelines/sfm_regions_provider.hpp>
 #include <openMVG/sfm/pipelines/sfm_regions_provider_cache.hpp>
+#include <openMVG/sfm/pipelines/sequential/sequential_SfM.hpp>
 #include <openMVG/matching_image_collection/F_ACRobust.hpp>
 #include <openMVG/matching_image_collection/E_ACRobust.hpp>
 #include <openMVG/matching_image_collection/E_ACRobust_Angular.hpp>
@@ -45,7 +46,6 @@
 using namespace openMVG::exif;
 using namespace openMVG::geodesy;
 using namespace openMVG::features;
-using namespace openMVG::matching;
 using namespace openMVG::robust;
 using namespace openMVG::matching_image_collection;
 
@@ -63,13 +63,34 @@ auto run_pipeline(Pipeline *pipeline_ptr) -> void {
     pipeline.run();
 }
 
+auto Pipeline::path_of_view(const openMVG::sfm::View &view) -> std::filesystem::path {
+    std::filesystem::path img_path = view.s_Img_path;
+    return std::filesystem::path("products/features") / img_path.filename();
+}
+
+auto Pipeline::mkdir_if_not_exists(std::filesystem::path path) -> void {
+    if (!std::filesystem::exists(path)) {
+        std::filesystem::create_directory(path);
+    }
+}
+
+auto Pipeline::save_sfm(const std::string path) -> bool {
+    mutex.lock();
+    LOG(PIPELINE) << "正在保存 SfM 数据到 " << path << "...";
+    auto success = Save(sfm_data, path, ESfM_Data(VIEWS | INTRINSICS));
+    mutex.unlock();
+    return success;
+}
+
 auto Pipeline::run() -> bool {
     mkdir_if_not_exists("products");
     mkdir_if_not_exists("products/features");
     mkdir_if_not_exists("products/matches");
+    mkdir_if_not_exists("products/sfm");
     if (intrinsics_analysis() &&
         feature_detection() &&
-        match_features()) {
+        match_features() &&
+        incremental_sfm()) {
         return true;
     }
     mutex.lock();
@@ -91,7 +112,7 @@ auto Pipeline::intrinsics_analysis() -> bool {
     for (auto i = 0; i < image_listing.size(); i++) {
         const auto &entry = image_listing[i];
         progress = (float) i / image_listing.size();
-        auto width = -1.0, height = -1.0, ppx = -1.0, ppy = -1.0, focal = 5.0;
+        auto width = -1.0, height = -1.0, ppx = -1.0, ppy = -1.0, focal = 2884.0;
         ImageHeader header;
         if (!ReadImageHeader(entry.c_str(), &header)) {
             mutex.lock();
@@ -186,8 +207,7 @@ auto Pipeline::match_features() -> bool {
             break;
     }
     
-    std::unique_ptr<Regions> regions;
-    regions.reset(new SIFT_Regions());
+    std::unique_ptr<Regions> regions(new SIFT_Regions());
     auto regions_provider = std::make_shared<Regions_Provider>();
     if (!regions_provider->load(sfm_data, "products/features", regions, nullptr)) {
         LOG(PIPELINE) << "区间错误。";
@@ -218,9 +238,7 @@ auto Pipeline::match_features() -> bool {
             break;
     }
     collection_matcher->Match(regions_provider, pairs, putative_matches);
-    
-//    PairWiseMatchingToAdjacencyMatrixSVG(images.size(), putative_matches, "products/matches/putative_adjacency_mat.svg");
-    
+
     // F I L T E R ///////////////////////////////////////////////////
     std::unique_ptr<ImageCollectionGeometricFilter> filterer(new ImageCollectionGeometricFilter(&sfm_data, regions_provider));
     const double d_distance_ratio = 0.6;
@@ -264,28 +282,73 @@ auto Pipeline::match_features() -> bool {
         return false;
     }
     mutex.unlock();
+    matches = std::move(geometric_matches);
     return true;
 }
 
-auto Pipeline::path_of_view(const openMVG::sfm::View &view) -> std::filesystem::path {
-    std::filesystem::path img_path = view.s_Img_path;
-    return std::filesystem::path("products/features") / img_path.filename();
-}
-
-auto Pipeline::mkdir_if_not_exists(std::filesystem::path path) -> void { 
-    if (!std::filesystem::exists(path)) {
-        std::filesystem::create_directory(path);
-    }
-}
-
-auto Pipeline::save_sfm(const std::string path) -> bool {
+auto Pipeline::incremental_sfm() -> bool {
+    progress = 0.0f;
+    state = PipelineState::INCREMENTAL_SFM;
     mutex.lock();
-    LOG(PIPELINE) << "正在保存 SfM 数据到 " << path << "...";
-    auto success = Save(sfm_data, path, ESfM_Data(VIEWS | INTRINSICS));
+    LOG(PIPELINE) << "开始进行初步 SfM (Structure from Motion)。";
     mutex.unlock();
-    return success;
+    
+    const auto triangulation_method = ETriangulationMethod::DEFAULT;
+    const auto camera_model = PINHOLE_CAMERA_RADIAL3;
+    const auto resection_method = resection::SolverType::DEFAULT;
+    const auto intrinsic_refinement_options = cameras::Intrinsic_Parameter_Type::ADJUST_FOCAL_LENGTH |
+        cameras::Intrinsic_Parameter_Type::ADJUST_PRINCIPAL_POINT |
+        cameras::Intrinsic_Parameter_Type::ADJUST_DISTORTION;
+    
+    std::unique_ptr<Regions> regions(new SIFT_Regions());
+    std::shared_ptr<Features_Provider> features_provider(new Features_Provider());
+    
+    progress = 0.1f;
+    if (!features_provider->load(sfm_data, "products/features", regions)) {
+        mutex.lock();
+        LOG(PIPELINE) << "读取特征失败。";
+        mutex.unlock();
+        return false;
+    }
+    
+    progress = 0.2f;
+    std::shared_ptr<Matches_Provider> matches_provider = std::make_shared<Matches_Provider>();
+    if (!matches_provider->load(sfm_data, "products/matches/matches.f.bin")) {
+        mutex.lock();
+        LOG(PIPELINE) << "匹配读取失败。";
+        mutex.unlock();
+        return false;
+    }
+    SequentialSfMReconstructionEngine sfm_engine(sfm_data, "products/sfm", "products/sfm/report.html");
+    sfm_engine.SetFeaturesProvider(features_provider.get());
+    sfm_engine.SetMatchesProvider(matches_provider.get());
+    sfm_engine.Set_Intrinsics_Refinement_Type(intrinsic_refinement_options);
+    sfm_engine.SetUnknownCameraType(camera_model);
+    sfm_engine.Set_Use_Motion_Prior(false);
+    sfm_engine.SetTriangulationMethod(triangulation_method);
+    sfm_engine.SetResectionMethod(resection_method);
+    
+    progress = 0.5f;
+    if (!sfm_engine.Process()) {
+        mutex.lock();
+        LOG(PIPELINE) << "SfM 引擎处理失败。";
+        mutex.unlock();
+        return false;
+    }
+    progress = 0.9f;
+    mutex.lock();
+    LOG(PIPELINE) << "SfM 引擎处理完毕。正在导出数据...";
+    mutex.unlock();
+    
+    Save(sfm_engine.Get_SfM_Data(), "products/sfm/sfm_engine_data.bin", ESfM_Data(ALL));
+    Save(sfm_engine.Get_SfM_Data(), "products/sfm/clouds_and_poses.ply", ESfM_Data(ALL));
+    
+    progress = 1.0f;
+    mutex.lock();
+    LOG(PIPELINE) << "初步 SfM 结束。";
+    mutex.unlock();
+    return true;
 }
-
 
 
 
@@ -341,6 +404,10 @@ auto PipelineModule::update_ui() -> void {
                         
                     case PipelineState::MATCHING_FEATURES:
                         ImGui::TextWrapped("正在两两匹配特征点...");
+                        break;
+                        
+                    case PipelineState::INCREMENTAL_SFM:
+                        ImGui::TextWrapped("正在进行初步 SfM 处理...");
                         break;
                 }
                 mutex.unlock();

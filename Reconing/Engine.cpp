@@ -30,12 +30,12 @@ Engine::Engine() {
     
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 330 core");
-    io.Fonts->AddFontFromFileTTF("assets/noto_sans_sc.otf", 16, nullptr, io.Fonts->GetGlyphRangesChineseFull());
+    io.Fonts->AddFontFromFileTTF("assets/noto_sans_sc.otf", 18, nullptr, io.Fonts->GetGlyphRangesChineseFull());
     log_autoscroll = true;
     
     // O P E N G L //////////////////////////////////
     glEnable(GL_DEPTH_TEST);
-    glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     
     LOG(ENGINE) << "初始化完毕。";
 }
@@ -50,6 +50,9 @@ auto Engine::run() -> int {
         
         // R E N D E R S /////////////////////////////
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        for (auto &m : modules) {
+            m->render();
+        }
         
         // I M G U I /////////////////////////////////
         ImGui_ImplOpenGL3_NewFrame();

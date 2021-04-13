@@ -90,7 +90,8 @@ auto Pipeline::run() -> bool {
     if (intrinsics_analysis() &&
         feature_detection() &&
         match_features() &&
-        incremental_sfm()) {
+        incremental_sfm() &&
+        global_sfm()) {
         return true;
     }
     mutex.lock();
@@ -350,6 +351,22 @@ auto Pipeline::incremental_sfm() -> bool {
     return true;
 }
 
+auto Pipeline::global_sfm() -> bool {
+    progress = 0.0f;
+    state = PipelineState::GLOBAL_SFM;
+    mutex.lock();
+    LOG(PIPELINE) << "开始进行全局 SfM。";
+    mutex.unlock();
+    
+    
+    
+    mutex.lock();
+    LOG(PIPELINE) << "全局 SfM 结束。";
+    mutex.unlock();
+    return true;
+}
+
+
 
 
 // M O D U L E ///////////////////////////
@@ -409,6 +426,10 @@ auto PipelineModule::update_ui() -> void {
                     case PipelineState::INCREMENTAL_SFM:
                         ImGui::TextWrapped("正在进行初步 SfM 处理...");
                         break;
+                        
+                    case PipelineState::GLOBAL_SFM:
+                        ImGui::TextWrapped("正在进行全局 SfM 处理...");
+                        break;
                 }
                 mutex.unlock();
                 if (pipeline.state != PipelineState::FINISHED_ERR ||
@@ -425,7 +446,7 @@ auto PipelineModule::update_ui() -> void {
     }
     if (state == State::CHOOSING_FILE) {
         ImGuiFileDialog::Instance()->OpenDialog("Folder", "选择输入目录...", nullptr, ".");
-        ImGui::SetNextWindowSize({ 300, 300 }, ImGuiCond_FirstUseEver);
+        ImGui::SetNextWindowSize({ 500, 300 }, ImGuiCond_FirstUseEver);
         if (ImGuiFileDialog::Instance()->Display("Folder")) {
             if (ImGuiFileDialog::Instance()->IsOk()) {
                 std::string path = ImGuiFileDialog::Instance()->GetCurrentPath();
@@ -441,7 +462,27 @@ auto PipelineModule::update_ui() -> void {
 }
 
 auto PipelineModule::update() -> void { 
-    
+    if (!opengl_ready && pipeline.state == PipelineState::GLOBAL_SFM) {
+        program = link(compile(GL_VERTEX_SHADER, "shaders/vertex.glsl"),
+                       compile(GL_FRAGMENT_SHADER, "shaders/fragment.glsl"));
+
+        glGenVertexArrays(1, &VAO);
+        glGenBuffers(1, &VBO);
+        glBindVertexArray(VAO);
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        
+        const float data[] = {
+            0.0f, 0.0f, 0.0f,
+            0.5f, 0.0f, 0.0f,
+            0.0f, 0.5f, 0.0f
+        };
+        glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, nullptr);
+        glBindVertexArray(GL_NONE);
+        
+        opengl_ready = true;
+    }
 }
 
 auto PipelineModule::list_images(std::filesystem::path path) -> int {
@@ -457,4 +498,16 @@ auto PipelineModule::list_images(std::filesystem::path path) -> int {
     }
     return legit_image;
 }
+
+auto PipelineModule::render() -> void { 
+    if (!opengl_ready) {
+        // Not ready yet
+        return;
+    }
+    glUseProgram(program);
+    glBindVertexArray(VAO);
+    glPointSize(10.0f);
+    glDrawArrays(GL_POINTS, 0, 3);
+}
+
 

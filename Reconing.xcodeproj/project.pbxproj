@@ -213,6 +213,8 @@
 		1819D48226256C8700C53EF4 /* libopenMVG_matching_image_collection.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopenMVG_matching_image_collection.a; path = "../openMVG/xcode/Darwin-x86_64-Release/Debug/libopenMVG_matching_image_collection.a"; sourceTree = "<group>"; };
 		1819D484262574B100C53EF4 /* libceres.2.0.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libceres.2.0.0.dylib; path = "../../../../usr/local/Cellar/ceres-solver/2.0.0/lib/libceres.2.0.0.dylib"; sourceTree = "<group>"; };
 		1819D487262574C300C53EF4 /* libglog.0.4.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libglog.0.4.0.dylib; path = ../../../../usr/local/Cellar/glog/0.4.0/lib/libglog.0.4.0.dylib; sourceTree = "<group>"; };
+		1819D48E262588D200C53EF4 /* vertex.glsl */ = {isa = PBXFileReference; lastKnownFileType = text; path = vertex.glsl; sourceTree = "<group>"; };
+		1819D48F262588E900C53EF4 /* fragment.glsl */ = {isa = PBXFileReference; lastKnownFileType = text; path = fragment.glsl; sourceTree = "<group>"; };
 		18EFFA4A261DA7A8002011A2 /* Reconing */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Reconing; sourceTree = BUILT_PRODUCTS_DIR; };
 		18EFFA4D261DA7A8002011A2 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		18EFFA56261DA7C3002011A2 /* libglfw.3.3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libglfw.3.3.dylib; path = ../../../../usr/local/Cellar/glfw/3.3.2/lib/libglfw.3.3.dylib; sourceTree = "<group>"; };
@@ -582,9 +584,19 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		1819D48D262588C700C53EF4 /* shaders */ = {
+			isa = PBXGroup;
+			children = (
+				1819D48E262588D200C53EF4 /* vertex.glsl */,
+				1819D48F262588E900C53EF4 /* fragment.glsl */,
+			);
+			path = shaders;
+			sourceTree = "<group>";
+		};
 		18EFFA41261DA7A8002011A2 = {
 			isa = PBXGroup;
 			children = (
+				1819D48D262588C700C53EF4 /* shaders */,
 				18EFFB9326249018002011A2 /* samples */,
 				18EFFB782624713A002011A2 /* assets */,
 				18EFFA5A261DA7DE002011A2 /* deps */,
@@ -1506,7 +1518,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "cp -r ${SRCROOT}/assets ${BUILT_PRODUCTS_DIR}\ncp -r ${SRCROOT}/samples ${BUILT_PRODUCTS_DIR}\n";
+			shellScript = "cp -r ${SRCROOT}/assets ${BUILT_PRODUCTS_DIR}\ncp -r ${SRCROOT}/samples ${BUILT_PRODUCTS_DIR}\ncp -r ${SRCROOT}/shaders ${BUILT_PRODUCTS_DIR}\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 

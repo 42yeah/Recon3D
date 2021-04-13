@@ -23,6 +23,8 @@ public:
     
     virtual auto destroy() -> bool;
     
+    virtual auto render() -> void;
+    
     std::string name;
 };
 

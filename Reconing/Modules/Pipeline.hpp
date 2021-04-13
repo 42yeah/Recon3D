@@ -13,6 +13,7 @@
 #include "Module.hpp"
 #include "common.hpp"
 #include <vector>
+#include <glad/glad.h>
 #include <filesystem>
 #include <mutex>
 #include <map>
@@ -47,7 +48,8 @@ enum class PipelineState {
     INTRINSICS_ANALYSIS = 1,
     FEATURE_DETECTION = 2,
     MATCHING_FEATURES = 3,
-    INCREMENTAL_SFM = 4
+    INCREMENTAL_SFM = 4,
+    GLOBAL_SFM = 5
 };
 
 enum class PairMode {
@@ -83,6 +85,8 @@ public:
     
     auto incremental_sfm() -> bool;
     
+    auto global_sfm() -> bool;
+    
 
     PipelineState state;
     float progress;
@@ -108,11 +112,14 @@ class PipelineModule : public Module {
 public:
     PipelineModule() : Module(PIPELINE),
         state(PipelineNS::State::ASKING_FOR_INPUT),
-        image_listing(std::vector<std::string>()) {}
+        image_listing(std::vector<std::string>()),
+        VAO(0), VBO(0), program(0), opengl_ready(false) {}
     
     virtual auto update() -> void override;
     
     virtual auto update_ui() -> void override;
+    
+    virtual auto render() -> void override;
 
     virtual auto list_images(std::filesystem::path path) -> int;
     
@@ -122,6 +129,10 @@ private:
     
     // I N P U T S //////////////////////////////////
     std::vector<std::string> image_listing;
+    
+    // O P E N G L //////////////////////////////////
+    bool opengl_ready;
+    GLuint VAO, VBO, program;
 };
 
 #endif /* Pipeline_hpp */

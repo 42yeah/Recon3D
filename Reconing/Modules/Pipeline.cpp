@@ -30,13 +30,16 @@
 #include <openMVG/matching_image_collection/Matcher_Regions.hpp>
 #include <openMVG/matching_image_collection/Cascade_Hashing_Matcher_Regions.hpp>
 #include <openMVG/matching_image_collection/GeometricFilter.hpp>
-#include <openMVG/sfm/pipelines/sfm_regions_provider.hpp>
-#include <openMVG/sfm/pipelines/sfm_regions_provider_cache.hpp>
 #include <openMVG/sfm/pipelines/global/GlobalSfM_rotation_averaging.hpp>
 #include <openMVG/sfm/pipelines/global/GlobalSfM_translation_averaging.hpp>
 #include <openMVG/sfm/pipelines/global/sfm_global_engine_relative_motions.hpp>
 #include <openMVG/sfm/pipelines/sequential/sequential_SfM.hpp>
 #include <openMVG/sfm/sfm_data_colorization.hpp>
+#include <openMVG/sfm/sfm_data_BA.hpp>
+#include <openMVG/sfm/sfm_data_BA_ceres.hpp>
+#include <openMVG/sfm/sfm_data_filters.hpp>
+#include <openMVG/sfm/sfm_data_filters_frustum.hpp>
+#include <openMVG/sfm/pipelines/structure_from_known_poses/structure_estimator.hpp>
 #include <openMVG/matching_image_collection/F_ACRobust.hpp>
 #include <openMVG/matching_image_collection/E_ACRobust.hpp>
 #include <openMVG/matching_image_collection/E_ACRobust_Angular.hpp>
@@ -155,7 +158,9 @@ auto Pipeline::run() -> bool {
         match_features() &&
         incremental_sfm() &&
         global_sfm() &&
-        colorize()) {
+        colorize(PipelineState::COLORIZING) &&
+        structure_from_known_poses() &&
+        colorize(PipelineState::COLORIZED_ROBUST_TRIANGULATION)) {
         return true;
     }
     mutex.lock();
@@ -274,7 +279,7 @@ auto Pipeline::match_features() -> bool {
     }
     
     std::unique_ptr<Regions> regions(new SIFT_Regions());
-    auto regions_provider = std::make_shared<Regions_Provider>();
+    regions_provider = std::make_shared<Regions_Provider>();
     if (!regions_provider->load(sfm_data, "products/features", regions, nullptr)) {
         LOG(PIPELINE) << "区间错误。";
         return false;
@@ -459,9 +464,9 @@ auto Pipeline::global_sfm() -> bool {
     return true;
 }
 
-auto Pipeline::colorize() -> bool {
+auto Pipeline::colorize(PipelineState state) -> bool {
     progress = 0.0f;
-    state = PipelineState::COLORIZING;
+    this->state = state;
     mutex.lock();
     LOG(PIPELINE) << "开始进行上色处理。";
     mutex.unlock();
@@ -473,24 +478,68 @@ auto Pipeline::colorize() -> bool {
         mutex.unlock();
         return false;
     }
+    progress = 0.5f;
     for (const auto &view : sfm_data.GetViews()) {
         if (sfm_data.IsPoseAndIntrinsicDefined(view.second.get())) {
             const Pose3 pose = sfm_data.GetPoseOrDie(view.second.get());
             cam_position.push_back(pose.center());
         }
     }
+    progress = 0.8f;
     if (!export_to_ply("products/sfm/global_recon_colorized.ply", points, cam_position, tracks_color)) {
         mutex.lock();
         LOG(PIPELINE) << "模型导出失败。跳过步骤。";
         mutex.unlock();
     }
-    
+    progress = 1.0f;
     mutex.lock();
     LOG(PIPELINE) << "上色处理完成。";
     mutex.unlock();
     return true;
 }
 
+auto Pipeline::structure_from_known_poses() -> bool {
+    state = PipelineState::STRUCTURE_FROM_KNOWN_POSES;
+    progress = 0.0f;
+    mutex.lock();
+    LOG(PIPELINE) << "正在恢复结构。最大重投影容错：4.0。";
+    mutex.unlock();
+    
+    const auto max_reprojection_error = 4.0;
+    const auto triangulation_method = ETriangulationMethod::DEFAULT;
+    
+    Pair_Set pairs;
+    PairWiseMatches matches;
+    if (!Load(matches, "products/matches/matches.f.bin")) {
+        mutex.lock();
+        LOG(PIPELINE) << "无法加载匹配文件。";
+        mutex.unlock();
+        return false;
+    }
+    pairs = getPairs(matches);
+    const std::set<IndexT> valid_views_idx = Get_Valid_Views(sfm_data);
+    pairs = Pair_filter(pairs, valid_views_idx);
+    
+    progress = 0.5f;
+    SfM_Data_Structure_Estimation_From_Known_Poses structure_estimator(max_reprojection_error);
+    structure_estimator.run(sfm_data, pairs, regions_provider, triangulation_method);
+    
+    RemoveOutliers_AngleError(sfm_data, 2.0);
+    progress = 0.7f;
+    mutex.lock();
+    LOG(PIPELINE) << "地标数量：" << sfm_data.GetLandmarks().size();
+    LOG(PIPELINE) << "处理结束。正在保存...";
+    mutex.unlock();
+    
+    Save(sfm_data, "products/sfm/robust.ply", ESfM_Data(ALL));
+    Save(sfm_data, "products/sfm/robust.bin", ESfM_Data(ALL));
+    
+    progress = 1.0f;
+    mutex.lock();
+    LOG(PIPELINE) << "结构恢复完成。";
+    mutex.unlock();
+    return true;
+}
 
 // M O D U L E ///////////////////////////
 auto PipelineModule::update_ui() -> void { 
@@ -556,6 +605,14 @@ auto PipelineModule::update_ui() -> void {
                         
                     case PipelineState::COLORIZING:
                         ImGui::TextWrapped("正在对模型进行上色...");
+                        break;
+                        
+                    case PipelineState::STRUCTURE_FROM_KNOWN_POSES:
+                        ImGui::TextWrapped("正在从已知相机坐标构建结构...");
+                        break;
+                        
+                    case PipelineState::COLORIZED_ROBUST_TRIANGULATION:
+                        ImGui::TextWrapped("正在对鲁棒模型进行上色...");
                         break;
                 }
                 mutex.unlock();

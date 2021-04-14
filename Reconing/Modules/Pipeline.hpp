@@ -30,6 +30,8 @@
 #include <openMVG/matching/indMatch.hpp>
 #include <openMVG/sfm/pipelines/sfm_features_provider.hpp>
 #include <openMVG/sfm/pipelines/sfm_matches_provider.hpp>
+#include <openMVG/sfm/pipelines/sfm_regions_provider.hpp>
+#include <openMVG/sfm/pipelines/sfm_regions_provider_cache.hpp>
 
 using namespace openMVG;
 using namespace openMVG::cameras;
@@ -56,7 +58,9 @@ enum class PipelineState {
     MATCHING_FEATURES = 3,
     INCREMENTAL_SFM = 4,
     GLOBAL_SFM = 5,
-    COLORIZING = 6
+    COLORIZING = 6,
+    STRUCTURE_FROM_KNOWN_POSES = 7,
+    COLORIZED_ROBUST_TRIANGULATION = 8
 };
 
 enum class PairMode {
@@ -99,7 +103,10 @@ public:
     
     auto global_sfm() -> bool;
     
-    auto colorize() -> bool;
+    auto colorize(PipelineState state) -> bool;
+    
+    auto structure_from_known_poses() -> bool;
+    
 
     PipelineState state;
     float progress;
@@ -110,6 +117,7 @@ private:
     // P R O V I D E R S //////////////////////////////
     std::shared_ptr<Features_Provider> features_provider;
     std::shared_ptr<Matches_Provider> matches_provider;
+    std::shared_ptr<Regions_Provider> regions_provider;
     
     // D A T A ////////////////////////////////////////
     std::vector<std::string> image_listing;

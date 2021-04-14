@@ -32,6 +32,7 @@
 #include <openMVG/sfm/pipelines/sfm_matches_provider.hpp>
 #include <openMVG/sfm/pipelines/sfm_regions_provider.hpp>
 #include <openMVG/sfm/pipelines/sfm_regions_provider_cache.hpp>
+#include "../Helpers/OpenMVS.hpp"
 
 using namespace openMVG;
 using namespace openMVG::cameras;
@@ -125,9 +126,9 @@ private:
     std::vector<std::string> image_listing;
     std::filesystem::path base_path;
     std::map<int, Image<unsigned char> > images;
-    PairWiseMatches matches;
     
     SfM_Data sfm_data;
+    OpenMVS open_mvs;
 };
 
 };

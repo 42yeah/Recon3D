@@ -363,7 +363,6 @@ auto Pipeline::match_features() -> bool {
         return false;
     }
     mutex.unlock();
-    matches = std::move(geometric_matches);
     return true;
 }
 
@@ -679,6 +678,8 @@ auto Pipeline::export_openmvg_to_openmvs() -> bool {
     mutex.lock();
     LOG(PIPELINE) << "格式转换完成。平台数量：" << scene.platforms.size();
     mutex.unlock();
+    
+    open_mvs = OpenMVS(std::move(scene));
     return true;
 }
 

@@ -113,6 +113,7 @@
 		1819D486262574B100C53EF4 /* libceres.2.0.0.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 1819D484262574B100C53EF4 /* libceres.2.0.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1819D488262574C300C53EF4 /* libglog.0.4.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1819D487262574C300C53EF4 /* libglog.0.4.0.dylib */; };
 		1819D489262574C400C53EF4 /* libglog.0.4.0.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 1819D487262574C300C53EF4 /* libglog.0.4.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1819D4A72626CF6C00C53EF4 /* OpenMVS.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1819D4A52626CF6C00C53EF4 /* OpenMVS.cpp */; };
 		18EFFA4E261DA7A8002011A2 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18EFFA4D261DA7A8002011A2 /* main.cpp */; };
 		18EFFA57261DA7C3002011A2 /* libglfw.3.3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 18EFFA56261DA7C3002011A2 /* libglfw.3.3.dylib */; };
 		18EFFA58261DA7C3002011A2 /* libglfw.3.3.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 18EFFA56261DA7C3002011A2 /* libglfw.3.3.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -216,6 +217,8 @@
 		1819D48E262588D200C53EF4 /* vertex.glsl */ = {isa = PBXFileReference; lastKnownFileType = text; path = vertex.glsl; sourceTree = "<group>"; };
 		1819D48F262588E900C53EF4 /* fragment.glsl */ = {isa = PBXFileReference; lastKnownFileType = text; path = fragment.glsl; sourceTree = "<group>"; };
 		1819D4912625AC5100C53EF4 /* tinyply.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = tinyply.h; sourceTree = "<group>"; };
+		1819D4A52626CF6C00C53EF4 /* OpenMVS.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = OpenMVS.cpp; sourceTree = "<group>"; };
+		1819D4A62626CF6C00C53EF4 /* OpenMVS.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = OpenMVS.hpp; sourceTree = "<group>"; };
 		18EFFA4A261DA7A8002011A2 /* Reconing */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Reconing; sourceTree = BUILT_PRODUCTS_DIR; };
 		18EFFA4D261DA7A8002011A2 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		18EFFA56261DA7C3002011A2 /* libglfw.3.3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libglfw.3.3.dylib; path = ../../../../usr/local/Cellar/glfw/3.3.2/lib/libglfw.3.3.dylib; sourceTree = "<group>"; };
@@ -602,6 +605,15 @@
 			path = tinyply;
 			sourceTree = "<group>";
 		};
+		1819D4A42626CF5B00C53EF4 /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				1819D4A52626CF6C00C53EF4 /* OpenMVS.cpp */,
+				1819D4A62626CF6C00C53EF4 /* OpenMVS.hpp */,
+			);
+			path = Helpers;
+			sourceTree = "<group>";
+		};
 		18EFFA41261DA7A8002011A2 = {
 			isa = PBXGroup;
 			children = (
@@ -626,6 +638,7 @@
 		18EFFA4C261DA7A8002011A2 /* Reconing */ = {
 			isa = PBXGroup;
 			children = (
+				1819D4A42626CF5B00C53EF4 /* Helpers */,
 				18EFFB8B26247EDE002011A2 /* Modules */,
 				18EFFA4D261DA7A8002011A2 /* main.cpp */,
 				18EFFA64261DA987002011A2 /* Engine.cpp */,
@@ -1541,6 +1554,7 @@
 				18EFFB6E26246E75002011A2 /* imgui_widgets.cpp in Sources */,
 				18EFFB8A26247DB8002011A2 /* Module.cpp in Sources */,
 				18EFFB6F26246E75002011A2 /* imgui_impl_opengl3.cpp in Sources */,
+				1819D4A72626CF6C00C53EF4 /* OpenMVS.cpp in Sources */,
 				18EFFB7026246E75002011A2 /* imgui_impl_glfw.cpp in Sources */,
 				18EFFB7126246E75002011A2 /* imgui.cpp in Sources */,
 				18EFFB91262482BD002011A2 /* Pipeline.cpp in Sources */,
@@ -1689,6 +1703,7 @@
 					/Users/apple/Projects/openMVG/build/third_party/lemon,
 					/Users/apple/Projects/openMVG/src/third_party/lemon,
 					"$(SRCROOT)/deps/tinyply",
+					/usr/local/include/opencv4,
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1722,6 +1737,7 @@
 					/Users/apple/Projects/openMVG/build/third_party/lemon,
 					/Users/apple/Projects/openMVG/src/third_party/lemon,
 					"$(SRCROOT)/deps/tinyply",
+					/usr/local/include/opencv4,
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",

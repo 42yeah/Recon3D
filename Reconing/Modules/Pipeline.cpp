@@ -153,6 +153,9 @@ auto Pipeline::export_to_ply(const std::string path, std::vector<Vec3> vertices,
 }
 
 auto Pipeline::run() -> bool {
+    if (std::filesystem::exists("products")) {
+        std::filesystem::remove_all("products");
+    }
     mkdir_if_not_exists("products");
     mkdir_if_not_exists("products/features");
     mkdir_if_not_exists("products/matches");
@@ -606,7 +609,11 @@ auto Pipeline::export_openmvg_to_openmvs() -> bool {
             
             MVS::Interface::Image image;
             std::filesystem::path image_path = view.second->s_Img_path;
-            image.name = "products/mvs/images/" + image_path.filename().string();
+            std::filesystem::path image_file_name = image_path.filename();
+            if (image_file_name.extension() == ".jpeg") {
+                image_file_name.replace_extension(".jpg");
+            }
+            image.name = "products/mvs/images/" + image_file_name.string();
             image.platformID = map_intrinsic.at(view.second->id_intrinsic);
             auto &platform = scene.platforms[image.platformID];
             image.cameraID = 0;
@@ -634,7 +641,7 @@ auto Pipeline::export_openmvg_to_openmvs() -> bool {
     }
     
     i = 0;
-    scene.vertices.resize(sfm_data.GetLandmarks().size());
+    scene.vertices.reserve(sfm_data.GetLandmarks().size());
     for (const auto &vertex : sfm_data.GetLandmarks()) {
         float sub_progress = (float) i / sfm_data.GetLandmarks().size();
         i++;

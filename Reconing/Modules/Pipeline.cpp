@@ -15,6 +15,7 @@
 #include <openMVG/exif/exif_IO_EasyExif.hpp>
 #include <openMVG/geodesy/geodesy.hpp>
 #include <openMVG/numeric/eigen_alias_definition.hpp>
+#include <openMVG/sfm/sfm_data.hpp>
 #include <openMVG/sfm/sfm_data_io.hpp>
 #include <openMVG/sfm/sfm_data_utils.hpp>
 #include <openMVG/sfm/sfm_view.hpp>
@@ -35,6 +36,7 @@
 #include <openMVG/sfm/pipelines/global/GlobalSfM_translation_averaging.hpp>
 #include <openMVG/sfm/pipelines/global/sfm_global_engine_relative_motions.hpp>
 #include <openMVG/sfm/pipelines/sequential/sequential_SfM.hpp>
+#include <openMVG/sfm/sfm_data_colorization.hpp>
 #include <openMVG/matching_image_collection/F_ACRobust.hpp>
 #include <openMVG/matching_image_collection/E_ACRobust.hpp>
 #include <openMVG/matching_image_collection/E_ACRobust_Angular.hpp>
@@ -84,6 +86,65 @@ auto Pipeline::save_sfm(const std::string path) -> bool {
     return success;
 }
 
+auto Pipeline::export_to_ply(const std::string path, std::vector<Vec3> vertices, std::vector<Vec3> camera_poses, std::vector<Vec3> colored_points) -> bool {
+    mutex.lock();
+    LOG(PIPELINE) << "正在导出模型到 " << path;
+    mutex.unlock();
+    
+    std::ofstream writer(path);
+    if (!writer.good()) {
+        mutex.lock();
+        LOG(PIPELINE) << "模型导出失败。无法打开文件。";
+        mutex.unlock();
+        return false;
+    }
+    writer << "ply" << std::endl
+        << "format ascii 1.0" << std::endl
+        << "element vertex " << vertices.size() + camera_poses.size() << std::endl
+        << "property double x" << std::endl
+        << "property double y" << std::endl
+        << "property double z" << std::endl
+        << "property uchar red" << std::endl
+        << "property uchar green" << std::endl
+        << "property uchar blue" << std::endl
+        << "end_header" << std::endl;
+
+    writer << std::fixed << std::setprecision(std::numeric_limits<double>::digits10 + 1);
+    for (auto i = 0; i < vertices.size(); i++) {
+        if (i <= colored_points.size() - 1) {
+            const auto color = colored_points[i];
+            writer << vertices[i](0) << ' '
+                << vertices[i](1) << ' '
+                << vertices[i](2) << ' '
+                << (int) color(0) << ' '
+                << (int) color(1) << ' '
+                << (int) color(2) << std::endl;
+        } else {
+            writer << vertices[i](0) << ' '
+                << vertices[i](1) << ' '
+                << vertices[i](2) << ' '
+                << 255 << ' '
+                << 255 << ' '
+                << 255 << std::endl;
+        }
+    }
+    
+    for (auto i = 0; i < camera_poses.size(); i++) {
+        writer << camera_poses[i](0) << ' '
+            << camera_poses[i](1) << ' '
+            << camera_poses[i](2) << ' '
+            << 0 << ' '
+            << 255 << ' '
+            << 0 << std::endl;
+    }
+    writer.close();
+    
+    mutex.lock();
+    LOG(PIPELINE) << "模型导出完成。";
+    mutex.unlock();
+    return true;
+}
+
 auto Pipeline::run() -> bool {
     mkdir_if_not_exists("products");
     mkdir_if_not_exists("products/features");
@@ -93,7 +154,8 @@ auto Pipeline::run() -> bool {
         feature_detection() &&
         match_features() &&
         incremental_sfm() &&
-        global_sfm()) {
+        global_sfm() &&
+        colorize()) {
         return true;
     }
     mutex.lock();
@@ -141,6 +203,7 @@ auto Pipeline::intrinsics_analysis() -> bool {
         intrinsics[view.id_view] = intrinsic;
         views[view.id_view] = std::make_shared<View>(view);
     }
+    sfm_data.s_root_path = "";
     mutex.lock();
     LOG(PIPELINE) << "相机内部参数提取完成。";
     mutex.unlock();
@@ -390,7 +453,40 @@ auto Pipeline::global_sfm() -> bool {
     
     progress = 1.0f;
     mutex.lock();
-    LOG(PIPELINE) << "全局 SfM 结束。";
+    LOG(PIPELINE) << "全局 SfM 结束。正在更新 SfM 数据...";
+    sfm_data = sfm_engine.Get_SfM_Data();
+    mutex.unlock();
+    return true;
+}
+
+auto Pipeline::colorize() -> bool {
+    progress = 0.0f;
+    state = PipelineState::COLORIZING;
+    mutex.lock();
+    LOG(PIPELINE) << "开始进行上色处理。";
+    mutex.unlock();
+    
+    std::vector<Vec3> points, tracks_color, cam_position;
+    if (!ColorizeTracks(sfm_data, points, tracks_color)) {
+        mutex.lock();
+        LOG(PIPELINE) << "上色处理失败：无法为轨迹上色。";
+        mutex.unlock();
+        return false;
+    }
+    for (const auto &view : sfm_data.GetViews()) {
+        if (sfm_data.IsPoseAndIntrinsicDefined(view.second.get())) {
+            const Pose3 pose = sfm_data.GetPoseOrDie(view.second.get());
+            cam_position.push_back(pose.center());
+        }
+    }
+    if (!export_to_ply("products/sfm/global_recon_colorized.ply", points, cam_position, tracks_color)) {
+        mutex.lock();
+        LOG(PIPELINE) << "模型导出失败。跳过步骤。";
+        mutex.unlock();
+    }
+    
+    mutex.lock();
+    LOG(PIPELINE) << "上色处理完成。";
     mutex.unlock();
     return true;
 }
@@ -457,9 +553,13 @@ auto PipelineModule::update_ui() -> void {
                     case PipelineState::GLOBAL_SFM:
                         ImGui::TextWrapped("正在进行全局 SfM 处理...");
                         break;
+                        
+                    case PipelineState::COLORIZING:
+                        ImGui::TextWrapped("正在对模型进行上色...");
+                        break;
                 }
                 mutex.unlock();
-                if (pipeline.state != PipelineState::FINISHED_ERR ||
+                if (pipeline.state != PipelineState::FINISHED_ERR &&
                     pipeline.state != PipelineState::FINISHED_SUCCESS) {
                     ImGui::ProgressBar(pipeline.progress);
                 }

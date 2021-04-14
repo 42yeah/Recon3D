@@ -55,7 +55,8 @@ enum class PipelineState {
     FEATURE_DETECTION = 2,
     MATCHING_FEATURES = 3,
     INCREMENTAL_SFM = 4,
-    GLOBAL_SFM = 5
+    GLOBAL_SFM = 5,
+    COLORIZING = 6
 };
 
 enum class PairMode {
@@ -81,6 +82,11 @@ public:
     auto path_of_view(const View &view) -> std::filesystem::path;
     
     auto save_sfm(const std::string path) -> bool;
+    
+    auto export_to_ply(const std::string path,
+                       std::vector<Vec3> vertices,
+                       std::vector<Vec3> camera_poses,
+                       std::vector<Vec3> colored_points = std::vector<Vec3>()) -> bool;
 
     // P I P E L I N E ///////////////////////////////
     auto intrinsics_analysis() -> bool;
@@ -92,6 +98,8 @@ public:
     auto incremental_sfm() -> bool;
     
     auto global_sfm() -> bool;
+    
+    auto colorize() -> bool;
 
     PipelineState state;
     float progress;
@@ -115,8 +123,10 @@ private:
 };
 
 
-/// Pipeline procedure:
-/// 1. Intrinsics analysis
+/// Files to load when states change:
+/// 1. AFTER incremental SfM, we can load the initial PLY;
+/// 2. AFTER global SfM, we can simply load it again.
+/// 3. AFTER data color calculation, we can load it, this time with color!
 class PipelineModule : public Module {
 public:
     PipelineModule() : Module(PIPELINE),

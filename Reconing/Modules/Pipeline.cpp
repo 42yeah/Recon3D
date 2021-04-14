@@ -486,7 +486,11 @@ auto Pipeline::colorize(PipelineState state) -> bool {
         }
     }
     progress = 0.8f;
-    if (!export_to_ply("products/sfm/global_recon_colorized.ply", points, cam_position, tracks_color)) {
+    std::string path = "products/sfm/global_recon_colorized.ply";
+    if (state == PipelineState::COLORIZED_ROBUST_TRIANGULATION) {
+        path = "products/sfm/robust_recon_colorized.ply";
+    }
+    if (!export_to_ply(path, points, cam_position, tracks_color)) {
         mutex.lock();
         LOG(PIPELINE) << "模型导出失败。跳过步骤。";
         mutex.unlock();

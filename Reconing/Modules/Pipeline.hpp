@@ -117,7 +117,6 @@ private:
     // P R O V I D E R S //////////////////////////////
     std::shared_ptr<Features_Provider> features_provider;
     std::shared_ptr<Matches_Provider> matches_provider;
-    std::shared_ptr<Regions_Provider> regions_provider;
     
     // D A T A ////////////////////////////////////////
     std::vector<std::string> image_listing;

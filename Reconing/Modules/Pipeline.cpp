@@ -279,7 +279,7 @@ auto Pipeline::match_features() -> bool {
     }
     
     std::unique_ptr<Regions> regions(new SIFT_Regions());
-    regions_provider = std::make_shared<Regions_Provider>();
+    auto regions_provider = std::make_shared<Regions_Provider>();
     if (!regions_provider->load(sfm_data, "products/features", regions, nullptr)) {
         LOG(PIPELINE) << "区间错误。";
         return false;
@@ -507,6 +507,12 @@ auto Pipeline::structure_from_known_poses() -> bool {
     
     const auto max_reprojection_error = 4.0;
     const auto triangulation_method = ETriangulationMethod::DEFAULT;
+    std::unique_ptr<Regions> regions(new SIFT_Regions());
+    auto regions_provider = std::make_shared<Regions_Provider>();
+    if (!regions_provider->load(sfm_data, "products/features", regions, nullptr)) {
+        LOG(PIPELINE) << "区间错误。";
+        return false;
+    }
     
     Pair_Set pairs;
     PairWiseMatches matches;
@@ -524,6 +530,7 @@ auto Pipeline::structure_from_known_poses() -> bool {
     SfM_Data_Structure_Estimation_From_Known_Poses structure_estimator(max_reprojection_error);
     structure_estimator.run(sfm_data, pairs, regions_provider, triangulation_method);
     
+    regions.reset();
     RemoveOutliers_AngleError(sfm_data, 2.0);
     progress = 0.7f;
     mutex.lock();

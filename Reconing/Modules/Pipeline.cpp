@@ -10,7 +10,7 @@
 #include <ImGuiFileDialog.h>
 #include <thread>
 
-// O P E N M V G (S) ///////////////////////////
+// O P E N M V G ///////////////////////////////
 #include <openMVG/cameras/cameras.hpp>
 #include <openMVG/exif/exif_IO_EasyExif.hpp>
 #include <openMVG/geodesy/geodesy.hpp>
@@ -53,6 +53,10 @@ using namespace openMVG::exif;
 using namespace openMVG::geodesy;
 using namespace openMVG::robust;
 using namespace openMVG::matching_image_collection;
+
+// O P E N M V S ////////////////////////////
+#define _USE_EIGEN
+#include <MVS/Interface.h>
 
 
 // P I P E L I N E ///////////////////////////
@@ -153,6 +157,8 @@ auto Pipeline::run() -> bool {
     mkdir_if_not_exists("products/features");
     mkdir_if_not_exists("products/matches");
     mkdir_if_not_exists("products/sfm");
+    mkdir_if_not_exists("products/mvs");
+    mkdir_if_not_exists("products/mvs/images");
     if (intrinsics_analysis() &&
         feature_detection() &&
         match_features() &&
@@ -160,7 +166,8 @@ auto Pipeline::run() -> bool {
         global_sfm() &&
         colorize(PipelineState::COLORIZING) &&
         structure_from_known_poses() &&
-        colorize(PipelineState::COLORIZED_ROBUST_TRIANGULATION)) {
+        colorize(PipelineState::COLORIZED_ROBUST_TRIANGULATION) &&
+        export_openmvg_to_openmvs()) {
         return true;
     }
     mutex.lock();
@@ -552,6 +559,122 @@ auto Pipeline::structure_from_known_poses() -> bool {
     return true;
 }
 
+auto Pipeline::export_openmvg_to_openmvs() -> bool {
+    progress = 0.0f;
+    state = PipelineState::MVG2MVS;
+    mutex.lock();
+    LOG(PIPELINE) << "开始转换 OpenMVG 格式 - OpenMVS 格式。";
+    mutex.unlock();
+    
+    MVS::Interface scene;
+    const auto num_views = sfm_data.GetViews().size();
+    std::map<IndexT, uint32_t> map_intrinsic, map_view;
+    auto i = 0;
+    for (const auto &intrinsic : sfm_data.GetIntrinsics()) {
+        progress = ((float) i / sfm_data.GetIntrinsics().size()) * 0.33f;
+        i++;
+        if (isPinhole(intrinsic.second->getType())) {
+            const Pinhole_Intrinsic *cam = (const Pinhole_Intrinsic *) intrinsic.second.get();
+            if (map_intrinsic.count(intrinsic.first) == 0) {
+                map_intrinsic[intrinsic.first] = (int) scene.platforms.size();
+            }
+            MVS::Interface::Platform platform;
+            MVS::Interface::Platform::Camera camera;
+            camera.width = cam->w();
+            camera.height = cam->h();
+            camera.K = cam->K();
+            camera.R = Mat3::Identity();
+            camera.C = Vec3::Zero();
+            platform.cameras.push_back(camera);
+            scene.platforms.push_back(platform);
+        } else {
+            mutex.lock();
+            LOG(PIPELINE) << "摄像机 #" << intrinsic.first << " 不是针孔摄像机；跳过。";
+            mutex.unlock();
+        }
+    }
+    
+    scene.images.reserve(num_views);
+    auto num_poses = 0;
+    i = 0;
+    for (const auto &view : sfm_data.GetViews()) {
+        progress = ((float) i / sfm_data.GetIntrinsics().size()) * 0.33f + 0.33f;
+        i++;
+        
+        if (sfm_data.IsPoseAndIntrinsicDefined(view.second.get())) {
+            map_view[view.first] = (int) scene.images.size();
+            
+            MVS::Interface::Image image;
+            std::filesystem::path image_path = view.second->s_Img_path;
+            image.name = "products/mvs/images/" + image_path.filename().string();
+            image.platformID = map_intrinsic.at(view.second->id_intrinsic);
+            auto &platform = scene.platforms[image.platformID];
+            image.cameraID = 0;
+            
+            // Just copy all the photos to destination, since we don't have distortion enabled
+            std::filesystem::path dest = image.name;
+            if (std::filesystem::exists(dest)) {
+                std::filesystem::remove(dest);
+            }
+            std::filesystem::copy(image_path, dest);
+            
+            MVS::Interface::Platform::Pose pose;
+            image.poseID = (int) platform.poses.size();
+            const Pose3 pose_mvg(sfm_data.GetPoseOrDie(view.second.get()));
+            pose.R = pose_mvg.rotation();
+            pose.C = pose_mvg.center();
+            platform.poses.push_back(pose);
+            num_poses++;
+            scene.images.emplace_back(image);
+        } else {
+            mutex.lock();
+            LOG(PIPELINE) << "无法读取对应相机坐标：#" << (i - 1);
+            mutex.unlock();
+        }
+    }
+    
+    i = 0;
+    scene.vertices.resize(sfm_data.GetLandmarks().size());
+    for (const auto &vertex : sfm_data.GetLandmarks()) {
+        float sub_progress = (float) i / sfm_data.GetLandmarks().size();
+        i++;
+        progress = sub_progress * 0.33f + 0.66f;
+        const auto &landmark = vertex.second;
+        
+        MVS::Interface::Vertex vert;
+        MVS::Interface::Vertex::ViewArr &views = vert.views;
+        for (const auto &observation : landmark.obs) {
+            const auto it(map_view.find(observation.first));
+            if (it != map_view.end()) {
+                MVS::Interface::Vertex::View view;
+                view.imageID = it->second;
+                view.confidence = 0;
+                views.push_back(view);
+            }
+        }
+        if (views.size() < 2) {
+            continue;
+        }
+        std::sort(views.begin(), views.end(), [] (const auto &v0, const auto &v1) {
+            return v0.imageID < v1.imageID;
+        });
+        vert.X = landmark.X.cast<float>();
+        scene.vertices.push_back(vert);
+    }
+    if (!MVS::ARCHIVE::SerializeSave(scene, "products/mvs/scene.mvs")) {
+        mutex.lock();
+        LOG(PIPELINE) << "MVS 场景保存失败。";
+        mutex.unlock();
+        return false;
+    }
+    
+    progress = 1.0f;
+    mutex.lock();
+    LOG(PIPELINE) << "格式转换完成。平台数量：" << scene.platforms.size();
+    mutex.unlock();
+    return true;
+}
+
 // M O D U L E ///////////////////////////
 auto PipelineModule::update_ui() -> void { 
     ImGui::SetNextWindowPos({ 10, 220 }, ImGuiCond_FirstUseEver);
@@ -624,6 +747,10 @@ auto PipelineModule::update_ui() -> void {
                         
                     case PipelineState::COLORIZED_ROBUST_TRIANGULATION:
                         ImGui::TextWrapped("正在对鲁棒模型进行上色...");
+                        break;
+                        
+                    case PipelineState::MVG2MVS:
+                        ImGui::TextWrapped("正在从 OpenMVG 格式转换到 OpenMVS 格式...");
                         break;
                 }
                 mutex.unlock();

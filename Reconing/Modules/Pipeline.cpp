@@ -74,6 +74,13 @@ auto run_pipeline(Pipeline *pipeline_ptr) -> void {
     pipeline.run();
 }
 
+auto Pipeline::init(std::vector<std::string> image_listing, std::filesystem::path base_path) -> void {
+    this->image_listing = image_listing;
+    this->base_path = base_path;
+    this->state = PipelineState::INTRINSICS_ANALYSIS;
+    progress = 0.0f;
+}
+
 auto Pipeline::path_of_view(const openMVG::sfm::View &view) -> std::filesystem::path {
     std::filesystem::path img_path = view.s_Img_path;
     return std::filesystem::path("products/features") / img_path.filename();
@@ -679,9 +686,10 @@ auto Pipeline::export_openmvg_to_openmvs() -> bool {
     RECON_LOG(PIPELINE) << "格式转换完成。平台数量：" << scene.platforms.size();
     mutex.unlock();
     
-    open_mvs = OpenMVS(std::move(scene));
+    open_mvs.init();
     return true;
 }
+
 
 // M O D U L E ///////////////////////////
 auto PipelineModule::update_ui() -> void { 
@@ -784,7 +792,7 @@ auto PipelineModule::update_ui() -> void {
                 RECON_LOG(PIPELINE) << "有效数据：" <<
                     list_images(path);
                 state = State::FOLDER_CHOSEN;
-                pipeline = Pipeline(image_listing, path);
+                pipeline.init(image_listing, path);
             }
             ImGuiFileDialog::Instance()->Close();
         }

@@ -78,10 +78,11 @@ class Pipeline {
 public:
     Pipeline() : state(PipelineState::INTRINSICS_ANALYSIS) {}
 
-    Pipeline(std::vector<std::string> image_listing, std::filesystem::path base_path) : image_listing(image_listing),
-        base_path(base_path),
-        state(PipelineState::INTRINSICS_ANALYSIS),
-        progress(0.0f) {};
+    Pipeline(std::vector<std::string> image_listing, std::filesystem::path base_path) {
+        init(image_listing, base_path);
+    }
+    
+    auto init(std::vector<std::string> image_listing, std::filesystem::path base_path) -> void;
 
     auto run() -> bool;
     

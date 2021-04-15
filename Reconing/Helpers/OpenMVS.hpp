@@ -9,19 +9,30 @@
 #define OpenMVS_hpp
 
 // O P E N M V S ////////////////////////////
-#include <vector>
-#define _USE_EIGEN
-#include <Eigen/Geometry>
-#include <MVS/Interface.h>
+enum ARCHIVE_TYPE {
+    ARCHIVE_MVS = -1,
+    ARCHIVE_TEXT = 0,
+    ARCHIVE_BINARY,
+    ARCHIVE_BINARY_ZIP,
+    ARCHIVE_LAST
+};
 
+#include <vector>
+#include <mutex>
+
+#define OMVS "多视图立体重建"
 
 class OpenMVS {
 public:
     OpenMVS() {}
+    
+    auto init() -> bool;
+    
+    // P I P E L I N E //////////////////////////
+    auto density_point_cloud(float &progress) -> bool;
 
-    OpenMVS(MVS::Interface scene) : scene(scene) {}
-
-    MVS::Interface scene;
+private:
+    std::mutex mutex;
 };
 
 #endif /* OpenMVS_hpp */

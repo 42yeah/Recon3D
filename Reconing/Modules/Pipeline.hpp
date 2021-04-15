@@ -63,7 +63,8 @@ enum class PipelineState {
     STRUCTURE_FROM_KNOWN_POSES = 7,
     COLORIZED_ROBUST_TRIANGULATION = 8,
     MVG2MVS = 9,
-    DENSIFY_PC = 10
+    DENSIFY_PC = 10,
+    RECONSTRUCT_MESH = 11
 };
 
 enum class PairMode {

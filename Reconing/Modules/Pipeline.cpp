@@ -160,24 +160,24 @@ auto Pipeline::export_to_ply(const std::string path, std::vector<Vec3> vertices,
 }
 
 auto Pipeline::run() -> bool {
-//    if (std::filesystem::exists("products")) {
-//        std::filesystem::remove_all("products");
-//    }
-//    mkdir_if_not_exists("products");
-//    mkdir_if_not_exists("products/features");
-//    mkdir_if_not_exists("products/matches");
-//    mkdir_if_not_exists("products/sfm");
-//    mkdir_if_not_exists("products/mvs");
-//    mkdir_if_not_exists("products/mvs/images");
-    if ( // intrinsics_analysis() &&
-//        feature_detection() &&
-//        match_features() &&
-//        incremental_sfm() &&
-//        global_sfm() &&
-//        colorize(PipelineState::COLORIZING) &&
-//        structure_from_known_poses() &&
-//        colorize(PipelineState::COLORIZED_ROBUST_TRIANGULATION) &&
-//        export_openmvg_to_openmvs() &&
+    if (std::filesystem::exists("products")) {
+        std::filesystem::remove_all("products");
+    }
+    mkdir_if_not_exists("products");
+    mkdir_if_not_exists("products/features");
+    mkdir_if_not_exists("products/matches");
+    mkdir_if_not_exists("products/sfm");
+    mkdir_if_not_exists("products/mvs");
+    mkdir_if_not_exists("products/mvs/images");
+    if (intrinsics_analysis() &&
+        feature_detection() &&
+        match_features() &&
+        incremental_sfm() &&
+        global_sfm() &&
+        colorize(PipelineState::COLORIZING) &&
+        structure_from_known_poses() &&
+        colorize(PipelineState::COLORIZED_ROBUST_TRIANGULATION) &&
+        export_openmvg_to_openmvs() &&
         mvs_procedures()) {
         return true;
     }
@@ -620,13 +620,13 @@ auto Pipeline::export_openmvg_to_openmvs() -> bool {
             if (image_file_name.extension() == ".jpeg") {
                 image_file_name.replace_extension(".jpg");
             }
-            image.name = "products/mvs/images/" + image_file_name.string();
+            image.name = "images/" + image_file_name.string();
             image.platformID = map_intrinsic.at(view.second->id_intrinsic);
             auto &platform = scene.platforms[image.platformID];
             image.cameraID = 0;
             
             // Just copy all the photos to destination, since we don't have distortion enabled
-            std::filesystem::path dest = image.name;
+            std::filesystem::path dest = "products/mvs/" + image.name;
             if (std::filesystem::exists(dest)) {
                 std::filesystem::remove(dest);
             }
@@ -694,6 +694,10 @@ auto Pipeline::export_openmvg_to_openmvs() -> bool {
 auto Pipeline::mvs_procedures() -> bool {
     state = PipelineState::DENSIFY_PC;
     if (!open_mvs.density_point_cloud(progress)) {
+        return false;
+    }
+    state = PipelineState::RECONSTRUCT_MESH;
+    if (!open_mvs.reconstruct_mesh(progress)) {
         return false;
     }
 
@@ -782,6 +786,10 @@ auto PipelineModule::update_ui() -> void {
                         
                     case PipelineState::DENSIFY_PC:
                         ImGui::TextWrapped("正在稠密化点云...");
+                        break;
+                        
+                    case PipelineState::RECONSTRUCT_MESH:
+                        ImGui::TextWrapped("正在重建网格模型...");
                         break;
                 }
                 mutex.unlock();

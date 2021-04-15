@@ -31,6 +31,8 @@ public:
     // P I P E L I N E //////////////////////////
     auto density_point_cloud(float &progress) -> bool;
 
+    auto reconstruct_mesh(float &progress) -> bool;
+
 private:
     std::mutex mutex;
 };

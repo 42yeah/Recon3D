@@ -33,7 +33,7 @@ auto OpenMVS::density_point_cloud(float &progress) -> bool {
     RECON_LOG(OMVS) << "正在稠密点云...";
     mutex.unlock();
     
-    WORKING_FOLDER = ".";
+    WORKING_FOLDER = "products/mvs/";
     INIT_WORKING_FOLDER;
     
     OPTDENSE::init();
@@ -86,3 +86,25 @@ auto OpenMVS::density_point_cloud(float &progress) -> bool {
     progress = 1.0f;
     return true;
 }
+
+auto OpenMVS::reconstruct_mesh(float &progress) -> bool {
+    progress = 0.0f;
+    mutex.lock();
+    RECON_LOG(OMVS) << "正在重建网格...";
+    mutex.unlock();
+    
+    Scene scene(0);
+    if (!scene.Load("products/mvs/dense.mvs")) {
+        mutex.lock();
+        RECON_LOG(OMVS) << "找不到场景文件：products/mvs/scene.mvs。";
+        mutex.unlock();
+        return false;
+    }
+    
+    progress = 1.0f;
+    mutex.lock();
+    RECON_LOG(OMVS) << "网格重建完成。";
+    mutex.unlock();
+    return true;
+}
+

@@ -10,54 +10,6 @@
 #include <ImGuiFileDialog.h>
 #include <thread>
 
-// O P E N M V G ///////////////////////////////
-#include <openMVG/cameras/cameras.hpp>
-#include <openMVG/exif/exif_IO_EasyExif.hpp>
-#include <openMVG/geodesy/geodesy.hpp>
-#include <openMVG/numeric/eigen_alias_definition.hpp>
-#include <openMVG/sfm/sfm_data.hpp>
-#include <openMVG/sfm/sfm_data_io.hpp>
-#include <openMVG/sfm/sfm_data_utils.hpp>
-#include <openMVG/sfm/sfm_view.hpp>
-#include <openMVG/sfm/sfm_view_priors.hpp>
-#include <openMVG/types.hpp>
-#include <nonFree/sift/SIFT_describer_io.hpp>
-#include <openMVG/graph/graph.hpp>
-#include <openMVG/graph/graph_stats.hpp>
-#include <openMVG/features/descriptor.hpp>
-#include <openMVG/features/feature.hpp>
-#include <openMVG/matching/indMatch_utils.hpp>
-#include <openMVG/matching_image_collection/Matcher_Regions.hpp>
-#include <openMVG/matching_image_collection/Cascade_Hashing_Matcher_Regions.hpp>
-#include <openMVG/matching_image_collection/GeometricFilter.hpp>
-#include <openMVG/sfm/pipelines/global/GlobalSfM_rotation_averaging.hpp>
-#include <openMVG/sfm/pipelines/global/GlobalSfM_translation_averaging.hpp>
-#include <openMVG/sfm/pipelines/global/sfm_global_engine_relative_motions.hpp>
-#include <openMVG/sfm/pipelines/sequential/sequential_SfM.hpp>
-#include <openMVG/sfm/sfm_data_colorization.hpp>
-#include <openMVG/sfm/sfm_data_BA.hpp>
-#include <openMVG/sfm/sfm_data_BA_ceres.hpp>
-#include <openMVG/sfm/sfm_data_filters.hpp>
-#include <openMVG/sfm/sfm_data_filters_frustum.hpp>
-#include <openMVG/sfm/pipelines/structure_from_known_poses/structure_estimator.hpp>
-#include <openMVG/matching_image_collection/F_ACRobust.hpp>
-#include <openMVG/matching_image_collection/E_ACRobust.hpp>
-#include <openMVG/matching_image_collection/E_ACRobust_Angular.hpp>
-#include <openMVG/matching_image_collection/Eo_Robust.hpp>
-#include <openMVG/matching_image_collection/H_ACRobust.hpp>
-#include <openMVG/matching_image_collection/Pair_Builder.hpp>
-#include <openMVG/matching/pairwiseAdjacencyDisplay.hpp>
-#include <openMVG/stl/stl.hpp>
-
-using namespace openMVG::exif;
-using namespace openMVG::geodesy;
-using namespace openMVG::robust;
-using namespace openMVG::matching_image_collection;
-
-// O P E N M V S ////////////////////////////
-#define _USE_EIGEN
-#include <MVS/Interface.h>
-
 
 // P I P E L I N E ///////////////////////////
 #define TINYPLY_IMPLEMENTATION
@@ -81,26 +33,13 @@ auto Pipeline::init(std::vector<std::string> image_listing, std::filesystem::pat
     progress = 0.0f;
 }
 
-auto Pipeline::path_of_view(const openMVG::sfm::View &view) -> std::filesystem::path {
-    std::filesystem::path img_path = view.s_Img_path;
-    return std::filesystem::path("products/features") / img_path.filename();
-}
-
 auto Pipeline::mkdir_if_not_exists(std::filesystem::path path) -> void {
     if (!std::filesystem::exists(path)) {
         std::filesystem::create_directory(path);
     }
 }
 
-auto Pipeline::save_sfm(const std::string path) -> bool {
-    mutex.lock();
-    RECON_LOG(PIPELINE) << "正在保存 SfM 数据到 " << path << "...";
-    auto success = Save(sfm_data, path, ESfM_Data(VIEWS | INTRINSICS));
-    mutex.unlock();
-    return success;
-}
-
-auto Pipeline::export_to_ply(const std::string path, std::vector<Vec3> vertices, std::vector<Vec3> camera_poses, std::vector<Vec3> colored_points) -> bool {
+auto Pipeline::export_to_ply(const std::string path, std::vector<glm::vec3> vertices, std::vector<glm::vec3> camera_poses, std::vector<glm::vec3> colored_points) -> bool {
     mutex.lock();
     RECON_LOG(PIPELINE) << "正在导出模型到 " << path;
     mutex.unlock();
@@ -127,16 +66,16 @@ auto Pipeline::export_to_ply(const std::string path, std::vector<Vec3> vertices,
     for (auto i = 0; i < vertices.size(); i++) {
         if (i <= colored_points.size() - 1) {
             const auto color = colored_points[i];
-            writer << vertices[i](0) << ' '
-                << vertices[i](1) << ' '
-                << vertices[i](2) << ' '
-                << (int) color(0) << ' '
-                << (int) color(1) << ' '
-                << (int) color(2) << std::endl;
+            writer << vertices[i].x << ' '
+                << vertices[i].y << ' '
+                << vertices[i].z << ' '
+                << (int) color.x << ' '
+                << (int) color.y << ' '
+                << (int) color.z << std::endl;
         } else {
-            writer << vertices[i](0) << ' '
-                << vertices[i](1) << ' '
-                << vertices[i](2) << ' '
+            writer << vertices[i].x << ' '
+                << vertices[i].y << ' '
+                << vertices[i].z << ' '
                 << 255 << ' '
                 << 255 << ' '
                 << 255 << std::endl;
@@ -144,9 +83,9 @@ auto Pipeline::export_to_ply(const std::string path, std::vector<Vec3> vertices,
     }
     
     for (auto i = 0; i < camera_poses.size(); i++) {
-        writer << camera_poses[i](0) << ' '
-            << camera_poses[i](1) << ' '
-            << camera_poses[i](2) << ' '
+        writer << camera_poses[i].x << ' '
+            << camera_poses[i].y << ' '
+            << camera_poses[i].z << ' '
             << 0 << ' '
             << 255 << ' '
             << 0 << std::endl;
@@ -194,39 +133,9 @@ auto Pipeline::intrinsics_analysis() -> bool {
     mutex.lock();
     RECON_LOG(PIPELINE) << "相机内部参数提取开始。";
     mutex.unlock();
-    sfm_data.s_root_path = base_path.string();
-    Views &views = sfm_data.views;
-    Intrinsics &intrinsics = sfm_data.intrinsics;
-    for (auto i = 0; i < image_listing.size(); i++) {
-        const auto &entry = image_listing[i];
-        progress = (float) i / image_listing.size();
-        auto width = -1.0, height = -1.0, ppx = -1.0, ppy = -1.0, focal = 2884.0;
-        ImageHeader header;
-        if (!ReadImageHeader(entry.c_str(), &header)) {
-            mutex.lock();
-            RECON_LOG(PIPELINE) << "无法读取图片头：" << entry << ", 跳过。";
-            mutex.unlock();
-            continue;
-        }
-        width = header.width;
-        height = header.height;
-        ppx = width / 2.0;
-        ppy = height / 2.0;
-        const auto exif_reader = new Exif_IO_EasyExif();
-        exif_reader->open(entry);
-        if (exif_reader->doesHaveExifInfo()) {
-            auto exif_focal = exif_reader->getFocal();
-            if (exif_focal != 0.0f) {
-                focal = exif_focal;
-            }
-        }
-        std::shared_ptr<IntrinsicBase> intrinsic = std::make_shared<Pinhole_Intrinsic_Radial_K3>(width, height, focal, ppx, ppy, 0.0, 0.0, 0.0);
-        auto iterator = image_listing.begin() + i;
-        View view(*iterator, (int) views.size(), (int) views.size(), (int) views.size(), width, height);
-        intrinsics[view.id_view] = intrinsic;
-        views[view.id_view] = std::make_shared<View>(view);
-    }
-    sfm_data.s_root_path = "";
+    
+    // TODO: actually implement intrinsics analysis
+    
     mutex.lock();
     RECON_LOG(PIPELINE) << "相机内部参数提取完成。";
     mutex.unlock();
@@ -239,35 +148,9 @@ auto Pipeline::feature_detection() -> bool {
     mutex.lock();
     RECON_LOG(PIPELINE) << "开始特征提取...";
     mutex.unlock();
-    auto image_describer = new SIFT_Image_describer(SIFT_Image_describer::Params());
     
-    for (auto i = 0; i < sfm_data.views.size(); i++) {
-        progress = (float) i / sfm_data.views.size();
-        auto iter_views = sfm_data.views.begin();
-        std::advance(iter_views, i);
-        const auto *view = iter_views->second.get();
-        
-        Image<unsigned char> image;
-        if (!ReadImage(image_listing[i].c_str(), &image)) {
-            mutex.lock();
-            RECON_LOG(PIPELINE) << "图片读取失败：" << image_listing[i] << "，跳过。";
-            mutex.unlock();
-        }
-        Image<unsigned char> *mask = nullptr;
-        images[view->id_view] = image;
-        auto regions = image_describer->Describe(image, mask);
-
-        auto pov = path_of_view(*view).replace_extension("");
-        if (regions && !image_describer->Save(regions.get(),
-                                                     pov.string() + ".feat",
-                                                     pov.string() + ".desc")) {
-            mutex.lock();
-            RECON_LOG(PIPELINE) << "无法为图片提取特征点：" << image_listing[i] << "。管线任务失败。";
-            progress = 0.0f;
-            mutex.unlock();
-            return false;
-        }
-    }
+    // TODO: implement feature detection
+    
     mutex.lock();
     RECON_LOG(PIPELINE) << "图片特征点提取完成。";
     mutex.unlock();
@@ -281,95 +164,11 @@ auto Pipeline::match_features() -> bool {
     RECON_LOG(PIPELINE) << "开始特征匹配，使用方法：HNSWL2，距离比：0.8，几何模型：基础矩阵。";
     mutex.unlock();
 
-    const auto dist_ratio = 0.8f;
-    const auto method = HNSW_L2;
-    const auto pair_mode = PairMode::EXHAUSITIVE;
-    const auto geometric_model = GeometricModel::FUNDAMENTAL_MATRIX;
-    std::string file_name = "";
-    switch (geometric_model) {
-        case GeometricModel::FUNDAMENTAL_MATRIX:
-            file_name = "matches.f.bin";
-            break;
-            
-        case GeometricModel::ESSENTIAL_MATRIX:
-            file_name = "matches.e.bin";
-            break;
-    }
+    // TODO: Implement match_features.
     
-    std::unique_ptr<Regions> regions(new SIFT_Regions());
-    auto regions_provider = std::make_shared<Regions_Provider>();
-    if (!regions_provider->load(sfm_data, "products/features", regions, nullptr)) {
-        RECON_LOG(PIPELINE) << "区间错误。";
-        return false;
-    }
-    
-    PairWiseMatches putative_matches;
-    std::vector<glm::ivec2> image_sizes;
-    image_sizes.resize(images.size());
-    
-    const auto views = sfm_data.GetViews();
-    for (auto it = views.begin(); it != views.end(); it++) {
-        const auto *view = it->second.get();
-        image_sizes.emplace_back(view->ui_width, view->ui_height);
-    }
-
     mutex.lock();
-    RECON_LOG(PIPELINE) << "正在开始进行推断匹配...";
-    mutex.unlock();
-    
-    std::unique_ptr<Matcher> collection_matcher;
-    collection_matcher.reset(new Matcher_Regions(dist_ratio, method));
-    
-    Pair_Set pairs;
-    switch (pair_mode) {
-        case PairMode::EXHAUSITIVE:
-            pairs = exhaustivePairs(images.size());
-            break;
-    }
-    collection_matcher->Match(regions_provider, pairs, putative_matches);
-
-    // F I L T E R ///////////////////////////////////////////////////
-    std::unique_ptr<ImageCollectionGeometricFilter> filterer(new ImageCollectionGeometricFilter(&sfm_data, regions_provider));
-    const double d_distance_ratio = 0.6;
-    PairWiseMatches geometric_matches;
-    progress = 0.5f;
-    switch (geometric_model) {
-        case GeometricModel::FUNDAMENTAL_MATRIX:
-            filterer->Robust_model_estimation(GeometricFilter_FMatrix_AC(4.0, 2048),
-                                              putative_matches,
-                                              false, // Guided matching
-                                              d_distance_ratio);
-            geometric_matches = filterer->Get_geometric_matches();
-            break;
-            
-        case GeometricModel::ESSENTIAL_MATRIX:
-            filterer->Robust_model_estimation(GeometricFilter_EMatrix_AC(4.0, 2048),
-                                              putative_matches,
-                                              false,
-                                              d_distance_ratio);
-            geometric_matches = filterer->Get_geometric_matches();
-            std::vector<PairWiseMatches::key_type> to_remove;
-            for (const auto &match : geometric_matches) {
-                const auto putative_photometric_count = putative_matches.find(match.first)->second.size();
-                const auto putative_geometric_count = match.second.size();
-                const auto ratio = (float) putative_geometric_count / putative_photometric_count;
-                if (putative_geometric_count < 50 || ratio < 0.3f) {
-                    to_remove.push_back(match.first);
-                }
-            }
-            for (const auto &k : to_remove) {
-                geometric_matches.erase(k);
-            }
-            break;
-    }
-    mutex.lock();
-    progress = 0.97f;
-    RECON_LOG(PIPELINE) << "匹配结束，正在保存...";
-    if (!Save(geometric_matches, std::string("products/matches/") + file_name)) {
-        RECON_LOG(PIPELINE) << "保存失败：" << (std::string("products/matches/") + file_name);
-        mutex.unlock();
-        return false;
-    }
+    progress = 1.0f;
+    RECON_LOG(PIPELINE) << "特征匹配结束。";
     mutex.unlock();
     return true;
 }
@@ -381,55 +180,8 @@ auto Pipeline::incremental_sfm() -> bool {
     RECON_LOG(PIPELINE) << "开始进行初步 SfM (Structure from Motion)。";
     mutex.unlock();
     
-    const auto triangulation_method = ETriangulationMethod::DEFAULT;
-    const auto camera_model = PINHOLE_CAMERA_RADIAL3;
-    const auto resection_method = resection::SolverType::DEFAULT;
-    const auto intrinsic_refinement_options = cameras::Intrinsic_Parameter_Type::ADJUST_FOCAL_LENGTH |
-        cameras::Intrinsic_Parameter_Type::ADJUST_PRINCIPAL_POINT |
-        cameras::Intrinsic_Parameter_Type::ADJUST_DISTORTION;
     
-    std::unique_ptr<Regions> regions(new SIFT_Regions());
-    features_provider = std::make_shared<Features_Provider>();
-    
-    progress = 0.1f;
-    if (!features_provider->load(sfm_data, "products/features", regions)) {
-        mutex.lock();
-        RECON_LOG(PIPELINE) << "读取特征失败。";
-        mutex.unlock();
-        return false;
-    }
-    
-    progress = 0.2f;
-    matches_provider = std::make_shared<Matches_Provider>();
-    if (!matches_provider->load(sfm_data, "products/matches/matches.f.bin")) {
-        mutex.lock();
-        RECON_LOG(PIPELINE) << "匹配读取失败。";
-        mutex.unlock();
-        return false;
-    }
-    SequentialSfMReconstructionEngine sfm_engine(sfm_data, "products/sfm", "products/sfm/report.html");
-    sfm_engine.SetFeaturesProvider(features_provider.get());
-    sfm_engine.SetMatchesProvider(matches_provider.get());
-    sfm_engine.Set_Intrinsics_Refinement_Type(intrinsic_refinement_options);
-    sfm_engine.SetUnknownCameraType(camera_model);
-    sfm_engine.Set_Use_Motion_Prior(false);
-    sfm_engine.SetTriangulationMethod(triangulation_method);
-    sfm_engine.SetResectionMethod(resection_method);
-    
-    progress = 0.5f;
-    if (!sfm_engine.Process()) {
-        mutex.lock();
-        RECON_LOG(PIPELINE) << "SfM 引擎处理失败。";
-        mutex.unlock();
-        return false;
-    }
-    progress = 0.9f;
-    mutex.lock();
-    RECON_LOG(PIPELINE) << "SfM 引擎处理完毕。正在导出数据...";
-    mutex.unlock();
-    
-    Save(sfm_engine.Get_SfM_Data(), "products/sfm/sfm_engine_data.bin", ESfM_Data(ALL));
-    Save(sfm_engine.Get_SfM_Data(), "products/sfm/clouds_and_poses.ply", ESfM_Data(ALL));
+    // TODO: Implement incremental SfM.
     
     progress = 1.0f;
     mutex.lock();
@@ -445,38 +197,11 @@ auto Pipeline::global_sfm() -> bool {
     RECON_LOG(PIPELINE) << "开始进行全局 SfM。";
     mutex.unlock();
     
-    const auto intrinsic_refinement_options = cameras::Intrinsic_Parameter_Type::ADJUST_FOCAL_LENGTH |
-        cameras::Intrinsic_Parameter_Type::ADJUST_PRINCIPAL_POINT |
-        cameras::Intrinsic_Parameter_Type::ADJUST_DISTORTION;
-    
-    GlobalSfMReconstructionEngine_RelativeMotions sfm_engine(sfm_data, "products/sfm", "products/sfm/global_report.html");
-    sfm_engine.SetFeaturesProvider(features_provider.get());
-    sfm_engine.SetMatchesProvider(matches_provider.get());
-    sfm_engine.Set_Intrinsics_Refinement_Type(intrinsic_refinement_options);
-    sfm_engine.Set_Use_Motion_Prior(false);
-    sfm_engine.SetRotationAveragingMethod(ERotationAveragingMethod(ROTATION_AVERAGING_L2));
-    sfm_engine.SetTranslationAveragingMethod(ETranslationAveragingMethod(TRANSLATION_AVERAGING_SOFTL1));
-    
-    progress = 0.5f;
-    if (!sfm_engine.Process()) {
-        mutex.lock();
-        RECON_LOG(PIPELINE) << "SfM 全局引擎处理失败。";
-        mutex.unlock();
-        return false;
-    }
-    
-    progress = 0.9f;
-    mutex.lock();
-    RECON_LOG(PIPELINE) << "SfM 引擎处理完毕。正在导出数据...";
-    mutex.unlock();
-    
-    Save(sfm_engine.Get_SfM_Data(), "products/sfm/sfm_engine_data.bin", ESfM_Data(ALL));
-    Save(sfm_engine.Get_SfM_Data(), "products/sfm/clouds_and_poses.ply", ESfM_Data(ALL));
+    // TODO: Implement Global SfM.
     
     progress = 1.0f;
     mutex.lock();
     RECON_LOG(PIPELINE) << "全局 SfM 结束。正在更新 SfM 数据...";
-    sfm_data = sfm_engine.Get_SfM_Data();
     mutex.unlock();
     return true;
 }
@@ -488,30 +213,9 @@ auto Pipeline::colorize(PipelineState state) -> bool {
     RECON_LOG(PIPELINE) << "开始进行上色处理。";
     mutex.unlock();
     
-    std::vector<Vec3> points, tracks_color, cam_position;
-    if (!ColorizeTracks(sfm_data, points, tracks_color)) {
-        mutex.lock();
-        RECON_LOG(PIPELINE) << "上色处理失败：无法为轨迹上色。";
-        mutex.unlock();
-        return false;
-    }
-    progress = 0.5f;
-    for (const auto &view : sfm_data.GetViews()) {
-        if (sfm_data.IsPoseAndIntrinsicDefined(view.second.get())) {
-            const Pose3 pose = sfm_data.GetPoseOrDie(view.second.get());
-            cam_position.push_back(pose.center());
-        }
-    }
-    progress = 0.8f;
-    std::string path = "products/sfm/global_recon_colorized.ply";
-    if (state == PipelineState::COLORIZED_ROBUST_TRIANGULATION) {
-        path = "products/sfm/robust_recon_colorized.ply";
-    }
-    if (!export_to_ply(path, points, cam_position, tracks_color)) {
-        mutex.lock();
-        RECON_LOG(PIPELINE) << "模型导出失败。跳过步骤。";
-        mutex.unlock();
-    }
+    
+    // TODO: Implement colorize (at different states).
+    
     progress = 1.0f;
     mutex.lock();
     RECON_LOG(PIPELINE) << "上色处理完成。";
@@ -526,41 +230,7 @@ auto Pipeline::structure_from_known_poses() -> bool {
     RECON_LOG(PIPELINE) << "正在恢复结构。最大重投影容错：4.0。";
     mutex.unlock();
     
-    const auto max_reprojection_error = 4.0;
-    const auto triangulation_method = ETriangulationMethod::DEFAULT;
-    std::unique_ptr<Regions> regions(new SIFT_Regions());
-    auto regions_provider = std::make_shared<Regions_Provider>();
-    if (!regions_provider->load(sfm_data, "products/features", regions, nullptr)) {
-        RECON_LOG(PIPELINE) << "区间错误。";
-        return false;
-    }
-    
-    Pair_Set pairs;
-    PairWiseMatches matches;
-    if (!Load(matches, "products/matches/matches.f.bin")) {
-        mutex.lock();
-        RECON_LOG(PIPELINE) << "无法加载匹配文件。";
-        mutex.unlock();
-        return false;
-    }
-    pairs = getPairs(matches);
-    const std::set<IndexT> valid_views_idx = Get_Valid_Views(sfm_data);
-    pairs = Pair_filter(pairs, valid_views_idx);
-    
-    progress = 0.5f;
-    SfM_Data_Structure_Estimation_From_Known_Poses structure_estimator(max_reprojection_error);
-    structure_estimator.run(sfm_data, pairs, regions_provider, triangulation_method);
-    
-    regions.reset();
-    RemoveOutliers_AngleError(sfm_data, 2.0);
-    progress = 0.7f;
-    mutex.lock();
-    RECON_LOG(PIPELINE) << "地标数量：" << sfm_data.GetLandmarks().size();
-    RECON_LOG(PIPELINE) << "处理结束。正在保存...";
-    mutex.unlock();
-    
-    Save(sfm_data, "products/sfm/robust.ply", ESfM_Data(ALL));
-    Save(sfm_data, "products/sfm/robust.bin", ESfM_Data(ALL));
+    // TODO: Implement structure from known poses.
     
     progress = 1.0f;
     mutex.lock();
@@ -576,130 +246,17 @@ auto Pipeline::export_openmvg_to_openmvs() -> bool {
     RECON_LOG(PIPELINE) << "开始转换 OpenMVG 格式 - OpenMVS 格式。";
     mutex.unlock();
     
-    MVS::Interface scene;
-    const auto num_views = sfm_data.GetViews().size();
-    std::map<IndexT, uint32_t> map_intrinsic, map_view;
-    auto i = 0;
-    for (const auto &intrinsic : sfm_data.GetIntrinsics()) {
-        progress = ((float) i / sfm_data.GetIntrinsics().size()) * 0.33f;
-        i++;
-        if (isPinhole(intrinsic.second->getType())) {
-            const Pinhole_Intrinsic *cam = (const Pinhole_Intrinsic *) intrinsic.second.get();
-            if (map_intrinsic.count(intrinsic.first) == 0) {
-                map_intrinsic[intrinsic.first] = (int) scene.platforms.size();
-            }
-            MVS::Interface::Platform platform;
-            MVS::Interface::Platform::Camera camera;
-            camera.width = cam->w();
-            camera.height = cam->h();
-            camera.K = cam->K();
-            camera.R = Mat3::Identity();
-            camera.C = Vec3::Zero();
-            platform.cameras.push_back(camera);
-            scene.platforms.push_back(platform);
-        } else {
-            mutex.lock();
-            RECON_LOG(PIPELINE) << "摄像机 #" << intrinsic.first << " 不是针孔摄像机；跳过。";
-            mutex.unlock();
-        }
-    }
-    
-    scene.images.reserve(num_views);
-    auto num_poses = 0;
-    i = 0;
-    for (const auto &view : sfm_data.GetViews()) {
-        progress = ((float) i / sfm_data.GetIntrinsics().size()) * 0.33f + 0.33f;
-        i++;
-        
-        if (sfm_data.IsPoseAndIntrinsicDefined(view.second.get())) {
-            map_view[view.first] = (int) scene.images.size();
-            
-            MVS::Interface::Image image;
-            std::filesystem::path image_path = view.second->s_Img_path;
-            std::filesystem::path image_file_name = image_path.filename();
-            if (image_file_name.extension() == ".jpeg") {
-                image_file_name.replace_extension(".jpg");
-            }
-            image.name = "images/" + image_file_name.string();
-            image.platformID = map_intrinsic.at(view.second->id_intrinsic);
-            auto &platform = scene.platforms[image.platformID];
-            image.cameraID = 0;
-            
-            // Just copy all the photos to destination, since we don't have distortion enabled
-            std::filesystem::path dest = "products/mvs/" + image.name;
-            if (std::filesystem::exists(dest)) {
-                std::filesystem::remove(dest);
-            }
-            std::filesystem::copy(image_path, dest);
-            
-            MVS::Interface::Platform::Pose pose;
-            image.poseID = (int) platform.poses.size();
-            const Pose3 pose_mvg(sfm_data.GetPoseOrDie(view.second.get()));
-            pose.R = pose_mvg.rotation();
-            pose.C = pose_mvg.center();
-            platform.poses.push_back(pose);
-            num_poses++;
-            scene.images.emplace_back(image);
-        } else {
-            mutex.lock();
-            RECON_LOG(PIPELINE) << "无法读取对应相机坐标：#" << (i - 1);
-            mutex.unlock();
-        }
-    }
-    
-    i = 0;
-    scene.vertices.reserve(sfm_data.GetLandmarks().size());
-    for (const auto &vertex : sfm_data.GetLandmarks()) {
-        float sub_progress = (float) i / sfm_data.GetLandmarks().size();
-        i++;
-        progress = sub_progress * 0.33f + 0.66f;
-        const auto &landmark = vertex.second;
-        
-        MVS::Interface::Vertex vert;
-        MVS::Interface::Vertex::ViewArr &views = vert.views;
-        for (const auto &observation : landmark.obs) {
-            const auto it(map_view.find(observation.first));
-            if (it != map_view.end()) {
-                MVS::Interface::Vertex::View view;
-                view.imageID = it->second;
-                view.confidence = 0;
-                views.push_back(view);
-            }
-        }
-        if (views.size() < 2) {
-            continue;
-        }
-        std::sort(views.begin(), views.end(), [] (const auto &v0, const auto &v1) {
-            return v0.imageID < v1.imageID;
-        });
-        vert.X = landmark.X.cast<float>();
-        scene.vertices.push_back(vert);
-    }
-    if (!MVS::ARCHIVE::SerializeSave(scene, "products/mvs/scene.mvs")) {
-        mutex.lock();
-        RECON_LOG(PIPELINE) << "MVS 场景保存失败。";
-        mutex.unlock();
-        return false;
-    }
+    // TODO: Implement openMVG - openMVS.
     
     progress = 1.0f;
     mutex.lock();
-    RECON_LOG(PIPELINE) << "格式转换完成。平台数量：" << scene.platforms.size();
+    RECON_LOG(PIPELINE) << "格式转换完成。";
     mutex.unlock();
-    
-    open_mvs.init();
     return true;
 }
 
 auto Pipeline::mvs_procedures() -> bool {
-    state = PipelineState::DENSIFY_PC;
-    if (!open_mvs.density_point_cloud(progress)) {
-        return false;
-    }
-    state = PipelineState::RECONSTRUCT_MESH;
-    if (!open_mvs.reconstruct_mesh(progress)) {
-        return false;
-    }
+    // TODO: Implement MVS procedures. Or maybe don't.
 
     return true;
 }
@@ -798,10 +355,6 @@ auto PipelineModule::update_ui() -> void {
                     ImGui::ProgressBar(pipeline.progress);
                 }
                 break;
-        }
-        
-        if (ImGui::Button("导出 SfM 文件")) {
-            pipeline.save_sfm("sfm_data.json");
         }
         ImGui::End();
     }

@@ -134,6 +134,8 @@
 		18B5B3EB2627EBCA0035C3A1 /* libboost_iostreams.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 18B5B3E92627EBCA0035C3A1 /* libboost_iostreams.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		18B5B3ED2627EFA60035C3A1 /* libopencv_highgui.4.5.2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 18B5B3EC2627EFA60035C3A1 /* libopencv_highgui.4.5.2.dylib */; };
 		18B5B3EE2627EFA60035C3A1 /* libopencv_highgui.4.5.2.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 18B5B3EC2627EFA60035C3A1 /* libopencv_highgui.4.5.2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		18B5B3F3262830F60035C3A1 /* libgmp.10.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 18B5B3F2262830F60035C3A1 /* libgmp.10.dylib */; };
+		18B5B3F4262830F60035C3A1 /* libgmp.10.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 18B5B3F2262830F60035C3A1 /* libgmp.10.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		18EFFA4E261DA7A8002011A2 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18EFFA4D261DA7A8002011A2 /* main.cpp */; };
 		18EFFA57261DA7C3002011A2 /* libglfw.3.3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 18EFFA56261DA7C3002011A2 /* libglfw.3.3.dylib */; };
 		18EFFA58261DA7C3002011A2 /* libglfw.3.3.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 18EFFA56261DA7C3002011A2 /* libglfw.3.3.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -199,6 +201,7 @@
 				18B5B3DA2627E75A0035C3A1 /* libopencv_features2d.4.5.2.dylib in Embed Libraries */,
 				18B5B3DE2627E75A0035C3A1 /* libopencv_calib3d.4.5.2.dylib in Embed Libraries */,
 				1819D486262574B100C53EF4 /* libceres.2.0.0.dylib in Embed Libraries */,
+				18B5B3F4262830F60035C3A1 /* libgmp.10.dylib in Embed Libraries */,
 				18EFFA58261DA7C3002011A2 /* libglfw.3.3.dylib in Embed Libraries */,
 				18EFFBD926254286002011A2 /* libomp.dylib in Embed Libraries */,
 				18B5B3EE2627EFA60035C3A1 /* libopencv_highgui.4.5.2.dylib in Embed Libraries */,
@@ -260,6 +263,7 @@
 		18B5B3E62627EBB20035C3A1 /* libboost_serialization.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libboost_serialization.dylib; path = ../../../../usr/local/Cellar/boost/1.75.0_2/lib/libboost_serialization.dylib; sourceTree = "<group>"; };
 		18B5B3E92627EBCA0035C3A1 /* libboost_iostreams.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libboost_iostreams.dylib; path = ../../../../usr/local/Cellar/boost/1.75.0_2/lib/libboost_iostreams.dylib; sourceTree = "<group>"; };
 		18B5B3EC2627EFA60035C3A1 /* libopencv_highgui.4.5.2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_highgui.4.5.2.dylib; path = ../../../../usr/local/lib/libopencv_highgui.4.5.2.dylib; sourceTree = "<group>"; };
+		18B5B3F2262830F60035C3A1 /* libgmp.10.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libgmp.10.dylib; path = ../../../../usr/local/Cellar/gmp/6.2.1/lib/libgmp.10.dylib; sourceTree = "<group>"; };
 		18EFFA4A261DA7A8002011A2 /* Reconing */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Reconing; sourceTree = BUILT_PRODUCTS_DIR; };
 		18EFFA4D261DA7A8002011A2 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		18EFFA56261DA7C3002011A2 /* libglfw.3.3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libglfw.3.3.dylib; path = ../../../../usr/local/Cellar/glfw/3.3.2/lib/libglfw.3.3.dylib; sourceTree = "<group>"; };
@@ -623,6 +627,7 @@
 				1819D3C12625655D00C53EF4 /* libopenMVG_exif.a in Frameworks */,
 				1819D3CC2625655D00C53EF4 /* libvlsift.a in Frameworks */,
 				1819D3E92625656B00C53EF4 /* libopenMVG_multiview.a in Frameworks */,
+				18B5B3F3262830F60035C3A1 /* libgmp.10.dylib in Frameworks */,
 				1819D45A26256C4B00C53EF4 /* libopenMVG_jpeg.a in Frameworks */,
 				1819D3EF2625656B00C53EF4 /* libopenMVG_tiff.a in Frameworks */,
 				1819D3E52625656B00C53EF4 /* libopenMVG_lemon.a in Frameworks */,
@@ -707,6 +712,7 @@
 		18EFFA55261DA7C3002011A2 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				18B5B3F2262830F60035C3A1 /* libgmp.10.dylib */,
 				18B5B3EC2627EFA60035C3A1 /* libopencv_highgui.4.5.2.dylib */,
 				18B5B3E92627EBCA0035C3A1 /* libboost_iostreams.dylib */,
 				18B5B3E62627EBB20035C3A1 /* libboost_serialization.dylib */,
@@ -1780,6 +1786,7 @@
 					/usr/local/Cellar/glog/0.4.0/lib,
 					/Users/apple/Projects/openMVS/build/lib/,
 					/usr/local/Cellar/boost/1.75.0_2/lib,
+					/usr/local/Cellar/gmp/6.2.1/lib,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -1816,6 +1823,7 @@
 					/usr/local/Cellar/glog/0.4.0/lib,
 					/Users/apple/Projects/openMVS/build/lib/,
 					/usr/local/Cellar/boost/1.75.0_2/lib,
+					/usr/local/Cellar/gmp/6.2.1/lib,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};

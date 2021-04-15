@@ -93,6 +93,9 @@ auto OpenMVS::reconstruct_mesh(float &progress) -> bool {
     RECON_LOG(OMVS) << "正在重建网格...";
     mutex.unlock();
     
+    WORKING_FOLDER = "products/mvs/";
+    INIT_WORKING_FOLDER;
+    
     Scene scene(0);
     if (!scene.Load("products/mvs/dense.mvs")) {
         mutex.lock();
@@ -100,7 +103,50 @@ auto OpenMVS::reconstruct_mesh(float &progress) -> bool {
         mutex.unlock();
         return false;
     }
+    for (auto i = 0; i < scene.images.size(); i++) {
+        progress = ((float) i / scene.images.size()) * 0.5f;
+        auto &image_data = scene.images[i];
+        if (!image_data.IsValid()) {
+            mutex.lock();
+            RECON_LOG(OMVS) << "警告：无效图像：" << image_data.name;
+            mutex.unlock();
+            continue;
+        }
+        if (!image_data.ReloadImage(0, false)) {
+            mutex.lock();
+            RECON_LOG(OMVS) << "警告：重新装载图像失败：" << image_data.name;
+            mutex.unlock();
+            return false;
+        }
+        image_data.UpdateCamera(scene.platforms);
+        if (image_data.neighbors.IsEmpty()) {
+            IndexArr points;
+            scene.SelectNeighborViews(i, points);
+        }
+    }
+    scene.pointcloud.pointWeights.Release();
+    if (!scene.ReconstructMesh(2.5f, false, 4, 1.0f, 1.0f)) {
+        mutex.lock();
+        RECON_LOG(OMVS) << "场景网格化失败。";
+        mutex.unlock();
+        return false;
+    }
+    mutex.lock();
+    RECON_LOG(OMVS) << "场景网格化完毕：" << scene.mesh.vertices.GetSize() << " 个点，" << scene.mesh.faces.GetSize() << " 个面";
+    scene.mesh.Save("products/mvs/mesh_raw.ply");
+    mutex.unlock();
     
+    progress = 0.9f;
+    mutex.lock();
+    RECON_LOG(OMVS) << "正在清洁网格数据...";
+    mutex.unlock();
+    
+    scene.mesh.Clean(1.0f, 20.0f, true, 30, 2, false);
+    scene.mesh.Clean(1.0f, 0.0f, true, 30, 0, false);
+    scene.mesh.Clean(1.0f, 0.0f, false, 0, 0, true);
+    scene.Save("products/mvs/result.mvs", ARCHIVE_BINARY_ZIP);
+    scene.mesh.Save("products/mvs/mesh.ply");
+
     progress = 1.0f;
     mutex.lock();
     RECON_LOG(OMVS) << "网格重建完成。";

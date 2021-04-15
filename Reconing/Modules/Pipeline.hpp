@@ -18,6 +18,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <filesystem>
+#include <iostream>
+#include <functional>
 #include <mutex>
 #include <map>
 
@@ -46,6 +48,10 @@ enum class PipelineState {
     DENSIFY_PC = 10,
     RECONSTRUCT_MESH = 11
 };
+
+template<typename ...Ar>
+auto invoke(std::function<void(std::string)> callback,
+            Ar... cmd) -> bool;
 
 class Pipeline {
 public:

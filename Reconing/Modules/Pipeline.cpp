@@ -9,6 +9,7 @@
 #include <imgui.h>
 #include <ImGuiFileDialog.h>
 #include <thread>
+#include <cstdio>
 
 
 // P I P E L I N E ///////////////////////////
@@ -19,6 +20,33 @@
 using namespace PipelineNS;
 
 std::mutex mutex;
+
+namespace PipelineNS {
+
+template<typename T>
+auto merge(T what) -> T {
+    return what;
+}
+
+template<typename T, typename ...Ar>
+auto merge(T first, Ar... remaining) -> std::string {
+    return std::string(first) + " " + merge(remaining...);
+}
+
+template<typename ...Ar>
+auto invoke(std::function<void(std::string)> callback,
+            Ar... cmd) -> bool {
+    std::string command = merge(cmd...);
+    auto file_ptr = popen(command.c_str(), "r");
+    char buf[8192] = { 0 };
+    while (fgets(buf, sizeof(buf), file_ptr)) {
+        callback(std::string(buf));
+    }
+    return pclose(file_ptr) == 0;
+}
+
+
+};
 
 auto run_pipeline(Pipeline *pipeline_ptr) -> void {
     auto &pipeline = *pipeline_ptr;
@@ -108,6 +136,7 @@ auto Pipeline::run() -> bool {
     mkdir_if_not_exists("products/sfm");
     mkdir_if_not_exists("products/mvs");
     mkdir_if_not_exists("products/mvs/images");
+
     if (intrinsics_analysis() &&
         feature_detection() &&
         match_features() &&
@@ -375,7 +404,7 @@ auto PipelineModule::update_ui() -> void {
     }
 }
 
-auto PipelineModule::update(float delta_time) -> void { 
+auto PipelineModule::update(float delta_time) -> void {
     if (!opengl_ready && pipeline.state == PipelineState::GLOBAL_SFM) {
         program = link(compile(GL_VERTEX_SHADER, "shaders/vertex.glsl"),
                        compile(GL_FRAGMENT_SHADER, "shaders/fragment.glsl"));
@@ -484,3 +513,4 @@ auto PipelineModule::load_ply_as_pointcloud(std::string path) -> void {
     
     num_vertices = (int) verts.size();
 }
+

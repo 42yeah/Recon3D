@@ -87,7 +87,7 @@ auto Pipeline::mkdir_if_not_exists(std::filesystem::path path) -> void {
 
 auto Pipeline::save_sfm(const std::string path) -> bool {
     mutex.lock();
-    LOG(PIPELINE) << "正在保存 SfM 数据到 " << path << "...";
+    RECON_LOG(PIPELINE) << "正在保存 SfM 数据到 " << path << "...";
     auto success = Save(sfm_data, path, ESfM_Data(VIEWS | INTRINSICS));
     mutex.unlock();
     return success;
@@ -95,13 +95,13 @@ auto Pipeline::save_sfm(const std::string path) -> bool {
 
 auto Pipeline::export_to_ply(const std::string path, std::vector<Vec3> vertices, std::vector<Vec3> camera_poses, std::vector<Vec3> colored_points) -> bool {
     mutex.lock();
-    LOG(PIPELINE) << "正在导出模型到 " << path;
+    RECON_LOG(PIPELINE) << "正在导出模型到 " << path;
     mutex.unlock();
     
     std::ofstream writer(path);
     if (!writer.good()) {
         mutex.lock();
-        LOG(PIPELINE) << "模型导出失败。无法打开文件。";
+        RECON_LOG(PIPELINE) << "模型导出失败。无法打开文件。";
         mutex.unlock();
         return false;
     }
@@ -147,7 +147,7 @@ auto Pipeline::export_to_ply(const std::string path, std::vector<Vec3> vertices,
     writer.close();
     
     mutex.lock();
-    LOG(PIPELINE) << "模型导出完成。";
+    RECON_LOG(PIPELINE) << "模型导出完成。";
     mutex.unlock();
     return true;
 }
@@ -174,7 +174,7 @@ auto Pipeline::run() -> bool {
         return true;
     }
     mutex.lock();
-    LOG(PIPELINE) << "管线运行错误。";
+    RECON_LOG(PIPELINE) << "管线运行错误。";
     mutex.unlock();
     state = PipelineState::FINISHED_ERR;
     return false;
@@ -184,7 +184,7 @@ auto Pipeline::intrinsics_analysis() -> bool {
     progress = 0.0f;
     state = PipelineState::INTRINSICS_ANALYSIS;
     mutex.lock();
-    LOG(PIPELINE) << "相机内部参数提取开始。";
+    RECON_LOG(PIPELINE) << "相机内部参数提取开始。";
     mutex.unlock();
     sfm_data.s_root_path = base_path.string();
     Views &views = sfm_data.views;
@@ -196,7 +196,7 @@ auto Pipeline::intrinsics_analysis() -> bool {
         ImageHeader header;
         if (!ReadImageHeader(entry.c_str(), &header)) {
             mutex.lock();
-            LOG(PIPELINE) << "无法读取图片头：" << entry << ", 跳过。";
+            RECON_LOG(PIPELINE) << "无法读取图片头：" << entry << ", 跳过。";
             mutex.unlock();
             continue;
         }
@@ -220,7 +220,7 @@ auto Pipeline::intrinsics_analysis() -> bool {
     }
     sfm_data.s_root_path = "";
     mutex.lock();
-    LOG(PIPELINE) << "相机内部参数提取完成。";
+    RECON_LOG(PIPELINE) << "相机内部参数提取完成。";
     mutex.unlock();
     return true;
 }
@@ -229,7 +229,7 @@ auto Pipeline::feature_detection() -> bool {
     progress = 0.0f;
     state = PipelineState::FEATURE_DETECTION;
     mutex.lock();
-    LOG(PIPELINE) << "开始特征提取...";
+    RECON_LOG(PIPELINE) << "开始特征提取...";
     mutex.unlock();
     auto image_describer = new SIFT_Image_describer(SIFT_Image_describer::Params());
     
@@ -242,7 +242,7 @@ auto Pipeline::feature_detection() -> bool {
         Image<unsigned char> image;
         if (!ReadImage(image_listing[i].c_str(), &image)) {
             mutex.lock();
-            LOG(PIPELINE) << "图片读取失败：" << image_listing[i] << "，跳过。";
+            RECON_LOG(PIPELINE) << "图片读取失败：" << image_listing[i] << "，跳过。";
             mutex.unlock();
         }
         Image<unsigned char> *mask = nullptr;
@@ -254,14 +254,14 @@ auto Pipeline::feature_detection() -> bool {
                                                      pov.string() + ".feat",
                                                      pov.string() + ".desc")) {
             mutex.lock();
-            LOG(PIPELINE) << "无法为图片提取特征点：" << image_listing[i] << "。管线任务失败。";
+            RECON_LOG(PIPELINE) << "无法为图片提取特征点：" << image_listing[i] << "。管线任务失败。";
             progress = 0.0f;
             mutex.unlock();
             return false;
         }
     }
     mutex.lock();
-    LOG(PIPELINE) << "图片特征点提取完成。";
+    RECON_LOG(PIPELINE) << "图片特征点提取完成。";
     mutex.unlock();
     return true;
 }
@@ -270,7 +270,7 @@ auto Pipeline::match_features() -> bool {
     progress = 0.0f;
     state = PipelineState::MATCHING_FEATURES;
     mutex.lock();
-    LOG(PIPELINE) << "开始特征匹配，使用方法：HNSWL2，距离比：0.8，几何模型：基础矩阵。";
+    RECON_LOG(PIPELINE) << "开始特征匹配，使用方法：HNSWL2，距离比：0.8，几何模型：基础矩阵。";
     mutex.unlock();
 
     const auto dist_ratio = 0.8f;
@@ -291,7 +291,7 @@ auto Pipeline::match_features() -> bool {
     std::unique_ptr<Regions> regions(new SIFT_Regions());
     auto regions_provider = std::make_shared<Regions_Provider>();
     if (!regions_provider->load(sfm_data, "products/features", regions, nullptr)) {
-        LOG(PIPELINE) << "区间错误。";
+        RECON_LOG(PIPELINE) << "区间错误。";
         return false;
     }
     
@@ -306,7 +306,7 @@ auto Pipeline::match_features() -> bool {
     }
 
     mutex.lock();
-    LOG(PIPELINE) << "正在开始进行推断匹配...";
+    RECON_LOG(PIPELINE) << "正在开始进行推断匹配...";
     mutex.unlock();
     
     std::unique_ptr<Matcher> collection_matcher;
@@ -356,9 +356,9 @@ auto Pipeline::match_features() -> bool {
     }
     mutex.lock();
     progress = 0.97f;
-    LOG(PIPELINE) << "匹配结束，正在保存...";
+    RECON_LOG(PIPELINE) << "匹配结束，正在保存...";
     if (!Save(geometric_matches, std::string("products/matches/") + file_name)) {
-        LOG(PIPELINE) << "保存失败：" << (std::string("products/matches/") + file_name);
+        RECON_LOG(PIPELINE) << "保存失败：" << (std::string("products/matches/") + file_name);
         mutex.unlock();
         return false;
     }
@@ -370,7 +370,7 @@ auto Pipeline::incremental_sfm() -> bool {
     progress = 0.0f;
     state = PipelineState::INCREMENTAL_SFM;
     mutex.lock();
-    LOG(PIPELINE) << "开始进行初步 SfM (Structure from Motion)。";
+    RECON_LOG(PIPELINE) << "开始进行初步 SfM (Structure from Motion)。";
     mutex.unlock();
     
     const auto triangulation_method = ETriangulationMethod::DEFAULT;
@@ -386,7 +386,7 @@ auto Pipeline::incremental_sfm() -> bool {
     progress = 0.1f;
     if (!features_provider->load(sfm_data, "products/features", regions)) {
         mutex.lock();
-        LOG(PIPELINE) << "读取特征失败。";
+        RECON_LOG(PIPELINE) << "读取特征失败。";
         mutex.unlock();
         return false;
     }
@@ -395,7 +395,7 @@ auto Pipeline::incremental_sfm() -> bool {
     matches_provider = std::make_shared<Matches_Provider>();
     if (!matches_provider->load(sfm_data, "products/matches/matches.f.bin")) {
         mutex.lock();
-        LOG(PIPELINE) << "匹配读取失败。";
+        RECON_LOG(PIPELINE) << "匹配读取失败。";
         mutex.unlock();
         return false;
     }
@@ -411,13 +411,13 @@ auto Pipeline::incremental_sfm() -> bool {
     progress = 0.5f;
     if (!sfm_engine.Process()) {
         mutex.lock();
-        LOG(PIPELINE) << "SfM 引擎处理失败。";
+        RECON_LOG(PIPELINE) << "SfM 引擎处理失败。";
         mutex.unlock();
         return false;
     }
     progress = 0.9f;
     mutex.lock();
-    LOG(PIPELINE) << "SfM 引擎处理完毕。正在导出数据...";
+    RECON_LOG(PIPELINE) << "SfM 引擎处理完毕。正在导出数据...";
     mutex.unlock();
     
     Save(sfm_engine.Get_SfM_Data(), "products/sfm/sfm_engine_data.bin", ESfM_Data(ALL));
@@ -425,7 +425,7 @@ auto Pipeline::incremental_sfm() -> bool {
     
     progress = 1.0f;
     mutex.lock();
-    LOG(PIPELINE) << "初步 SfM 结束。";
+    RECON_LOG(PIPELINE) << "初步 SfM 结束。";
     mutex.unlock();
     return true;
 }
@@ -434,7 +434,7 @@ auto Pipeline::global_sfm() -> bool {
     progress = 0.0f;
     state = PipelineState::GLOBAL_SFM;
     mutex.lock();
-    LOG(PIPELINE) << "开始进行全局 SfM。";
+    RECON_LOG(PIPELINE) << "开始进行全局 SfM。";
     mutex.unlock();
     
     const auto intrinsic_refinement_options = cameras::Intrinsic_Parameter_Type::ADJUST_FOCAL_LENGTH |
@@ -452,14 +452,14 @@ auto Pipeline::global_sfm() -> bool {
     progress = 0.5f;
     if (!sfm_engine.Process()) {
         mutex.lock();
-        LOG(PIPELINE) << "SfM 全局引擎处理失败。";
+        RECON_LOG(PIPELINE) << "SfM 全局引擎处理失败。";
         mutex.unlock();
         return false;
     }
     
     progress = 0.9f;
     mutex.lock();
-    LOG(PIPELINE) << "SfM 引擎处理完毕。正在导出数据...";
+    RECON_LOG(PIPELINE) << "SfM 引擎处理完毕。正在导出数据...";
     mutex.unlock();
     
     Save(sfm_engine.Get_SfM_Data(), "products/sfm/sfm_engine_data.bin", ESfM_Data(ALL));
@@ -467,7 +467,7 @@ auto Pipeline::global_sfm() -> bool {
     
     progress = 1.0f;
     mutex.lock();
-    LOG(PIPELINE) << "全局 SfM 结束。正在更新 SfM 数据...";
+    RECON_LOG(PIPELINE) << "全局 SfM 结束。正在更新 SfM 数据...";
     sfm_data = sfm_engine.Get_SfM_Data();
     mutex.unlock();
     return true;
@@ -477,13 +477,13 @@ auto Pipeline::colorize(PipelineState state) -> bool {
     progress = 0.0f;
     this->state = state;
     mutex.lock();
-    LOG(PIPELINE) << "开始进行上色处理。";
+    RECON_LOG(PIPELINE) << "开始进行上色处理。";
     mutex.unlock();
     
     std::vector<Vec3> points, tracks_color, cam_position;
     if (!ColorizeTracks(sfm_data, points, tracks_color)) {
         mutex.lock();
-        LOG(PIPELINE) << "上色处理失败：无法为轨迹上色。";
+        RECON_LOG(PIPELINE) << "上色处理失败：无法为轨迹上色。";
         mutex.unlock();
         return false;
     }
@@ -501,12 +501,12 @@ auto Pipeline::colorize(PipelineState state) -> bool {
     }
     if (!export_to_ply(path, points, cam_position, tracks_color)) {
         mutex.lock();
-        LOG(PIPELINE) << "模型导出失败。跳过步骤。";
+        RECON_LOG(PIPELINE) << "模型导出失败。跳过步骤。";
         mutex.unlock();
     }
     progress = 1.0f;
     mutex.lock();
-    LOG(PIPELINE) << "上色处理完成。";
+    RECON_LOG(PIPELINE) << "上色处理完成。";
     mutex.unlock();
     return true;
 }
@@ -515,7 +515,7 @@ auto Pipeline::structure_from_known_poses() -> bool {
     state = PipelineState::STRUCTURE_FROM_KNOWN_POSES;
     progress = 0.0f;
     mutex.lock();
-    LOG(PIPELINE) << "正在恢复结构。最大重投影容错：4.0。";
+    RECON_LOG(PIPELINE) << "正在恢复结构。最大重投影容错：4.0。";
     mutex.unlock();
     
     const auto max_reprojection_error = 4.0;
@@ -523,7 +523,7 @@ auto Pipeline::structure_from_known_poses() -> bool {
     std::unique_ptr<Regions> regions(new SIFT_Regions());
     auto regions_provider = std::make_shared<Regions_Provider>();
     if (!regions_provider->load(sfm_data, "products/features", regions, nullptr)) {
-        LOG(PIPELINE) << "区间错误。";
+        RECON_LOG(PIPELINE) << "区间错误。";
         return false;
     }
     
@@ -531,7 +531,7 @@ auto Pipeline::structure_from_known_poses() -> bool {
     PairWiseMatches matches;
     if (!Load(matches, "products/matches/matches.f.bin")) {
         mutex.lock();
-        LOG(PIPELINE) << "无法加载匹配文件。";
+        RECON_LOG(PIPELINE) << "无法加载匹配文件。";
         mutex.unlock();
         return false;
     }
@@ -547,8 +547,8 @@ auto Pipeline::structure_from_known_poses() -> bool {
     RemoveOutliers_AngleError(sfm_data, 2.0);
     progress = 0.7f;
     mutex.lock();
-    LOG(PIPELINE) << "地标数量：" << sfm_data.GetLandmarks().size();
-    LOG(PIPELINE) << "处理结束。正在保存...";
+    RECON_LOG(PIPELINE) << "地标数量：" << sfm_data.GetLandmarks().size();
+    RECON_LOG(PIPELINE) << "处理结束。正在保存...";
     mutex.unlock();
     
     Save(sfm_data, "products/sfm/robust.ply", ESfM_Data(ALL));
@@ -556,7 +556,7 @@ auto Pipeline::structure_from_known_poses() -> bool {
     
     progress = 1.0f;
     mutex.lock();
-    LOG(PIPELINE) << "结构恢复完成。";
+    RECON_LOG(PIPELINE) << "结构恢复完成。";
     mutex.unlock();
     return true;
 }
@@ -565,7 +565,7 @@ auto Pipeline::export_openmvg_to_openmvs() -> bool {
     progress = 0.0f;
     state = PipelineState::MVG2MVS;
     mutex.lock();
-    LOG(PIPELINE) << "开始转换 OpenMVG 格式 - OpenMVS 格式。";
+    RECON_LOG(PIPELINE) << "开始转换 OpenMVG 格式 - OpenMVS 格式。";
     mutex.unlock();
     
     MVS::Interface scene;
@@ -591,7 +591,7 @@ auto Pipeline::export_openmvg_to_openmvs() -> bool {
             scene.platforms.push_back(platform);
         } else {
             mutex.lock();
-            LOG(PIPELINE) << "摄像机 #" << intrinsic.first << " 不是针孔摄像机；跳过。";
+            RECON_LOG(PIPELINE) << "摄像机 #" << intrinsic.first << " 不是针孔摄像机；跳过。";
             mutex.unlock();
         }
     }
@@ -634,7 +634,7 @@ auto Pipeline::export_openmvg_to_openmvs() -> bool {
             scene.images.emplace_back(image);
         } else {
             mutex.lock();
-            LOG(PIPELINE) << "无法读取对应相机坐标：#" << (i - 1);
+            RECON_LOG(PIPELINE) << "无法读取对应相机坐标：#" << (i - 1);
             mutex.unlock();
         }
     }
@@ -669,14 +669,14 @@ auto Pipeline::export_openmvg_to_openmvs() -> bool {
     }
     if (!MVS::ARCHIVE::SerializeSave(scene, "products/mvs/scene.mvs")) {
         mutex.lock();
-        LOG(PIPELINE) << "MVS 场景保存失败。";
+        RECON_LOG(PIPELINE) << "MVS 场景保存失败。";
         mutex.unlock();
         return false;
     }
     
     progress = 1.0f;
     mutex.lock();
-    LOG(PIPELINE) << "格式转换完成。平台数量：" << scene.platforms.size();
+    RECON_LOG(PIPELINE) << "格式转换完成。平台数量：" << scene.platforms.size();
     mutex.unlock();
     
     open_mvs = OpenMVS(std::move(scene));
@@ -780,8 +780,8 @@ auto PipelineModule::update_ui() -> void {
         if (ImGuiFileDialog::Instance()->Display("Folder")) {
             if (ImGuiFileDialog::Instance()->IsOk()) {
                 std::string path = ImGuiFileDialog::Instance()->GetCurrentPath();
-                LOG(PIPELINE) << "目录已选定：" << path;
-                LOG(PIPELINE) << "有效数据：" <<
+                RECON_LOG(PIPELINE) << "目录已选定：" << path;
+                RECON_LOG(PIPELINE) << "有效数据：" <<
                     list_images(path);
                 state = State::FOLDER_CHOSEN;
                 pipeline = Pipeline(image_listing, path);
@@ -852,20 +852,20 @@ auto PipelineModule::load_ply_as_pointcloud(std::string path) -> void {
     tinyply::PlyFile file;
     std::ifstream reader(path);
     if (!reader.good()) {
-        LOG(PIPELINE) << "无法读取 ply 路径：" << path;
+        RECON_LOG(PIPELINE) << "无法读取 ply 路径：" << path;
         return;
     }
     file.parse_header(reader);
-    LOG(PIPELINE) << path << " 头部解析成功：是 " << (file.is_binary_file() ? "二进制" : "纯文本");
+    RECON_LOG(PIPELINE) << path << " 头部解析成功：是 " << (file.is_binary_file() ? "二进制" : "纯文本");
     
     std::shared_ptr<tinyply::PlyData> vertices, normals, colors, tex_coords, faces, tripstrip;
     try { vertices = file.request_properties_from_element("vertex", { "x", "y", "z" }); }
-    catch (const std::exception & e) { LOG(PIPELINE) << "tinyply 错误: " << e.what() << std::endl; }
+    catch (const std::exception & e) { RECON_LOG(PIPELINE) << "tinyply 错误: " << e.what() << std::endl; }
     
     file.read(reader);
     reader.close();
 
-    LOG(PIPELINE) << "读取完毕。节点数量：" << vertices->count;
+    RECON_LOG(PIPELINE) << "读取完毕。节点数量：" << vertices->count;
     const auto num_bytes = vertices->buffer.size_bytes();
     std::vector<glm::vec3> verts(vertices->count);
     

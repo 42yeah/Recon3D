@@ -38,7 +38,7 @@ auto compile(GLuint type, std::string path) -> GLuint {
     
     char log[512] = { 0 };
     glGetShaderInfoLog(shader, sizeof(log), nullptr, log);
-    LOG(SHADER) << path << " 编译结果：" << log;
+    RECON_LOG(SHADER) << path << " 编译结果：" << log;
     return shader;
 }
 
@@ -50,6 +50,6 @@ auto link(GLuint vertex_shader, GLuint fragment_shader) -> GLuint {
     
     char log[512] = { 0 };
     glGetProgramInfoLog(program, sizeof(log), nullptr, log);
-    LOG(SHADER) << "程序链接结果：" << log;
+    RECON_LOG(SHADER) << "程序链接结果：" << log;
     return program;
 }

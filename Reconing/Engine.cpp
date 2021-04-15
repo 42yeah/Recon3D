@@ -44,7 +44,7 @@ Engine::Engine() {
     // C H R O N O L O G Y //////////////////////////
     last_instant = glfwGetTime();
     
-    LOG(ENGINE) << "初始化完毕。";
+    RECON_LOG(ENGINE) << "初始化完毕。";
 }
 
 auto Engine::run() -> int { 
@@ -107,6 +107,6 @@ Engine::~Engine() {
 
 auto Engine::register_module(Module *module) -> bool {
     modules.push_back(module);
-    LOG(ENGINE) << "模块已注册：" << module->name;
+    RECON_LOG(ENGINE) << "模块已注册：" << module->name;
     return true;
 }

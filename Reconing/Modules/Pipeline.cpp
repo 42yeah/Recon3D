@@ -177,7 +177,8 @@ auto Pipeline::run() -> bool {
         colorize(PipelineState::COLORIZING) &&
         structure_from_known_poses() &&
         colorize(PipelineState::COLORIZED_ROBUST_TRIANGULATION) &&
-        export_openmvg_to_openmvs()) {
+        export_openmvg_to_openmvs() &&
+        mvs_procedures()) {
         return true;
     }
     mutex.lock();
@@ -690,6 +691,16 @@ auto Pipeline::export_openmvg_to_openmvs() -> bool {
     return true;
 }
 
+auto Pipeline::mvs_procedures() -> bool {
+    state = PipelineState::DENSIFY_PC;
+    if (!open_mvs.density_point_cloud(progress)) {
+        return false;
+    }
+
+    return true;
+}
+
+
 
 // M O D U L E ///////////////////////////
 auto PipelineModule::update_ui() -> void { 
@@ -767,6 +778,10 @@ auto PipelineModule::update_ui() -> void {
                         
                     case PipelineState::MVG2MVS:
                         ImGui::TextWrapped("正在从 OpenMVG 格式转换到 OpenMVS 格式...");
+                        break;
+                        
+                    case PipelineState::DENSIFY_PC:
+                        ImGui::TextWrapped("正在稠密化点云...");
                         break;
                 }
                 mutex.unlock();

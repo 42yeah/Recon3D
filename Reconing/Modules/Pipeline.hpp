@@ -62,7 +62,8 @@ enum class PipelineState {
     COLORIZING = 6,
     STRUCTURE_FROM_KNOWN_POSES = 7,
     COLORIZED_ROBUST_TRIANGULATION = 8,
-    MVG2MVS = 9
+    MVG2MVS = 9,
+    DENSIFY_PC = 10
 };
 
 enum class PairMode {
@@ -111,6 +112,8 @@ public:
     auto structure_from_known_poses() -> bool;
     
     auto export_openmvg_to_openmvs() -> bool;
+    
+    auto mvs_procedures() -> bool;
     
 
     PipelineState state;

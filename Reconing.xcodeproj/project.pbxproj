@@ -128,6 +128,12 @@
 		18B5B3E02627E75A0035C3A1 /* libopencv_imgproc.4.5.2.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 18B5B3D72627E75A0035C3A1 /* libopencv_imgproc.4.5.2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		18B5B3E12627E75B0035C3A1 /* libopencv_imgcodecs.4.5.2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 18B5B3D82627E75A0035C3A1 /* libopencv_imgcodecs.4.5.2.dylib */; };
 		18B5B3E22627E75B0035C3A1 /* libopencv_imgcodecs.4.5.2.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 18B5B3D82627E75A0035C3A1 /* libopencv_imgcodecs.4.5.2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		18B5B3E72627EBB30035C3A1 /* libboost_serialization.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 18B5B3E62627EBB20035C3A1 /* libboost_serialization.dylib */; };
+		18B5B3E82627EBB30035C3A1 /* libboost_serialization.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 18B5B3E62627EBB20035C3A1 /* libboost_serialization.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		18B5B3EA2627EBCA0035C3A1 /* libboost_iostreams.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 18B5B3E92627EBCA0035C3A1 /* libboost_iostreams.dylib */; };
+		18B5B3EB2627EBCA0035C3A1 /* libboost_iostreams.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 18B5B3E92627EBCA0035C3A1 /* libboost_iostreams.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		18B5B3ED2627EFA60035C3A1 /* libopencv_highgui.4.5.2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 18B5B3EC2627EFA60035C3A1 /* libopencv_highgui.4.5.2.dylib */; };
+		18B5B3EE2627EFA60035C3A1 /* libopencv_highgui.4.5.2.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 18B5B3EC2627EFA60035C3A1 /* libopencv_highgui.4.5.2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		18EFFA4E261DA7A8002011A2 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18EFFA4D261DA7A8002011A2 /* main.cpp */; };
 		18EFFA57261DA7C3002011A2 /* libglfw.3.3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 18EFFA56261DA7C3002011A2 /* libglfw.3.3.dylib */; };
 		18EFFA58261DA7C3002011A2 /* libglfw.3.3.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 18EFFA56261DA7C3002011A2 /* libglfw.3.3.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -189,14 +195,17 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				18B5B3E82627EBB30035C3A1 /* libboost_serialization.dylib in Embed Libraries */,
 				18B5B3DA2627E75A0035C3A1 /* libopencv_features2d.4.5.2.dylib in Embed Libraries */,
 				18B5B3DE2627E75A0035C3A1 /* libopencv_calib3d.4.5.2.dylib in Embed Libraries */,
 				1819D486262574B100C53EF4 /* libceres.2.0.0.dylib in Embed Libraries */,
 				18EFFA58261DA7C3002011A2 /* libglfw.3.3.dylib in Embed Libraries */,
 				18EFFBD926254286002011A2 /* libomp.dylib in Embed Libraries */,
+				18B5B3EE2627EFA60035C3A1 /* libopencv_highgui.4.5.2.dylib in Embed Libraries */,
 				1819D489262574C400C53EF4 /* libglog.0.4.0.dylib in Embed Libraries */,
 				18B5B3E02627E75A0035C3A1 /* libopencv_imgproc.4.5.2.dylib in Embed Libraries */,
 				18B5B3DC2627E75A0035C3A1 /* libopencv_core.4.5.2.dylib in Embed Libraries */,
+				18B5B3EB2627EBCA0035C3A1 /* libboost_iostreams.dylib in Embed Libraries */,
 				18B5B3E22627E75B0035C3A1 /* libopencv_imgcodecs.4.5.2.dylib in Embed Libraries */,
 			);
 			name = "Embed Libraries";
@@ -247,6 +256,10 @@
 		18B5B3D62627E75A0035C3A1 /* libopencv_calib3d.4.5.2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_calib3d.4.5.2.dylib; path = ../../../../usr/local/lib/libopencv_calib3d.4.5.2.dylib; sourceTree = "<group>"; };
 		18B5B3D72627E75A0035C3A1 /* libopencv_imgproc.4.5.2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_imgproc.4.5.2.dylib; path = ../../../../usr/local/lib/libopencv_imgproc.4.5.2.dylib; sourceTree = "<group>"; };
 		18B5B3D82627E75A0035C3A1 /* libopencv_imgcodecs.4.5.2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_imgcodecs.4.5.2.dylib; path = ../../../../usr/local/lib/libopencv_imgcodecs.4.5.2.dylib; sourceTree = "<group>"; };
+		18B5B3E32627EBA40035C3A1 /* libboost_iostreams-mt.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libboost_iostreams-mt.dylib"; path = "../../../../usr/local/Cellar/boost/1.75.0_2/lib/libboost_iostreams-mt.dylib"; sourceTree = "<group>"; };
+		18B5B3E62627EBB20035C3A1 /* libboost_serialization.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libboost_serialization.dylib; path = ../../../../usr/local/Cellar/boost/1.75.0_2/lib/libboost_serialization.dylib; sourceTree = "<group>"; };
+		18B5B3E92627EBCA0035C3A1 /* libboost_iostreams.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libboost_iostreams.dylib; path = ../../../../usr/local/Cellar/boost/1.75.0_2/lib/libboost_iostreams.dylib; sourceTree = "<group>"; };
+		18B5B3EC2627EFA60035C3A1 /* libopencv_highgui.4.5.2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_highgui.4.5.2.dylib; path = ../../../../usr/local/lib/libopencv_highgui.4.5.2.dylib; sourceTree = "<group>"; };
 		18EFFA4A261DA7A8002011A2 /* Reconing */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Reconing; sourceTree = BUILT_PRODUCTS_DIR; };
 		18EFFA4D261DA7A8002011A2 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		18EFFA56261DA7C3002011A2 /* libglfw.3.3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libglfw.3.3.dylib; path = ../../../../usr/local/Cellar/glfw/3.3.2/lib/libglfw.3.3.dylib; sourceTree = "<group>"; };
@@ -512,6 +525,7 @@
 				1819D3E02625656B00C53EF4 /* libopenMVG_features.a in Frameworks */,
 				1819D488262574C300C53EF4 /* libglog.0.4.0.dylib in Frameworks */,
 				1819D3C72625655D00C53EF4 /* libopenMVG_numeric.a in Frameworks */,
+				18B5B3ED2627EFA60035C3A1 /* libopencv_highgui.4.5.2.dylib in Frameworks */,
 				1819D45D26256C4B00C53EF4 /* libopenMVG_linearProgramming.a in Frameworks */,
 				18B5B3E12627E75B0035C3A1 /* libopencv_imgcodecs.4.5.2.dylib in Frameworks */,
 				1819D46626256C4C00C53EF4 /* libopenMVG_tiff.a in Frameworks */,
@@ -519,11 +533,13 @@
 				1819D47B26256C5500C53EF4 /* libopenMVG_png.a in Frameworks */,
 				1819D47826256C5500C53EF4 /* libopenMVG_matching.a in Frameworks */,
 				1819D47F26256C5600C53EF4 /* libopenMVG_tiff.a in Frameworks */,
+				18B5B3EA2627EBCA0035C3A1 /* libboost_iostreams.dylib in Frameworks */,
 				1819D47426256C5500C53EF4 /* libopenMVG_kvld.a in Frameworks */,
 				1819D47326256C5500C53EF4 /* libopenMVG_jpeg.a in Frameworks */,
 				1819D3C22625655D00C53EF4 /* libopenMVG_fast.a in Frameworks */,
 				1819D47126256C5500C53EF4 /* libopenMVG_geometry.a in Frameworks */,
 				1819D45E26256C4B00C53EF4 /* libopenMVG_lInftyComputerVision.a in Frameworks */,
+				18B5B3E72627EBB30035C3A1 /* libboost_serialization.dylib in Frameworks */,
 				1819D45926256C4B00C53EF4 /* libopenMVG_image.a in Frameworks */,
 				1819D46C26256C5400C53EF4 /* liblib_OsiClpSolver.a in Frameworks */,
 				1819D3BC2625643600C53EF4 /* libopenMVG_tiff.a in Frameworks */,
@@ -691,6 +707,10 @@
 		18EFFA55261DA7C3002011A2 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				18B5B3EC2627EFA60035C3A1 /* libopencv_highgui.4.5.2.dylib */,
+				18B5B3E92627EBCA0035C3A1 /* libboost_iostreams.dylib */,
+				18B5B3E62627EBB20035C3A1 /* libboost_serialization.dylib */,
+				18B5B3E32627EBA40035C3A1 /* libboost_iostreams-mt.dylib */,
 				18B5B3D62627E75A0035C3A1 /* libopencv_calib3d.4.5.2.dylib */,
 				18B5B3D52627E75A0035C3A1 /* libopencv_core.4.5.2.dylib */,
 				18B5B3D42627E75A0035C3A1 /* libopencv_features2d.4.5.2.dylib */,
@@ -1759,6 +1779,7 @@
 					"/usr/local/Cellar/ceres-solver/2.0.0/lib",
 					/usr/local/Cellar/glog/0.4.0/lib,
 					/Users/apple/Projects/openMVS/build/lib/,
+					/usr/local/Cellar/boost/1.75.0_2/lib,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -1794,6 +1815,7 @@
 					"/usr/local/Cellar/ceres-solver/2.0.0/lib",
 					/usr/local/Cellar/glog/0.4.0/lib,
 					/Users/apple/Projects/openMVS/build/lib/,
+					/usr/local/Cellar/boost/1.75.0_2/lib,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};

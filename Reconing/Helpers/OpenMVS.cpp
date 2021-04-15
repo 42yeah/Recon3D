@@ -33,7 +33,7 @@ auto OpenMVS::density_point_cloud(float &progress) -> bool {
     RECON_LOG(OMVS) << "正在稠密点云...";
     mutex.unlock();
     
-    WORKING_FOLDER = "products/mvs/";
+    WORKING_FOLDER = ".";
     INIT_WORKING_FOLDER;
     
     OPTDENSE::init();

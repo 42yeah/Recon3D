@@ -160,24 +160,24 @@ auto Pipeline::export_to_ply(const std::string path, std::vector<Vec3> vertices,
 }
 
 auto Pipeline::run() -> bool {
-    if (std::filesystem::exists("products")) {
-        std::filesystem::remove_all("products");
-    }
-    mkdir_if_not_exists("products");
-    mkdir_if_not_exists("products/features");
-    mkdir_if_not_exists("products/matches");
-    mkdir_if_not_exists("products/sfm");
-    mkdir_if_not_exists("products/mvs");
-    mkdir_if_not_exists("products/mvs/images");
-    if (intrinsics_analysis() &&
-        feature_detection() &&
-        match_features() &&
-        incremental_sfm() &&
-        global_sfm() &&
-        colorize(PipelineState::COLORIZING) &&
-        structure_from_known_poses() &&
-        colorize(PipelineState::COLORIZED_ROBUST_TRIANGULATION) &&
-        export_openmvg_to_openmvs() &&
+//    if (std::filesystem::exists("products")) {
+//        std::filesystem::remove_all("products");
+//    }
+//    mkdir_if_not_exists("products");
+//    mkdir_if_not_exists("products/features");
+//    mkdir_if_not_exists("products/matches");
+//    mkdir_if_not_exists("products/sfm");
+//    mkdir_if_not_exists("products/mvs");
+//    mkdir_if_not_exists("products/mvs/images");
+    if ( // intrinsics_analysis() &&
+//        feature_detection() &&
+//        match_features() &&
+//        incremental_sfm() &&
+//        global_sfm() &&
+//        colorize(PipelineState::COLORIZING) &&
+//        structure_from_known_poses() &&
+//        colorize(PipelineState::COLORIZED_ROBUST_TRIANGULATION) &&
+//        export_openmvg_to_openmvs() &&
         mvs_procedures()) {
         return true;
     }

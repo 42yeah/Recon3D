@@ -16,6 +16,8 @@
 #define TINYPLY_IMPLEMENTATION
 #include <tinyply.h>
 #include <GLFW/glfw3.h>
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
 
 using namespace PipelineNS;
 
@@ -386,7 +388,7 @@ auto Pipeline::refine_mesh() -> bool {
     }, mvs() / "RefineMesh", "products/mvs/scene_dense_mesh.mvs",
                       "--scales", "2",
                       "-w", ".");
-    
+
     mutex.lock();
     RECON_LOG(PIPELINE) << "网格修正完成。";
     mutex.unlock();
@@ -432,6 +434,7 @@ auto PipelineModule::update_ui() -> void {
                 ImGui::TextWrapped("一切已经准备就绪。点击下一步开始。");
                 if (ImGui::Button("下一步")) {
                     state = State::RUNNING;
+                    mesh_texture = GL_NONE; // Reset mesh_texture so we won't accidentally sample it
                     std::thread pipeline_runner(run_pipeline, &pipeline);
                     pipeline_runner.detach();
                 }
@@ -505,6 +508,9 @@ auto PipelineModule::update_ui() -> void {
                     case PipelineState::TEXTURE_MESH:
                         ImGui::TextWrapped("正在对网格进行贴图...");
                         break;
+                        
+                    default:
+                        break;
                 }
                 mutex.unlock();
                 if (pipeline.state != PipelineState::FINISHED_ERR &&
@@ -543,27 +549,72 @@ auto PipelineModule::update(float delta_time) -> void {
         load_ply_as_pointcloud("products/sfm/cloud_and_poses.ply");
         
         eye = glm::vec3(0.0f, 0.0f, 5.0f);
+        center = glm::vec3(0.0f);
         perspective_mat = glm::perspective(glm::radians(45.0f), (float) window_size.x / window_size.y, 0.01f, 200.0f);
-        
+        view_mat = glm::lookAt(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        render_state = pipeline.state;
+
         opengl_ready = true;
         time = 0.0f;
     }
+    if (opengl_ready && render_state != pipeline.state && pipeline.state == PipelineState::STRUCTURE_FROM_KNOWN_POSES) {
+        render_state = pipeline.state;
+        load_colorized_ply_as_pointcloud("products/sfm/colorized.ply");
+    }
+    if (opengl_ready && render_state != pipeline.state && pipeline.state == PipelineState::MVG2MVS) {
+        render_state = pipeline.state;
+        load_colorized_ply_as_pointcloud("products/sfm/robust_colorized.ply");
+    }
+    if (opengl_ready && render_state != pipeline.state && pipeline.state == PipelineState::RECONSTRUCT_MESH) {
+        render_state = pipeline.state;
+        load_colorized_ply_as_pointcloud("products/mvs/scene_dense.ply");
+    }
+    if (opengl_ready && render_state != pipeline.state && pipeline.state == PipelineState::REFINE_MESH) {
+        render_state = pipeline.state;
+        load_ply_as_mesh("products/mvs/scene_dense_mesh.ply");
+    }
+    if (opengl_ready && render_state != pipeline.state && pipeline.state == PipelineState::FINISHED_SUCCESS) {
+        render_state = pipeline.state;
+        load_ply_and_texture_map("products/mvs/scene_dense_mesh_refine_texture.ply",
+                                 "products/mvs/scene_dense_mesh_refine_texture.png");
+    }
     time += delta_time;
-    
-    if (glfwGetKey(window, GLFW_KEY_W)) {
-        radius += delta_time * 5.0f;
+
+    float horizontal_rotation_delta = horizontal_rotation_target - horizontal_rotation;
+    horizontal_rotation += (horizontal_rotation_delta * delta_time) * 10.0f;
+
+    model_mat = glm::mat4(1.0f);
+    model_mat = glm::rotate(model_mat, glm::radians(180.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    model_mat = glm::rotate(model_mat, glm::radians(horizontal_rotation * 180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    view_mat = glm::lookAt(glm::vec3(0.0f, 0.0f, radius), center, glm::vec3(0.0f, 1.0f, 0.0f));
+
+    if (glfwGetKey(window, GLFW_KEY_A)) {
+        horizontal_rotation_target -= glm::radians(delta_time * 180.0f);
+    }
+    if (glfwGetKey(window, GLFW_KEY_D)) {
+        horizontal_rotation_target += glm::radians(delta_time * 180.0f);
     }
     if (glfwGetKey(window, GLFW_KEY_S)) {
+        radius += delta_time * 5.0f;
+    }
+    if (glfwGetKey(window, GLFW_KEY_W)) {
         radius -= delta_time * 5.0f;
     }
     
-    eye = glm::vec3(0.0f, 0.0f, radius);
-    model_mat = glm::mat4(1.0f);
-    model_mat = glm::rotate(model_mat, glm::radians(180.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    model_mat = glm::rotate(model_mat, glm::radians(time * 5.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    view_mat = glm::lookAt(eye, center, glm::vec3(0.0f, 1.0f, 0.0f));
-
-    
+    const auto front = glm::normalize(center - eye);
+    const auto right = glm::cross(front, glm::vec3(0.0f, 1.0f, 0.0f));
+    if (glfwGetKey(window, GLFW_KEY_LEFT)) {
+        center -= right * delta_time;
+    }
+    if (glfwGetKey(window, GLFW_KEY_RIGHT)) {
+        center += right * delta_time;
+    }
+    if (glfwGetKey(window, GLFW_KEY_UP)) {
+        center += glm::vec3(0.0f, 1.0f, 0.0f) * delta_time;
+    }
+    if (glfwGetKey(window, GLFW_KEY_DOWN)) {
+        center -= glm::vec3(0.0f, 1.0f, 0.0f) * delta_time;
+    }
 }
 
 auto PipelineModule::list_images(std::filesystem::path path) -> int {
@@ -594,9 +645,15 @@ auto PipelineModule::render() -> void {
     glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, glm::value_ptr(model_mat));
     glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, glm::value_ptr(view_mat));
     glUniformMatrix4fv(glGetUniformLocation(program, "perspective"), 1, GL_FALSE, glm::value_ptr(perspective_mat));
+    if (mesh_texture != GL_NONE) {
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, mesh_texture);
+        glUniform1i(glGetUniformLocation(program, "tex"), 0);
+        glUniform1i(glGetUniformLocation(program, "use_texture"), 1);
+    }
     glBindVertexArray(VAO);
     glPointSize(5.0f);
-    glDrawArrays(GL_POINTS, 0, num_vertices);
+    glDrawArrays(render_mode, 0, num_vertices);
     glBindVertexArray(GL_NONE);
 }
 
@@ -618,27 +675,229 @@ auto PipelineModule::load_ply_as_pointcloud(std::string path) -> void {
     reader.close();
 
     RECON_LOG(PIPELINE) << "读取完毕。节点数量：" << vertices->count;
-    const auto num_bytes = vertices->buffer.size_bytes();
-    std::vector<glm::vec3> verts(vertices->count);
+    std::vector<Vertex> verts(vertices->count);
     
-    if (vertices->t == tinyply::Type::FLOAT64) {
-        std::vector<glm::dvec3> verts64(vertices->count);
-        std::memcpy(verts64.data(), vertices->buffer.get(), num_bytes);
-
-        for (auto i = 0; i < vertices->count; i++) {
-            verts[i] = { verts64[i].x,
-                verts64[i].y,
-                verts64[i].z };
-        }
-    } else {
-        std::memcpy(verts.data(), vertices->buffer.get(), num_bytes);
+    for (auto i = 0; i < vertices->count; i++) {
+        Vertex vertex;
+        vertex = {
+            point_fetch(vertices, i),
+            { 0.0f, 0.0f, 0.0f },
+            { 0.0f, 0.0f },
+            { 1.0f, 0.5f, 0.0f }
+        };
+        verts[i] = vertex;
     }
-    center = glm::vec3(0.0f);
+    glm::vec3 center_of_gravity = glm::vec3(0.0f);
     for (auto i = 0; i < verts.size(); i++) {
-        center += verts[i];
+        center_of_gravity += verts[i].position;
     }
-    center /= verts.size();
+    center_of_gravity /= verts.size();
+    for (auto i = 0; i < verts.size(); i++) {
+        verts[i].position -= center_of_gravity;
+    }
 
+    setup_render(verts, GL_POINTS);
+}
+
+auto PipelineModule::load_colorized_ply_as_pointcloud(std::string path) -> void { 
+    tinyply::PlyFile file;
+    std::ifstream reader(path);
+    if (!reader.good()) {
+        RECON_LOG(PIPELINE) << "无法读取 ply 路径：" << path;
+        return;
+    }
+    file.parse_header(reader);
+    RECON_LOG(PIPELINE) << path << " 头部解析成功：是 " << (file.is_binary_file() ? "二进制" : "纯文本");
+    
+    std::shared_ptr<tinyply::PlyData> vertices, normals, colors, tex_coords, faces, tripstrip;
+    try { vertices = file.request_properties_from_element("vertex", { "x", "y", "z" }); }
+    catch (const std::exception & e) { RECON_LOG(PIPELINE) << "tinyply 错误: " << e.what(); }
+    
+    try { colors = file.request_properties_from_element("vertex", { "red", "green", "blue" }); }
+    catch (const std::exception & e) { RECON_LOG(PIPELINE) << "tinyply 无法读取颜色通道 (red, green, blue): " << e.what(); }
+
+    try { colors = file.request_properties_from_element("vertex", { "r", "g", "b" }); }
+    catch (const std::exception & e) { RECON_LOG(PIPELINE) << "tinyply 无法读取颜色通道 (r, g, b): " << e.what(); }
+    
+    file.read(reader);
+    reader.close();
+
+    RECON_LOG(PIPELINE) << "读取完毕。节点数量：" << vertices->count;
+    std::vector<Vertex> verts(vertices->count);
+
+    for (auto i = 0; i < vertices->count; i++) {
+        Vertex vertex;
+        vertex = {
+            point_fetch(vertices, i),
+            { 0.0f, 0.0f, 0.0f },
+            { 0.0f, 0.0f },
+            point_fetch(colors, i)
+        };
+        verts[i] = vertex;
+    }
+
+    glm::vec3 center_of_gravity = glm::vec3(0.0f);
+    for (auto i = 0; i < verts.size(); i++) {
+        center_of_gravity += verts[i].position;
+    }
+    center_of_gravity /= verts.size();
+    for (auto i = 0; i < verts.size(); i++) {
+        verts[i].position -= center_of_gravity;
+    }
+
+    setup_render(verts, GL_POINTS);
+}
+
+auto PipelineModule::load_ply_as_mesh(std::string path) -> void {
+    tinyply::PlyFile file;
+    std::ifstream reader(path);
+    if (!reader.good()) {
+        RECON_LOG(PIPELINE) << "无法读取 ply 路径：" << path;
+        return;
+    }
+    file.parse_header(reader);
+    RECON_LOG(PIPELINE) << path << " 头部解析成功：是 " << (file.is_binary_file() ? "二进制" : "纯文本");
+    
+    std::shared_ptr<tinyply::PlyData> vertices, normals, colors, tex_coords, faces, tripstrip;
+    try { vertices = file.request_properties_from_element("vertex", { "x", "y", "z" }); }
+    catch (const std::exception & e) { RECON_LOG(PIPELINE) << "tinyply 错误: " << e.what(); }
+
+    try { faces = file.request_properties_from_element("face", { "vertex_indices" }, 3); }
+    catch (const std::exception & e) { RECON_LOG(PIPELINE) << "tinyply 无法读取面: " << e.what(); }
+    
+    file.read(reader);
+    reader.close();
+
+    RECON_LOG(PIPELINE) << "读取完毕。节点数量：" << vertices->count << "，面数量：" << faces->count;
+    std::vector<Vertex> verts;
+    glm::u32vec3 *indices = (glm::u32vec3 *) faces->buffer.get();
+    for (auto i = 0; i < faces->count; i++) {
+        glm::u32vec3 &triangle = indices[i];
+        Vertex v1, v2, v3;
+        v1 = {
+            point_fetch(vertices, triangle.x),
+            { 0.0f, 0.0f, 0.0f },
+            { 0.0f, 0.0f },
+            { 1.0f, 0.5f, 0.0f }
+        };
+        v2 = {
+            point_fetch(vertices, triangle.y),
+            { 0.0f, 0.0f, 0.0f },
+            { 0.0f, 0.0f },
+            { 1.0f, 0.5f, 0.0f }
+        };
+        v3 = {
+            point_fetch(vertices, triangle.z),
+            { 0.0f, 0.0f, 0.0f },
+            { 0.0f, 0.0f },
+            { 1.0f, 0.5f, 0.0f }
+        };
+        verts.push_back(v1);
+        verts.push_back(v2);
+        verts.push_back(v3);
+    }
+
+    glm::vec3 center_of_gravity = glm::vec3(0.0f);
+    for (auto i = 0; i < verts.size(); i++) {
+        center_of_gravity += verts[i].position;
+    }
+    center_of_gravity /= verts.size();
+    for (auto i = 0; i < verts.size(); i++) {
+        verts[i].position -= center_of_gravity;
+    }
+    RECON_LOG(PIPELINE) << "重心：" << center_of_gravity.x << ", " << center_of_gravity.y << ", " << center_of_gravity.z;
+
+    setup_render(verts, GL_TRIANGLES);
+}
+
+auto PipelineModule::load_ply_and_texture_map(std::string path, std::string texture_path) -> void {
+    tinyply::PlyFile file;
+    std::ifstream reader(path);
+    if (!reader.good()) {
+        RECON_LOG(PIPELINE) << "无法读取 ply 路径：" << path;
+        return;
+    }
+    file.parse_header(reader);
+    RECON_LOG(PIPELINE) << path << " 头部解析成功：是 " << (file.is_binary_file() ? "二进制" : "纯文本");
+    
+    std::shared_ptr<tinyply::PlyData> vertices, normals, colors, tex_coords, faces, tripstrip;
+    try { vertices = file.request_properties_from_element("vertex", { "x", "y", "z" }); }
+    catch (const std::exception & e) { RECON_LOG(PIPELINE) << "tinyply 错误: " << e.what(); }
+
+    try { faces = file.request_properties_from_element("face", { "vertex_indices" }, 3); }
+    catch (const std::exception & e) { RECON_LOG(PIPELINE) << "tinyply 无法读取面: " << e.what(); }
+    
+    try { tex_coords = file.request_properties_from_element("face", { "texcoord" }, 6); }
+    catch (const std::exception & e) { RECON_LOG(PIPELINE) << "tinyply 错误: " << e.what(); }
+    
+    file.read(reader);
+    reader.close();
+
+    RECON_LOG(PIPELINE) << "读取完毕。节点数量：" << vertices->count << "，面数量：" << faces->count;
+    std::vector<Vertex> verts;
+    glm::u32vec3 *indices = (glm::u32vec3 *) faces->buffer.get();
+    float *uv_arr = (float *) tex_coords->buffer.get();
+    for (auto i = 0; i < faces->count; i++) {
+        glm::u32vec3 &triangle = indices[i];
+        Vertex v1, v2, v3;
+        v1 = {
+            point_fetch(vertices, triangle.x),
+            { 0.0f, 0.0f, 0.0f },
+            { uv_arr[i * 6 + 0], uv_arr[i * 6 + 1] },
+            { 1.0f, 0.5f, 0.0f }
+        };
+        v2 = {
+            point_fetch(vertices, triangle.y),
+            { 0.0f, 0.0f, 0.0f },
+            { uv_arr[i * 6 + 2], uv_arr[i * 6 + 3] },
+            { 1.0f, 0.5f, 0.0f }
+        };
+        v3 = {
+            point_fetch(vertices, triangle.z),
+            { 0.0f, 0.0f, 0.0f },
+            { uv_arr[i * 6 + 4], uv_arr[i * 6 + 5] },
+            { 1.0f, 0.5f, 0.0f }
+        };
+        verts.push_back(v1);
+        verts.push_back(v2);
+        verts.push_back(v3);
+    }
+
+    glm::vec3 center_of_gravity = glm::vec3(0.0f);
+    for (auto i = 0; i < verts.size(); i++) {
+        center_of_gravity += verts[i].position;
+    }
+    center_of_gravity /= verts.size();
+    for (auto i = 0; i < verts.size(); i++) {
+        verts[i].position -= center_of_gravity;
+    }
+    RECON_LOG(PIPELINE) << "重心：" << center_of_gravity.x << ", " << center_of_gravity.y << ", " << center_of_gravity.z;
+    
+    if (mesh_texture != GL_NONE) {
+        glDeleteTextures(1, &mesh_texture);
+    }
+    glGenTextures(1, &mesh_texture);
+    glBindTexture(GL_TEXTURE_2D, mesh_texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    
+    stbi_set_flip_vertically_on_load(true);
+    int width, height, channels;
+    auto *data = stbi_load(texture_path.c_str(), &width, &height, &channels, 0);
+    if (!data) {
+        RECON_LOG(PIPELINE) << "加载材质失败：" << texture_path << " 未找到或无权限";
+        return;
+    }
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+    stbi_image_free(data);
+    glBindTexture(GL_TEXTURE_2D, GL_NONE);
+
+    setup_render(verts, GL_TRIANGLES);
+}
+
+auto PipelineModule::setup_render(std::vector<Vertex> vertices, GLuint render_mode) -> void { 
     if (VAO != GL_NONE) {
         glDeleteVertexArrays(1, &VAO);
     }
@@ -650,11 +909,54 @@ auto PipelineModule::load_ply_as_pointcloud(std::string path) -> void {
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * verts.size(), &verts[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void *) (sizeof(float) * 3));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void *) (sizeof(float) * 6));
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void *) (sizeof(float) * 8));
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, nullptr);
+    glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(2);
+    glEnableVertexAttribArray(3);
     glBindVertexArray(GL_NONE);
     
-    num_vertices = (int) verts.size();
+    this->render_mode = render_mode;
+    num_vertices = (int) vertices.size();
+}
+
+auto PipelineModule::point_fetch(std::shared_ptr<tinyply::PlyData> ply_data, int offset) -> glm::vec3 { 
+    glm::vec3 result(0.0f);
+    
+    const auto *buf = ply_data->buffer.get();
+    switch (ply_data->t) {
+        case tinyply::Type::FLOAT32:
+            result = { ((glm::vec3 *) (buf))[offset].x,
+                ((glm::vec3 *) (buf))[offset].y,
+                ((glm::vec3 *) (buf))[offset].z };
+            break;
+            
+        case tinyply::Type::FLOAT64:
+            result = { (float) ((glm::dvec3 *) (buf))[offset].x,
+                (float) ((glm::dvec3 *) (buf))[offset].y,
+                (float) ((glm::dvec3 *) (buf))[offset].z };
+            break;
+            
+        case tinyply::Type::INT8:
+            result = { (float) ((glm::i8vec3 *) (buf))[offset].x / 255,
+                (float) ((glm::i8vec3 *) (buf))[offset].y / 255,
+                (float) ((glm::i8vec3 *) (buf))[offset].z / 255 };
+            break;
+            
+        case tinyply::Type::UINT8:
+            result = { (float) ((glm::u8vec3 *) (buf))[offset].x / 255,
+                (float) ((glm::u8vec3 *) (buf))[offset].y / 255,
+                (float) ((glm::u8vec3 *) (buf))[offset].z / 255 };
+            break;
+            
+        default:
+            // Unsupported, because I don't want to
+            break;
+    }
+    return result;
 }
 

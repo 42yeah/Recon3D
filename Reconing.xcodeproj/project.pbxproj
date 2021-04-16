@@ -369,6 +369,7 @@
 		18EFFBAF26249A87002011A2 /* libopenMVG_tiff.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopenMVG_tiff.a; path = "../openMVG/build/Darwin-x86_64-RELEASE/libopenMVG_tiff.a"; sourceTree = "<group>"; };
 		18EFFBB026249A87002011A2 /* libvlsift.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libvlsift.a; path = "../openMVG/build/Darwin-x86_64-RELEASE/libvlsift.a"; sourceTree = "<group>"; };
 		18EFFBD726254286002011A2 /* libomp.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libomp.dylib; path = ../../../../usr/local/Cellar/libomp/11.1.0/lib/libomp.dylib; sourceTree = "<group>"; };
+		18FF387F2629BF4F000BC2C3 /* stb_image.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = stb_image.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -519,6 +520,7 @@
 		18EFFA5A261DA7DE002011A2 /* deps */ = {
 			isa = PBXGroup;
 			children = (
+				18FF387E2629BF4F000BC2C3 /* stb */,
 				1819D4902625AC5100C53EF4 /* tinyply */,
 				18EFFB7D26247D99002011A2 /* ImGuiFileDialog */,
 				18EFFA6726246E4E002011A2 /* imgui */,
@@ -1237,6 +1239,14 @@
 			path = Modules;
 			sourceTree = "<group>";
 		};
+		18FF387E2629BF4F000BC2C3 /* stb */ = {
+			isa = PBXGroup;
+			children = (
+				18FF387F2629BF4F000BC2C3 /* stb_image.h */,
+			);
+			path = stb;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -1502,6 +1512,7 @@
 					/Users/apple/Projects/openMVG/src/third_party/lemon,
 					"$(SRCROOT)/deps/tinyply",
 					/usr/local/include/opencv4,
+					"$(SRCROOT)/deps/stb",
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1532,6 +1543,7 @@
 					/Users/apple/Projects/openMVG/src/third_party/lemon,
 					"$(SRCROOT)/deps/tinyply",
 					/usr/local/include/opencv4,
+					"$(SRCROOT)/deps/stb",
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",

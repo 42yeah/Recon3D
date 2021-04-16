@@ -56,6 +56,7 @@ auto Engine::run() -> int {
         
         // E V E N T S ///////////////////////////////
         glfwPollEvents();
+        glfwGetFramebufferSize(window, &window_size.x, &window_size.y);
         for (auto &m : modules) {
             m->window_size = { window_size.x, window_size.y };
             m->window = window;
@@ -89,7 +90,6 @@ auto Engine::run() -> int {
         }
         ImGui::Render();
 
-        glfwGetFramebufferSize(window, &window_size.x, &window_size.y);
         glViewport(0, 0, window_size.x, window_size.y);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 

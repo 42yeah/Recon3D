@@ -22,6 +22,7 @@
 #include <functional>
 #include <mutex>
 #include <map>
+#include <tinyply.h>
 
 
 namespace PipelineNS {
@@ -120,6 +121,13 @@ private:
     std::string mvs_executable_path;
 };
 
+struct Vertex {
+    glm::vec3 position;
+    glm::vec3 normal;
+    glm::vec2 tex_coord;
+    glm::vec3 color;
+};
+
 };
 
 
@@ -133,7 +141,10 @@ public:
         state(PipelineNS::State::ASKING_FOR_INPUT),
         image_listing(std::vector<std::string>()),
         VAO(0), VBO(0), program(0), opengl_ready(false), time(0.0f), radius(5.0f),
-        center(0.0f, 0.0f, 0.0f) {}
+        horizontal_rotation_target(0.0f), horizontal_rotation(0.0f),
+        center(0.0f, 0.0f, 0.0f),
+        render_mode(GL_POINTS),
+        mesh_texture(GL_NONE) {}
     
     virtual auto update(float delta_time) -> void override;
     
@@ -145,7 +156,18 @@ public:
     
 private:
     auto load_ply_as_pointcloud(std::string path) -> void;
+    
+    auto load_colorized_ply_as_pointcloud(std::string path) -> void;
+    
+    auto load_ply_as_mesh(std::string path) -> void;
+    
+    auto load_ply_and_texture_map(std::string path, std::string texture_path) -> void;
+    
+    auto setup_render(std::vector<PipelineNS::Vertex> vertices, GLuint render_mode) -> void;
+    
+    auto point_fetch(std::shared_ptr<tinyply::PlyData> ply_data, int offset) -> glm::vec3;
 
+    PipelineNS::PipelineState render_state;
     PipelineNS::State state;
     PipelineNS::Pipeline pipeline;
     
@@ -158,7 +180,10 @@ private:
     GLuint VAO, VBO, program;
     glm::vec3 eye, center;
     glm::mat4 model_mat, view_mat, perspective_mat;
-    float time, radius;
+    float time, radius, horizontal_rotation, horizontal_rotation_target;
+    GLuint render_mode;
+    
+    GLuint mesh_texture;
 };
 
 #endif /* Pipeline_hpp */

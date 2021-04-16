@@ -46,7 +46,10 @@ enum class PipelineState {
     COLORIZED_ROBUST_TRIANGULATION = 8,
     MVG2MVS = 9,
     DENSIFY_PC = 10,
-    RECONSTRUCT_MESH = 11
+    RECONSTRUCT_MESH = 11,
+    REFINE_MESH = 12,
+    TEXTURE_MESH = 13,
+    NUM_PROCEDURES
 };
 
 template<typename ...Ar>
@@ -57,11 +60,15 @@ class Pipeline {
 public:
     Pipeline() : state(PipelineState::INTRINSICS_ANALYSIS) {}
 
-    Pipeline(std::vector<std::string> image_listing, std::filesystem::path base_path) {
-        init(image_listing, base_path);
+    Pipeline(std::vector<std::string> image_listing, std::filesystem::path base_path,
+             std::string mvg_executable_path,
+             std::string mvs_executable_path) {
+        init(image_listing, base_path, mvg_executable_path, mvs_executable_path);
     }
     
-    auto init(std::vector<std::string> image_listing, std::filesystem::path base_path) -> void;
+    auto init(std::vector<std::string> image_listing, std::filesystem::path base_path,
+              std::string mvg_executable_path,
+              std::string mvs_executable_path) -> void;
 
     auto run() -> bool;
     
@@ -87,7 +94,13 @@ public:
     
     auto export_openmvg_to_openmvs() -> bool;
     
-    auto mvs_procedures() -> bool;
+    auto density_pointcloud() -> bool;
+    
+    auto reconstruct_mesh() -> bool;
+    
+    auto refine_mesh() -> bool;
+    
+    auto texture_mesh() -> bool;
     
 
     PipelineState state;
@@ -96,9 +109,15 @@ public:
 private:
     auto mkdir_if_not_exists(std::filesystem::path path) -> void;
     
+    auto mvg() -> std::filesystem::path;
+    
+    auto mvs() -> std::filesystem::path;
+    
     // D A T A ////////////////////////////////////////
     std::vector<std::string> image_listing;
     std::filesystem::path base_path;
+    std::string mvg_executable_path;
+    std::string mvs_executable_path;
 };
 
 };
@@ -113,7 +132,8 @@ public:
     PipelineModule() : Module(PIPELINE),
         state(PipelineNS::State::ASKING_FOR_INPUT),
         image_listing(std::vector<std::string>()),
-        VAO(0), VBO(0), program(0), opengl_ready(false), time(0.0f), radius(5.0f) {}
+        VAO(0), VBO(0), program(0), opengl_ready(false), time(0.0f), radius(5.0f),
+        center(0.0f, 0.0f, 0.0f) {}
     
     virtual auto update(float delta_time) -> void override;
     
@@ -137,7 +157,7 @@ private:
     int num_vertices;
     GLuint VAO, VBO, program;
     glm::vec3 eye, center;
-    glm::mat4 view_mat, perspective_mat;
+    glm::mat4 model_mat, view_mat, perspective_mat;
     float time, radius;
 };
 

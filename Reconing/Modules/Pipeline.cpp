@@ -54,12 +54,25 @@ auto run_pipeline(Pipeline *pipeline_ptr) -> void {
     pipeline.run();
 }
 
-auto Pipeline::init(std::vector<std::string> image_listing, std::filesystem::path base_path) -> void {
+auto Pipeline::init(std::vector<std::string> image_listing, std::filesystem::path base_path,
+                    std::string mvg_executable_path,
+                    std::string mvs_executable_path) -> void {
     this->image_listing = image_listing;
     this->base_path = base_path;
     this->state = PipelineState::INTRINSICS_ANALYSIS;
+    this->mvg_executable_path = mvg_executable_path;
+    this->mvs_executable_path = mvs_executable_path;
     progress = 0.0f;
 }
+
+auto Pipeline::mvs() -> std::filesystem::path {
+    return mvs_executable_path;
+}
+
+auto Pipeline::mvg() -> std::filesystem::path {
+    return mvg_executable_path;
+}
+
 
 auto Pipeline::mkdir_if_not_exists(std::filesystem::path path) -> void {
     if (!std::filesystem::exists(path)) {
@@ -146,7 +159,11 @@ auto Pipeline::run() -> bool {
         structure_from_known_poses() &&
         colorize(PipelineState::COLORIZED_ROBUST_TRIANGULATION) &&
         export_openmvg_to_openmvs() &&
-        mvs_procedures()) {
+        density_pointcloud() &&
+        reconstruct_mesh() &&
+        refine_mesh() &&
+        texture_mesh()) {
+        state = PipelineState::FINISHED_SUCCESS;
         return true;
     }
     mutex.lock();
@@ -157,139 +174,242 @@ auto Pipeline::run() -> bool {
 }
 
 auto Pipeline::intrinsics_analysis() -> bool {
-    progress = 0.0f;
     state = PipelineState::INTRINSICS_ANALYSIS;
+    progress = (float) state / (float) PipelineState::NUM_PROCEDURES;
     mutex.lock();
     RECON_LOG(PIPELINE) << "相机内部参数提取开始。";
     mutex.unlock();
-    
-    // TODO: actually implement intrinsics analysis
-    
+
+    auto ret = invoke([&] (std::string message) {
+    }, mvg() / "openMVG_main_SfMInit_ImageListing", "-i", base_path, "-o", "products/matches", "-f", "2500.0");
+
     mutex.lock();
     RECON_LOG(PIPELINE) << "相机内部参数提取完成。";
     mutex.unlock();
-    return true;
+    return ret == 1;
 }
 
 auto Pipeline::feature_detection() -> bool {
-    progress = 0.0f;
     state = PipelineState::FEATURE_DETECTION;
+    progress = (float) state / (float) PipelineState::NUM_PROCEDURES;
     mutex.lock();
     RECON_LOG(PIPELINE) << "开始特征提取...";
     mutex.unlock();
     
-    // TODO: implement feature detection
+    auto ret = invoke([&] (std::string message) {
+    }, mvg() / "openMVG_main_ComputeFeatures",
+           "-i" "products/matches/sfm_data.json",
+           "-o", "products/matches/",
+           "-m", "SIFT",
+           "-n", "4");
     
     mutex.lock();
     RECON_LOG(PIPELINE) << "图片特征点提取完成。";
     mutex.unlock();
-    return true;
+    return ret == 1;
 }
 
 auto Pipeline::match_features() -> bool {
-    progress = 0.0f;
     state = PipelineState::MATCHING_FEATURES;
+    progress = (float) state / (float) PipelineState::NUM_PROCEDURES;
     mutex.lock();
     RECON_LOG(PIPELINE) << "开始特征匹配，使用方法：HNSWL2，距离比：0.8，几何模型：基础矩阵。";
     mutex.unlock();
 
-    // TODO: Implement match_features.
+    auto ret = invoke([&] (std::string message) {
+    }, mvg() / "openMVG_main_ComputeMatches",
+           "-i", "products/matches/sfm_data.json",
+           "-o", "products/matches/",
+           "-n", "HNSWL2",
+           "-r", "0.8");
     
     mutex.lock();
-    progress = 1.0f;
     RECON_LOG(PIPELINE) << "特征匹配结束。";
     mutex.unlock();
-    return true;
+    return ret == 1;
 }
 
 auto Pipeline::incremental_sfm() -> bool {
-    progress = 0.0f;
     state = PipelineState::INCREMENTAL_SFM;
+    progress = (float) state / (float) PipelineState::NUM_PROCEDURES;
     mutex.lock();
     RECON_LOG(PIPELINE) << "开始进行初步 SfM (Structure from Motion)。";
     mutex.unlock();
     
+    auto ret = invoke([&] (std::string message) {
+    }, mvg() / "openMVG_main_IncrementalSfM",
+           "-i", "products/matches/sfm_data.json",
+           "-m", "products/matches/",
+           "-o", "products/sfm/");
     
-    // TODO: Implement incremental SfM.
-    
-    progress = 1.0f;
     mutex.lock();
     RECON_LOG(PIPELINE) << "初步 SfM 结束。";
     mutex.unlock();
-    return true;
+    return ret == 1;
 }
 
 auto Pipeline::global_sfm() -> bool {
-    progress = 0.0f;
     state = PipelineState::GLOBAL_SFM;
+    progress = (float) state / (float) PipelineState::NUM_PROCEDURES;
     mutex.lock();
     RECON_LOG(PIPELINE) << "开始进行全局 SfM。";
     mutex.unlock();
     
-    // TODO: Implement Global SfM.
+    auto ret = invoke([&] (std::string message) {
+    }, mvg() / "openMVG_main_GlobalSfM",
+           "-i", "products/matches/sfm_data.json",
+           "-M", "products/matches/matches.f.bin",
+           "-m", "products/matches/",
+           "-o", "products/sfm/");
     
-    progress = 1.0f;
     mutex.lock();
     RECON_LOG(PIPELINE) << "全局 SfM 结束。正在更新 SfM 数据...";
     mutex.unlock();
-    return true;
+    return ret == 1;
 }
 
 auto Pipeline::colorize(PipelineState state) -> bool {
-    progress = 0.0f;
     this->state = state;
+    progress = (float) state / (float) PipelineState::NUM_PROCEDURES;
     mutex.lock();
     RECON_LOG(PIPELINE) << "开始进行上色处理。";
     mutex.unlock();
     
+    auto ret = 0;
+    if (state == PipelineState::COLORIZING) {
+        ret = invoke([&] (std::string message) {
+        }, mvg() / "openMVG_main_ComputeSfM_DataColor",
+               "-i", "products/sfm/sfm_data.bin",
+               "-o", "products/sfm/colorized.ply");
+    } else if (state == PipelineState::COLORIZED_ROBUST_TRIANGULATION) {
+        ret = invoke([&] (std::string message) {
+        }, mvg() / "openMVG_main_ComputeSfM_DataColor",
+               "-i", "products/sfm/robust.bin",
+               "-o", "products/sfm/robust_colorized.ply");
+    } else {
+        mutex.lock();
+        RECON_LOG(PIPELINE) << "错误！未知上色阶段。";
+        mutex.unlock();
+        return false;
+    }
     
-    // TODO: Implement colorize (at different states).
-    
-    progress = 1.0f;
     mutex.lock();
     RECON_LOG(PIPELINE) << "上色处理完成。";
     mutex.unlock();
-    return true;
+    return ret == 1;
 }
 
 auto Pipeline::structure_from_known_poses() -> bool {
     state = PipelineState::STRUCTURE_FROM_KNOWN_POSES;
-    progress = 0.0f;
+    progress = (float) state / (float) PipelineState::NUM_PROCEDURES;
     mutex.lock();
     RECON_LOG(PIPELINE) << "正在恢复结构。最大重投影容错：4.0。";
     mutex.unlock();
     
-    // TODO: Implement structure from known poses.
-    
-    progress = 1.0f;
+    auto ret = invoke([&] (std::string message) {
+    }, mvg() / "openMVG_main_ComputeStructureFromKnownPoses",
+           "-i", "products/sfm/sfm_data.bin",
+           "-m", "products/matches/",
+           "-r", "4.0",
+           "-f", "products/matches/matches.f.bin",
+           "-o", "products/sfm/robust.bin");
+
     mutex.lock();
     RECON_LOG(PIPELINE) << "结构恢复完成。";
     mutex.unlock();
-    return true;
+    return ret == 1;
 }
 
 auto Pipeline::export_openmvg_to_openmvs() -> bool {
-    progress = 0.0f;
     state = PipelineState::MVG2MVS;
+    progress = (float) state / (float) PipelineState::NUM_PROCEDURES;
     mutex.lock();
     RECON_LOG(PIPELINE) << "开始转换 OpenMVG 格式 - OpenMVS 格式。";
     mutex.unlock();
     
-    // TODO: Implement openMVG - openMVS.
-    
-    progress = 1.0f;
+    auto ret = invoke([&] (std::string) {
+    }, mvg() / "openMVG_main_openMVG2openMVS",
+           "-i", "products/sfm/sfm_data.bin",
+           "-o", "products/mvs/scene.mvs",
+           "-d", "products/mvs/images");
+
     mutex.lock();
     RECON_LOG(PIPELINE) << "格式转换完成。";
     mutex.unlock();
-    return true;
+    return ret == 1;
 }
 
-auto Pipeline::mvs_procedures() -> bool {
-    // TODO: Implement MVS procedures. Or maybe don't.
-
-    return true;
+auto Pipeline::density_pointcloud() -> bool {
+    state = PipelineState::DENSIFY_PC;
+    progress = (float) state / (float) PipelineState::NUM_PROCEDURES;
+    mutex.lock();
+    RECON_LOG(PIPELINE) << "开始稠密化点云。";
+    mutex.unlock();
+    
+    auto ret = invoke([&] (std::string) {
+    }, mvs() / "DensifyPointCloud", "products/mvs/scene.mvs",
+           "--dense-config-file", "densify.ini",
+           "--resolution-level", "1",
+           "-w", ".");
+    
+    mutex.lock();
+    RECON_LOG(PIPELINE) << "稠密化点云完成。";
+    mutex.unlock();
+    return ret == 1;
 }
 
+auto Pipeline::reconstruct_mesh() -> bool { 
+    state = PipelineState::RECONSTRUCT_MESH;
+    progress = (float) state / (float) PipelineState::NUM_PROCEDURES;
+    mutex.lock();
+    RECON_LOG(PIPELINE) << "开始重建网格。";
+    mutex.unlock();
+    
+    auto ret = invoke([&] (std::string) {
+    }, mvs() / "ReconstructMesh", "products/mvs/scene_dense.mvs",
+           "-w", ".");
+    
+    mutex.lock();
+    RECON_LOG(PIPELINE) << "重建网格完成。";
+    mutex.unlock();
+    return ret == 1;
+}
+
+auto Pipeline::refine_mesh() -> bool {
+    state = PipelineState::REFINE_MESH;
+    progress = (float) state / (float) PipelineState::NUM_PROCEDURES;
+    mutex.lock();
+    RECON_LOG(PIPELINE) << "开始修正网格。迭代数：2";
+    mutex.unlock();
+    
+    auto ret = invoke([&] (std::string) {
+    }, mvs() / "RefineMesh", "products/mvs/scene_dense_mesh.mvs",
+                      "--scales", "2",
+                      "-w", ".");
+    
+    mutex.lock();
+    RECON_LOG(PIPELINE) << "网格修正完成。";
+    mutex.unlock();
+    return ret == 1;
+}
+
+auto Pipeline::texture_mesh() -> bool {
+    state = PipelineState::TEXTURE_MESH;
+    progress = (float) state / (float) PipelineState::NUM_PROCEDURES;
+    mutex.lock();
+    RECON_LOG(PIPELINE) << "开始网格贴图。";
+    mutex.unlock();
+    
+    auto ret = invoke([&] (std::string) {
+    }, mvs() / "TextureMesh", "products/mvs/scene_dense_mesh_refine.mvs",
+                      "--decimate", "0.5",
+                      "-w", ".");
+    
+    mutex.lock();
+    RECON_LOG(PIPELINE) << "网格贴图完成。";
+    mutex.unlock();
+    return ret == 1;
+}
 
 
 // M O D U L E ///////////////////////////
@@ -377,6 +497,14 @@ auto PipelineModule::update_ui() -> void {
                     case PipelineState::RECONSTRUCT_MESH:
                         ImGui::TextWrapped("正在重建网格模型...");
                         break;
+                        
+                    case PipelineState::REFINE_MESH:
+                        ImGui::TextWrapped("正在修正网格...");
+                        break;
+                        
+                    case PipelineState::TEXTURE_MESH:
+                        ImGui::TextWrapped("正在对网格进行贴图...");
+                        break;
                 }
                 mutex.unlock();
                 if (pipeline.state != PipelineState::FINISHED_ERR &&
@@ -397,7 +525,10 @@ auto PipelineModule::update_ui() -> void {
                 RECON_LOG(PIPELINE) << "有效数据：" <<
                     list_images(path);
                 state = State::FOLDER_CHOSEN;
-                pipeline.init(image_listing, path);
+                pipeline.init(image_listing,
+                              path,
+                              "/Users/apple/Projects/openMVG/build/Darwin-x86_64-DEBUG/",
+                              "/Users/apple/Projects/openMVS/build/bin/");
             }
             ImGuiFileDialog::Instance()->Close();
         }
@@ -409,10 +540,9 @@ auto PipelineModule::update(float delta_time) -> void {
         program = link(compile(GL_VERTEX_SHADER, "shaders/vertex.glsl"),
                        compile(GL_FRAGMENT_SHADER, "shaders/fragment.glsl"));
 
-        load_ply_as_pointcloud("products/sfm/clouds_and_poses.ply");
+        load_ply_as_pointcloud("products/sfm/cloud_and_poses.ply");
         
         eye = glm::vec3(0.0f, 0.0f, 5.0f);
-        center = glm::vec3(0.0f, 0.0f, 0.0f);
         perspective_mat = glm::perspective(glm::radians(45.0f), (float) window_size.x / window_size.y, 0.01f, 200.0f);
         
         opengl_ready = true;
@@ -427,7 +557,10 @@ auto PipelineModule::update(float delta_time) -> void {
         radius -= delta_time * 5.0f;
     }
     
-    eye = glm::vec3(sinf(time) * radius, 0.0f, cosf(time) * radius);
+    eye = glm::vec3(0.0f, 0.0f, radius);
+    model_mat = glm::mat4(1.0f);
+    model_mat = glm::rotate(model_mat, glm::radians(180.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    model_mat = glm::rotate(model_mat, glm::radians(time * 5.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     view_mat = glm::lookAt(eye, center, glm::vec3(0.0f, 1.0f, 0.0f));
 
     
@@ -441,7 +574,12 @@ auto PipelineModule::list_images(std::filesystem::path path) -> int {
         if (fext != ".jpg" && fext != ".bmp" && fext != ".png" && fext != ".jpeg") {
             continue;
         }
-        image_listing.push_back(entry.path().string());
+        auto extension_fix = entry.path();
+        if (fext == ".jpeg") {
+            extension_fix.replace_extension(".jpg");
+            std::rename(entry.path().c_str(), extension_fix.c_str());
+        }
+        image_listing.push_back(extension_fix.string());
         legit_image++;
     }
     return legit_image;
@@ -453,6 +591,7 @@ auto PipelineModule::render() -> void {
         return;
     }
     glUseProgram(program);
+    glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, glm::value_ptr(model_mat));
     glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, glm::value_ptr(view_mat));
     glUniformMatrix4fv(glGetUniformLocation(program, "perspective"), 1, GL_FALSE, glm::value_ptr(perspective_mat));
     glBindVertexArray(VAO);
@@ -494,6 +633,11 @@ auto PipelineModule::load_ply_as_pointcloud(std::string path) -> void {
     } else {
         std::memcpy(verts.data(), vertices->buffer.get(), num_bytes);
     }
+    center = glm::vec3(0.0f);
+    for (auto i = 0; i < verts.size(); i++) {
+        center += verts[i];
+    }
+    center /= verts.size();
 
     if (VAO != GL_NONE) {
         glDeleteVertexArrays(1, &VAO);

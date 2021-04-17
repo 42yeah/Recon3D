@@ -93,6 +93,16 @@ auto Server::run() -> bool {
                         } else {
                             send(client_sock, make_request("error", "wrong credentials"));
                         }
+                    } else if (cmd == "register") {
+                        std::cout << "用户正在尝试注册..." << std::endl;
+                        auto user = receive<online::User>(client_sock);
+                        if (!user.has_value()) {
+                            BAIL("用户信息接收异常，正在关闭连接。");
+                        }
+                        if (!user->has_username() || !user->has_password()) {
+                            send(client_sock, make_request("error", "not enough credentials"));
+                            return;
+                        }
                     }
                 } else if (request.arg_size() == 2) {
                     const auto &cmd = request.arg(0);

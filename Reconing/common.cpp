@@ -55,15 +55,46 @@ auto link(GLuint vertex_shader, GLuint fragment_shader) -> GLuint {
 }
 
 
-ReconRecord::ReconRecord(std::string path, std::string obj_file, std::string mtl_file) { 
-    if (path.length() >= 512 || obj_file.length() >= 512 || mtl_file.length() >= 512) {
+ReconRecord::ReconRecord(std::string name, std::string obj_file) {
+    if (name.length() >= 512 || obj_file.length() >= 512) {
         RECON_LOG(RECON_RECORD) << "保存路径过长，会被截掉。";
     }
-    path = path.substr(511);
-    obj_file = obj_file.substr(511);
-    mtl_file = mtl_file.substr(511);
+    name = name.substr(std::min((int) name.length(), 511));
+    obj_file = obj_file.substr(std::min((int) obj_file.length(), 511));
     
-    memcpy(this->path, path.c_str(), path.length());
+    memcpy(this->name, name.c_str(), name.length());
     memcpy(this->obj_file, obj_file.c_str(), obj_file.length());
-    memcpy(this->mtl_file, mtl_file.c_str(), mtl_file.length());
+}
+
+auto read_recon_records(std::string path) -> std::vector<ReconRecord> {
+    std::ifstream reader(path);
+    std::vector<ReconRecord> records;
+    if (!reader.good()) {
+        RECON_LOG(RECON_RECORD) << "无法打开保存列表：" << path;
+        return records;
+    }
+    int count;
+    reader.read((char *) &count, sizeof(count));
+    for (auto i = 0; i < count; i++) {
+        ReconRecord record;
+        reader.read((char *) &record, sizeof(record));
+        records.push_back(record);
+    }
+    reader.close();
+    return records;
+}
+
+auto write_recon_records(const std::vector<ReconRecord> &records, std::string path) -> bool {
+    std::ofstream writer(path);
+    if (!writer.good()) {
+        RECON_LOG(RECON_RECORD) << "无法打开写入重建记录文件：" << path;
+        return false;
+    }
+    auto count = (int) records.size();
+    writer.write((char *) &count, sizeof(count));
+    for (auto i = 0; i < count; i++) {
+        writer.write((char *) &records[i], sizeof(ReconRecord));
+    }
+    writer.close();
+    return true;
 }

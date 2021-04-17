@@ -515,6 +515,11 @@ auto Pipeline::save_session(std::string name) -> bool {
     mtl_writer << "map_Ka " << texture_name << std::endl;
     mtl_writer << "map_Kd " << texture_name << std::endl;
     mtl_writer.close();
+    
+    ReconRecord record(name, name + ".obj");
+    auto records = read_recon_records("recons/records.bin");
+    records.push_back(record);
+    write_recon_records(records, "recons/records.bin");
 
     return true;
 }

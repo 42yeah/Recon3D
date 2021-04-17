@@ -10,6 +10,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <vector>
 #include <glad/glad.h>
 
 auto get_log_stream(std::string type) -> std::ostream &;
@@ -30,14 +31,15 @@ auto link(GLuint vertex_shader, GLuint fragment_shader) -> GLuint;
 struct ReconRecord {
     ReconRecord() {}
     
-    ReconRecord(std::string path,
-                std::string obj_file,
-                std::string mtl_file);
+    ReconRecord(std::string name, std::string obj_file);
 
-    char path[512] = { 0 };
+    char name[512] = { 0 };
     char obj_file[512] = { 0 };
-    char mtl_file[512] = { 0 };
 };
+
+auto read_recon_records(std::string path) -> std::vector<ReconRecord>;
+
+auto write_recon_records(const std::vector<ReconRecord> &records, std::string path) -> bool;
 
 
 #endif /* common_hpp */

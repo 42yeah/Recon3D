@@ -40,9 +40,12 @@ public:
     
     virtual auto update_ui() -> void override;
     
+    // O N L I N E ////////////////////////////////
     auto connect() -> void;
     
     auto login() -> void;
+    
+    auto register_account() -> void;
     
     template<typename T>
     auto receive() -> std::optional<T>;

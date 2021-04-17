@@ -74,7 +74,9 @@ auto OnlineModule::update_ui() -> void {
         case State::REGISTER:
             ImGui::InputText("账户名", username, sizeof(username));
             ImGui::InputText("密码", password, sizeof(password), ImGuiInputTextFlags_Password);
-            ImGui::Button("注册");
+            if (ImGui::Button("注册")) {
+                register_account();
+            }
             ImGui::Separator();
             ImGui::TextWrapped("已有账户？");
             ImGui::SameLine();
@@ -84,9 +86,13 @@ auto OnlineModule::update_ui() -> void {
             break;
             
         case State::MAIN_INTERFACE:
+            ImGui::TextWrapped("在线功能：在这里，你可以选择你想上传到服务器与其他人分享的重建历史，也可以下载他人的重建历史来观赏。");
+            if (ImGui::Button("上传")) {
+                // TODO: upload
+            }
+            
             break;
     }
-
 
     ImGui::End();
 }
@@ -162,6 +168,40 @@ auto OnlineModule::login() -> void {
     });
     thread.detach();
 }
+
+auto OnlineModule::register_account() -> void { 
+    std::thread thread([&] () {
+        mutex().lock();
+        state = State::CONNECTING;
+        mutex().unlock();
+        
+        if (!send(make_request("register"))) {
+            BAIL("发送信息给服务器失败。请重新建立连接。");
+        }
+        
+        online::User user;
+        user.set_username(std::string(username));
+        user.set_password(std::string(password));
+        if (!send(user)) {
+            BAIL("发送用户信息失败。请重新建立连接。");
+        }
+        
+        auto response = receive<online::Request>();
+        if (response.has_value() && response->arg_size() == 1 && response->arg(0) == "success") {
+            mutex().lock();
+            RECON_LOG(ONLINE) << "注册成功。可以登陆了。";
+            state = State::LOGIN;
+            mutex().unlock();
+            return;
+        }
+        mutex().lock();
+        RECON_LOG(ONLINE) << "注册失败。请重试。";
+        state = State::REGISTER;
+        mutex().unlock();
+    });
+    thread.detach();
+}
+
 
 
 template<typename T>

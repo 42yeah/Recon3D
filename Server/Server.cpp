@@ -67,6 +67,9 @@ auto Server::run() -> bool {
         std::cout << "有新连接：" << client_sockaddr.sin_addr.s_addr << std::endl;
         sockets.insert(client_sock);
         std::thread thread([&, client_sock] () {
+            online::User user;
+            bool logged_in = false;
+
             while (true) {
                 auto req_opt = receive<online::Request>(client_sock);
                 if (!req_opt.has_value()) {
@@ -88,11 +91,18 @@ auto Server::run() -> bool {
                         if (!credentials.has_value()) {
                             BAIL("用户信息接收异常，正在关闭连接。");
                         }
-                        if (credentials->username() == "42yeah" && credentials->password() == "jacksfather") {
+                        auto located = std::find_if(users.begin(), users.end(), [&] (auto &u) {
+                            return u.username() == credentials->username() &&
+                            u.password() == credentials->password();
+                        });
+                        if (located != users.end()) {
+                            user = *located;
+                            logged_in = true;
+                            std::cout << "用户成功证明自己是 " << user.username() << std::endl;
                             send(client_sock, make_request("success"));
-                        } else {
-                            send(client_sock, make_request("error", "wrong credentials"));
+                            return;
                         }
+                        send(client_sock, make_request("error", "wrong credentials"));
                     } else if (cmd == "register") {
                         std::cout << "用户正在尝试注册..." << std::endl;
                         auto user = receive<online::User>(client_sock);
@@ -103,6 +113,14 @@ auto Server::run() -> bool {
                             send(client_sock, make_request("error", "not enough credentials"));
                             return;
                         }
+                        if (std::find_if(users.begin(), users.end(), [&] (auto &u) {
+                            return u.username() == user->username();
+                        }) != users.end()) {
+                            send(client_sock, make_request("error", "user exist"));
+                            return;
+                        }
+                        users.push_back(*user);
+                        send(client_sock, make_request("success"));
                     }
                 } else if (request.arg_size() == 2) {
                     const auto &cmd = request.arg(0);

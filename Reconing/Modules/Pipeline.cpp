@@ -694,22 +694,6 @@ auto PipelineModule::update_ui() -> void {
 }
 
 auto PipelineModule::update(float delta_time) -> bool {
-    if (!opengl_ready) {
-        program = link(compile(GL_VERTEX_SHADER, "shaders/vertex.glsl"),
-                       compile(GL_FRAGMENT_SHADER, "shaders/fragment.glsl"));
-
-        load_ply_and_texture_map("products/mvs/scene_dense_mesh_refine_texture.ply",
-                                 "products/mvs/scene_dense_mesh_refine_texture.png");
-
-        eye = glm::vec3(0.0f, 0.0f, 5.0f);
-        center = glm::vec3(0.0f);
-        perspective_mat = glm::perspective(glm::radians(45.0f), (float) window_size.x / window_size.y, 0.01f, 200.0f);
-        view_mat = glm::lookAt(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-        render_state = pipeline.state;
-
-        opengl_ready = true;
-        time = 0.0f;
-    }
     if (!opengl_ready && pipeline.state == PipelineState::GLOBAL_SFM) {
         program = link(compile(GL_VERTEX_SHADER, "shaders/vertex.glsl"),
                        compile(GL_FRAGMENT_SHADER, "shaders/fragment.glsl"));

@@ -119,8 +119,14 @@ auto Server::run() -> bool {
                             send(client_sock, make_request("error", "user exist"));
                             return;
                         }
+                        user->set_id((int) users.size());
                         users.push_back(*user);
                         send(client_sock, make_request("success"));
+                    } else if (logged_in && cmd == "records") {
+                        std::cout << user.username() << " 正在访问重建记录" << std::endl;
+                        send(client_sock, records);
+                    } else if (logged_in && cmd == "upload") {
+                        // TODO: ACTUALLY UPLOAD STUFFS TO THE SERVER
                     }
                 } else if (request.arg_size() == 2) {
                     const auto &cmd = request.arg(0);

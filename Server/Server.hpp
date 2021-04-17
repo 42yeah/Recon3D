@@ -40,6 +40,7 @@ private:
     bool ready;
     int server_sock;
     std::vector<online::User> users;
+    online::ReconRecords records;
 };
 
 #endif /* Server_hpp */

@@ -20,10 +20,24 @@ auto get_log() -> const std::stringstream &;
 
 // S H A D E R S //////////////////////////////////////////
 #define SHADER "着色器"
+#define RECON_RECORD "重建导出记录"
 
 auto compile(GLuint type, std::string path) -> GLuint;
 
 auto link(GLuint vertex_shader, GLuint fragment_shader) -> GLuint;
+
+// S T O R A G E //////////////////////////////////////////
+struct ReconRecord {
+    ReconRecord() {}
+    
+    ReconRecord(std::string path,
+                std::string obj_file,
+                std::string mtl_file);
+
+    char path[512] = { 0 };
+    char obj_file[512] = { 0 };
+    char mtl_file[512] = { 0 };
+};
 
 
 #endif /* common_hpp */

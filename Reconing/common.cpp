@@ -53,3 +53,17 @@ auto link(GLuint vertex_shader, GLuint fragment_shader) -> GLuint {
     RECON_LOG(SHADER) << "程序链接结果：" << log;
     return program;
 }
+
+
+ReconRecord::ReconRecord(std::string path, std::string obj_file, std::string mtl_file) { 
+    if (path.length() >= 512 || obj_file.length() >= 512 || mtl_file.length() >= 512) {
+        RECON_LOG(RECON_RECORD) << "保存路径过长，会被截掉。";
+    }
+    path = path.substr(511);
+    obj_file = obj_file.substr(511);
+    mtl_file = mtl_file.substr(511);
+    
+    memcpy(this->path, path.c_str(), path.length());
+    memcpy(this->obj_file, obj_file.c_str(), obj_file.length());
+    memcpy(this->mtl_file, mtl_file.c_str(), mtl_file.length());
+}

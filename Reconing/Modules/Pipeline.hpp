@@ -13,6 +13,7 @@
 #include "common.hpp"
 #include "Module.hpp"
 #include <vector>
+#include <chrono>
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -57,9 +58,11 @@ template<typename ...Ar>
 auto invoke(std::function<void(std::string)> callback,
             Ar... cmd) -> bool;
 
+auto point_fetch(std::shared_ptr<tinyply::PlyData> ply_data, int offset) -> glm::vec3;
+
 class Pipeline {
 public:
-    Pipeline() : state(PipelineState::INTRINSICS_ANALYSIS) {}
+    Pipeline() : state(PipelineState::FINISHED_SUCCESS) {}
 
     Pipeline(std::vector<std::string> image_listing, std::filesystem::path base_path,
              std::string mvg_executable_path,
@@ -77,6 +80,8 @@ public:
                        std::vector<glm::vec3> vertices,
                        std::vector<glm::vec3> camera_poses,
                        std::vector<glm::vec3> colored_points = std::vector<glm::vec3>()) -> bool;
+    
+    auto save_session(std::string name) -> bool;
 
     // P I P E L I N E ///////////////////////////////
     auto intrinsics_analysis() -> bool;
@@ -138,13 +143,19 @@ struct Vertex {
 class PipelineModule : public Module {
 public:
     PipelineModule() : Module(PIPELINE),
-        state(PipelineNS::State::ASKING_FOR_INPUT),
+        state(PipelineNS::State::RUNNING),
         image_listing(std::vector<std::string>()),
         VAO(0), VBO(0), program(0), opengl_ready(false), time(0.0f), radius(5.0f),
         horizontal_rotation_target(0.0f), horizontal_rotation(0.0f),
         center(0.0f, 0.0f, 0.0f),
         render_mode(GL_POINTS),
-        mesh_texture(GL_NONE) {}
+        mesh_texture(GL_NONE) {
+            auto now = std::chrono::system_clock::now();
+            auto time_t = std::chrono::system_clock::to_time_t(now);
+            std::memset(session_name, 0, sizeof(session_name));
+            auto t_struct = *localtime(&time_t);
+            strftime(session_name, sizeof(session_name), "recon-at-%Y-%m-%d-%H-%M-%S", &t_struct);
+        }
     
     virtual auto update(float delta_time) -> void override;
     
@@ -164,8 +175,6 @@ private:
     auto load_ply_and_texture_map(std::string path, std::string texture_path) -> void;
     
     auto setup_render(std::vector<PipelineNS::Vertex> vertices, GLuint render_mode) -> void;
-    
-    auto point_fetch(std::shared_ptr<tinyply::PlyData> ply_data, int offset) -> glm::vec3;
 
     PipelineNS::PipelineState render_state;
     PipelineNS::State state;
@@ -184,6 +193,7 @@ private:
     GLuint render_mode;
     
     GLuint mesh_texture;
+    char session_name[512];
 };
 
 #endif /* Pipeline_hpp */

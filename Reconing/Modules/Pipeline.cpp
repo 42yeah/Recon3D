@@ -47,6 +47,43 @@ auto invoke(std::function<void(std::string)> callback,
     return pclose(file_ptr) == 0;
 }
 
+auto point_fetch(std::shared_ptr<tinyply::PlyData> ply_data, int offset) -> glm::vec3 {
+    glm::vec3 result(0.0f);
+    
+    const auto *buf = ply_data->buffer.get();
+    switch (ply_data->t) {
+        case tinyply::Type::FLOAT32:
+            result = { ((glm::vec3 *) (buf))[offset].x,
+                ((glm::vec3 *) (buf))[offset].y,
+                ((glm::vec3 *) (buf))[offset].z };
+            break;
+            
+        case tinyply::Type::FLOAT64:
+            result = { (float) ((glm::dvec3 *) (buf))[offset].x,
+                (float) ((glm::dvec3 *) (buf))[offset].y,
+                (float) ((glm::dvec3 *) (buf))[offset].z };
+            break;
+            
+        case tinyply::Type::INT8:
+            result = { (float) ((glm::i8vec3 *) (buf))[offset].x / 255,
+                (float) ((glm::i8vec3 *) (buf))[offset].y / 255,
+                (float) ((glm::i8vec3 *) (buf))[offset].z / 255 };
+            break;
+            
+        case tinyply::Type::UINT8:
+            result = { (float) ((glm::u8vec3 *) (buf))[offset].x / 255,
+                (float) ((glm::u8vec3 *) (buf))[offset].y / 255,
+                (float) ((glm::u8vec3 *) (buf))[offset].z / 255 };
+            break;
+            
+        default:
+            // Unsupported, because I don't want to
+            break;
+    }
+    return result;
+}
+
+
 
 };
 
@@ -413,6 +450,76 @@ auto Pipeline::texture_mesh() -> bool {
     return ret == 1;
 }
 
+auto Pipeline::save_session(std::string name) -> bool {
+    tinyply::PlyFile file;
+    std::string path = "products/mvs/scene_dense_mesh_refine_texture.ply";
+    std::ifstream reader(path);
+    if (!reader.good()) {
+        RECON_LOG(PIPELINE) << "无法读取 ply 路径：" << path;
+        return false;
+    }
+    file.parse_header(reader);
+    RECON_LOG(PIPELINE) << path << " 头部解析成功：是 " << (file.is_binary_file() ? "二进制" : "纯文本");
+    
+    std::shared_ptr<tinyply::PlyData> vertices, normals, colors, tex_coords, faces, tripstrip;
+    try { vertices = file.request_properties_from_element("vertex", { "x", "y", "z" }); }
+    catch (const std::exception & e) { RECON_LOG(PIPELINE) << "tinyply 错误: " << e.what(); }
+
+    try { faces = file.request_properties_from_element("face", { "vertex_indices" }, 3); }
+    catch (const std::exception & e) { RECON_LOG(PIPELINE) << "tinyply 无法读取面: " << e.what(); }
+    
+    try { tex_coords = file.request_properties_from_element("face", { "texcoord" }, 6); }
+    catch (const std::exception & e) { RECON_LOG(PIPELINE) << "tinyply 错误: " << e.what(); }
+    
+    file.read(reader);
+    reader.close();
+    
+    RECON_LOG(PIPELINE) << "ply 读取结束。开始转存为 .obj...";
+    std::ofstream obj_writer("recons/" + name + ".obj");
+    std::ofstream mtl_writer("recons/" + name + ".mtl");
+    if (!obj_writer.good() || !mtl_writer.good()) {
+        if (obj_writer.good()) {
+            obj_writer.close();
+        }
+        if (mtl_writer.good()) {
+            mtl_writer.close();
+        }
+        RECON_LOG(PIPELINE) << "错误！无法打开 obj 进行写入。";
+        return false;
+    }
+    obj_writer << "mtllib " << name << ".mtl" << std::endl << std::endl;
+    for (auto i = 0; i < vertices->count; i++) {
+        glm::vec3 vertex = point_fetch(vertices, i);
+        obj_writer << "v " << vertex.x << " " << vertex.y << " " << vertex.z << std::endl;
+    }
+    float *uv_arr = (float *) tex_coords->buffer.get();
+    for (auto i = 0; i < faces->count; i++) {
+        // For each face, there are 3 texture coordinates
+        obj_writer << "vt " << uv_arr[i * 6 + 0] << " " << uv_arr[i * 6 + 1] << std::endl;
+        obj_writer << "vt " << uv_arr[i * 6 + 2] << " " << uv_arr[i * 6 + 3] << std::endl;
+        obj_writer << "vt " << uv_arr[i * 6 + 4] << " " << uv_arr[i * 6 + 5] << std::endl;
+    }
+    
+    glm::u32vec3 *indices = (glm::u32vec3 *) faces->buffer.get();
+    obj_writer << "g face" << std::endl;
+    for (auto i = 0; i < faces->count; i++) {
+        const auto &index = indices[i];
+        obj_writer << "f " << (index.x + 1) << "/" << ((i * 3) + 1) << " " << (index.y + 1) << "/" << ((i * 3) + 2)
+            << " " << (index.z + 1) << "/" << ((i * 3) + 3) << std::endl;
+    }
+    obj_writer.close();
+    
+    std::string texture_name = name + ".png";
+    std::filesystem::copy("products/mvs/scene_dense_mesh_refine_texture.png", std::string("recons/") + texture_name);
+    mtl_writer << "newmtl Material" << std::endl;
+    mtl_writer << "map_Ka " << texture_name << std::endl;
+    mtl_writer << "map_Kd " << texture_name << std::endl;
+    mtl_writer.close();
+
+    return true;
+}
+
+
 
 // M O D U L E ///////////////////////////
 auto PipelineModule::update_ui() -> void { 
@@ -451,10 +558,21 @@ auto PipelineModule::update_ui() -> void {
                         break;
                         
                     case PipelineState::FINISHED_SUCCESS:
-                        ImGui::TextWrapped("管线执行完毕。点击 “重试” 重新执行向导。");
+                        ImGui::TextWrapped("管线执行完毕。点击 “重试” 重新执行向导。点击 “保存” 保存到历史中。");
+                        ImGui::InputText("保存名称", session_name, sizeof(session_name));
+                        if (ImGui::Button("保存")) {
+                            RECON_LOG(PIPELINE) << "正在保存重建记录...";
+                            if (!pipeline.save_session(std::string(session_name))) {
+                                RECON_LOG(PIPELINE) << "记录保存失败。";
+                            } else {
+                                RECON_LOG(PIPELINE) << "记录保存完成。";
+                            }
+                        }
+                        ImGui::SameLine();
                         if (ImGui::Button("重试")) {
                             state = State::ASKING_FOR_INPUT;
                         }
+                        
                         break;
                         
                     case PipelineState::INTRINSICS_ANALYSIS:
@@ -922,41 +1040,5 @@ auto PipelineModule::setup_render(std::vector<Vertex> vertices, GLuint render_mo
     
     this->render_mode = render_mode;
     num_vertices = (int) vertices.size();
-}
-
-auto PipelineModule::point_fetch(std::shared_ptr<tinyply::PlyData> ply_data, int offset) -> glm::vec3 { 
-    glm::vec3 result(0.0f);
-    
-    const auto *buf = ply_data->buffer.get();
-    switch (ply_data->t) {
-        case tinyply::Type::FLOAT32:
-            result = { ((glm::vec3 *) (buf))[offset].x,
-                ((glm::vec3 *) (buf))[offset].y,
-                ((glm::vec3 *) (buf))[offset].z };
-            break;
-            
-        case tinyply::Type::FLOAT64:
-            result = { (float) ((glm::dvec3 *) (buf))[offset].x,
-                (float) ((glm::dvec3 *) (buf))[offset].y,
-                (float) ((glm::dvec3 *) (buf))[offset].z };
-            break;
-            
-        case tinyply::Type::INT8:
-            result = { (float) ((glm::i8vec3 *) (buf))[offset].x / 255,
-                (float) ((glm::i8vec3 *) (buf))[offset].y / 255,
-                (float) ((glm::i8vec3 *) (buf))[offset].z / 255 };
-            break;
-            
-        case tinyply::Type::UINT8:
-            result = { (float) ((glm::u8vec3 *) (buf))[offset].x / 255,
-                (float) ((glm::u8vec3 *) (buf))[offset].y / 255,
-                (float) ((glm::u8vec3 *) (buf))[offset].z / 255 };
-            break;
-            
-        default:
-            // Unsupported, because I don't want to
-            break;
-    }
-    return result;
 }
 

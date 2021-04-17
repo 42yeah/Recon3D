@@ -100,11 +100,11 @@ auto Engine::run() -> int {
         for (auto &m : modules) {
             m->update_ui();
         }
-        if (available_renders.size() > 0) {
+        if (available_renders.size() > 1) {
             ImGui::SetNextWindowPos({ 50, 50 }, ImGuiCond_FirstUseEver);
             ImGui::SetNextWindowSize({ 300, 200 }, ImGuiCond_FirstUseEver);
             ImGui::Begin("选择输出 ");
-            ImGui::TextWrapped("大于等于一个模块尝试渲染内容到主界面。选择一个你想要查看的模块：");
+            ImGui::TextWrapped("大于一个模块尝试渲染内容到主界面。选择一个你想要查看的模块：");
             if (ImGui::BeginListBox("", ImVec2 { -FLT_MIN, 5 * ImGui::GetTextLineHeightWithSpacing() })) {
                 for (auto i = 0; i < available_renders.size(); i++) {
                     auto selected = currently_selected_render == i;

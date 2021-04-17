@@ -7,6 +7,8 @@
 
 #include "common.hpp"
 #include <fstream>
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
 
 std::stringstream log_stream;
 

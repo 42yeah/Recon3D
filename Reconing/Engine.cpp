@@ -102,13 +102,13 @@ auto Engine::run() -> int {
         }
         if (available_renders.size() > 0) {
             ImGui::SetNextWindowPos({ 50, 50 }, ImGuiCond_FirstUseEver);
-            ImGui::SetNextWindowSize({ 400, 200 }, ImGuiCond_FirstUseEver);
+            ImGui::SetNextWindowSize({ 300, 200 }, ImGuiCond_FirstUseEver);
             ImGui::Begin("选择输出 ");
             ImGui::TextWrapped("大于等于一个模块尝试渲染内容到主界面。选择一个你想要查看的模块：");
-            if (ImGui::BeginListBox("render list", ImVec2 { -FLT_MIN, 5 * ImGui::GetTextLineHeightWithSpacing() })) {
+            if (ImGui::BeginListBox("", ImVec2 { -FLT_MIN, 5 * ImGui::GetTextLineHeightWithSpacing() })) {
                 for (auto i = 0; i < available_renders.size(); i++) {
                     auto selected = currently_selected_render == i;
-                    if (ImGui::Selectable(modules[available_renders[currently_selected_render]]->name.c_str(),
+                    if (ImGui::Selectable(modules[available_renders[i]]->name.c_str(),
                                           selected)) {
                         currently_selected_render = i;
                     }

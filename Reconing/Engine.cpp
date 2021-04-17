@@ -88,15 +88,14 @@ auto Engine::run() -> int {
         
         ImGui::SetNextWindowPos({ 10, 10 }, ImGuiCond_FirstUseEver);
         ImGui::SetNextWindowSize({ 300, 200 }, ImGuiCond_FirstUseEver);
-        if (ImGui::Begin("日志")) {
-            auto str = get_log().str();
-            ImGui::TextWrapped("%s", str.c_str());
-            ImGui::Checkbox("自动滚动", &log_autoscroll);
-            if (log_autoscroll) {
-                ImGui::SetScrollHereY(1.0f);
-            }
-            ImGui::End();
+        ImGui::Begin("日志");
+        auto str = get_log().str();
+        ImGui::TextWrapped("%s", str.c_str());
+        ImGui::Checkbox("自动滚动", &log_autoscroll);
+        if (log_autoscroll) {
+            ImGui::SetScrollHereY(1.0f);
         }
+        ImGui::End();
         for (auto &m : modules) {
             m->update_ui();
         }

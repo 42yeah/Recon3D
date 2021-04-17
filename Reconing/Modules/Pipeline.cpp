@@ -20,8 +20,6 @@
 
 using namespace PipelineNS;
 
-std::mutex mutex;
-
 namespace PipelineNS {
 
 template<typename T>
@@ -119,15 +117,15 @@ auto Pipeline::mkdir_if_not_exists(std::filesystem::path path) -> void {
 }
 
 auto Pipeline::export_to_ply(const std::string path, std::vector<glm::vec3> vertices, std::vector<glm::vec3> camera_poses, std::vector<glm::vec3> colored_points) -> bool {
-    mutex.lock();
+    mutex().lock();
     RECON_LOG(PIPELINE) << "正在导出模型到 " << path;
-    mutex.unlock();
+    mutex().unlock();
     
     std::ofstream writer(path);
     if (!writer.good()) {
-        mutex.lock();
+        mutex().lock();
         RECON_LOG(PIPELINE) << "模型导出失败。无法打开文件。";
-        mutex.unlock();
+        mutex().unlock();
         return false;
     }
     writer << "ply" << std::endl
@@ -171,9 +169,9 @@ auto Pipeline::export_to_ply(const std::string path, std::vector<glm::vec3> vert
     }
     writer.close();
     
-    mutex.lock();
+    mutex().lock();
     RECON_LOG(PIPELINE) << "模型导出完成。";
-    mutex.unlock();
+    mutex().unlock();
     return true;
 }
 
@@ -205,9 +203,9 @@ auto Pipeline::run() -> bool {
         state = PipelineState::FINISHED_SUCCESS;
         return true;
     }
-    mutex.lock();
+    mutex().lock();
     RECON_LOG(PIPELINE) << "管线运行错误。";
-    mutex.unlock();
+    mutex().unlock();
     state = PipelineState::FINISHED_ERR;
     return false;
 }
@@ -215,25 +213,25 @@ auto Pipeline::run() -> bool {
 auto Pipeline::intrinsics_analysis() -> bool {
     state = PipelineState::INTRINSICS_ANALYSIS;
     progress = (float) state / (float) PipelineState::NUM_PROCEDURES;
-    mutex.lock();
+    mutex().lock();
     RECON_LOG(PIPELINE) << "相机内部参数提取开始。";
-    mutex.unlock();
+    mutex().unlock();
 
     auto ret = invoke([&] (std::string message) {
     }, mvg() / "openMVG_main_SfMInit_ImageListing", "-i", base_path, "-o", "products/matches", "-f", "2500.0");
 
-    mutex.lock();
+    mutex().lock();
     RECON_LOG(PIPELINE) << "相机内部参数提取完成。";
-    mutex.unlock();
+    mutex().unlock();
     return ret == 1;
 }
 
 auto Pipeline::feature_detection() -> bool {
     state = PipelineState::FEATURE_DETECTION;
     progress = (float) state / (float) PipelineState::NUM_PROCEDURES;
-    mutex.lock();
+    mutex().lock();
     RECON_LOG(PIPELINE) << "开始特征提取...";
-    mutex.unlock();
+    mutex().unlock();
     
     auto ret = invoke([&] (std::string message) {
     }, mvg() / "openMVG_main_ComputeFeatures",
@@ -242,18 +240,18 @@ auto Pipeline::feature_detection() -> bool {
            "-m", "SIFT",
            "-n", "4");
     
-    mutex.lock();
+    mutex().lock();
     RECON_LOG(PIPELINE) << "图片特征点提取完成。";
-    mutex.unlock();
+    mutex().unlock();
     return ret == 1;
 }
 
 auto Pipeline::match_features() -> bool {
     state = PipelineState::MATCHING_FEATURES;
     progress = (float) state / (float) PipelineState::NUM_PROCEDURES;
-    mutex.lock();
+    mutex().lock();
     RECON_LOG(PIPELINE) << "开始特征匹配，使用方法：HNSWL2，距离比：0.8，几何模型：基础矩阵。";
-    mutex.unlock();
+    mutex().unlock();
 
     auto ret = invoke([&] (std::string message) {
     }, mvg() / "openMVG_main_ComputeMatches",
@@ -262,18 +260,18 @@ auto Pipeline::match_features() -> bool {
            "-n", "HNSWL2",
            "-r", "0.8");
     
-    mutex.lock();
+    mutex().lock();
     RECON_LOG(PIPELINE) << "特征匹配结束。";
-    mutex.unlock();
+    mutex().unlock();
     return ret == 1;
 }
 
 auto Pipeline::incremental_sfm() -> bool {
     state = PipelineState::INCREMENTAL_SFM;
     progress = (float) state / (float) PipelineState::NUM_PROCEDURES;
-    mutex.lock();
+    mutex().lock();
     RECON_LOG(PIPELINE) << "开始进行初步 SfM (Structure from Motion)。";
-    mutex.unlock();
+    mutex().unlock();
     
     auto ret = invoke([&] (std::string message) {
     }, mvg() / "openMVG_main_IncrementalSfM",
@@ -281,18 +279,18 @@ auto Pipeline::incremental_sfm() -> bool {
            "-m", "products/matches/",
            "-o", "products/sfm/");
     
-    mutex.lock();
+    mutex().lock();
     RECON_LOG(PIPELINE) << "初步 SfM 结束。";
-    mutex.unlock();
+    mutex().unlock();
     return ret == 1;
 }
 
 auto Pipeline::global_sfm() -> bool {
     state = PipelineState::GLOBAL_SFM;
     progress = (float) state / (float) PipelineState::NUM_PROCEDURES;
-    mutex.lock();
+    mutex().lock();
     RECON_LOG(PIPELINE) << "开始进行全局 SfM。";
-    mutex.unlock();
+    mutex().unlock();
     
     auto ret = invoke([&] (std::string message) {
     }, mvg() / "openMVG_main_GlobalSfM",
@@ -301,18 +299,18 @@ auto Pipeline::global_sfm() -> bool {
            "-m", "products/matches/",
            "-o", "products/sfm/");
     
-    mutex.lock();
+    mutex().lock();
     RECON_LOG(PIPELINE) << "全局 SfM 结束。正在更新 SfM 数据...";
-    mutex.unlock();
+    mutex().unlock();
     return ret == 1;
 }
 
 auto Pipeline::colorize(PipelineState state) -> bool {
     this->state = state;
     progress = (float) state / (float) PipelineState::NUM_PROCEDURES;
-    mutex.lock();
+    mutex().lock();
     RECON_LOG(PIPELINE) << "开始进行上色处理。";
-    mutex.unlock();
+    mutex().unlock();
     
     auto ret = 0;
     if (state == PipelineState::COLORIZING) {
@@ -326,24 +324,24 @@ auto Pipeline::colorize(PipelineState state) -> bool {
                "-i", "products/sfm/robust.bin",
                "-o", "products/sfm/robust_colorized.ply");
     } else {
-        mutex.lock();
+        mutex().lock();
         RECON_LOG(PIPELINE) << "错误！未知上色阶段。";
-        mutex.unlock();
+        mutex().unlock();
         return false;
     }
     
-    mutex.lock();
+    mutex().lock();
     RECON_LOG(PIPELINE) << "上色处理完成。";
-    mutex.unlock();
+    mutex().unlock();
     return ret == 1;
 }
 
 auto Pipeline::structure_from_known_poses() -> bool {
     state = PipelineState::STRUCTURE_FROM_KNOWN_POSES;
     progress = (float) state / (float) PipelineState::NUM_PROCEDURES;
-    mutex.lock();
+    mutex().lock();
     RECON_LOG(PIPELINE) << "正在恢复结构。最大重投影容错：4.0。";
-    mutex.unlock();
+    mutex().unlock();
     
     auto ret = invoke([&] (std::string message) {
     }, mvg() / "openMVG_main_ComputeStructureFromKnownPoses",
@@ -353,18 +351,18 @@ auto Pipeline::structure_from_known_poses() -> bool {
            "-f", "products/matches/matches.f.bin",
            "-o", "products/sfm/robust.bin");
 
-    mutex.lock();
+    mutex().lock();
     RECON_LOG(PIPELINE) << "结构恢复完成。";
-    mutex.unlock();
+    mutex().unlock();
     return ret == 1;
 }
 
 auto Pipeline::export_openmvg_to_openmvs() -> bool {
     state = PipelineState::MVG2MVS;
     progress = (float) state / (float) PipelineState::NUM_PROCEDURES;
-    mutex.lock();
+    mutex().lock();
     RECON_LOG(PIPELINE) << "开始转换 OpenMVG 格式 - OpenMVS 格式。";
-    mutex.unlock();
+    mutex().unlock();
     
     auto ret = invoke([&] (std::string) {
     }, mvg() / "openMVG_main_openMVG2openMVS",
@@ -372,18 +370,18 @@ auto Pipeline::export_openmvg_to_openmvs() -> bool {
            "-o", "products/mvs/scene.mvs",
            "-d", "products/mvs/images");
 
-    mutex.lock();
+    mutex().lock();
     RECON_LOG(PIPELINE) << "格式转换完成。";
-    mutex.unlock();
+    mutex().unlock();
     return ret == 1;
 }
 
 auto Pipeline::density_pointcloud() -> bool {
     state = PipelineState::DENSIFY_PC;
     progress = (float) state / (float) PipelineState::NUM_PROCEDURES;
-    mutex.lock();
+    mutex().lock();
     RECON_LOG(PIPELINE) << "开始稠密化点云。";
-    mutex.unlock();
+    mutex().unlock();
     
     auto ret = invoke([&] (std::string) {
     }, mvs() / "DensifyPointCloud", "products/mvs/scene.mvs",
@@ -391,62 +389,62 @@ auto Pipeline::density_pointcloud() -> bool {
            "--resolution-level", "1",
            "-w", ".");
     
-    mutex.lock();
+    mutex().lock();
     RECON_LOG(PIPELINE) << "稠密化点云完成。";
-    mutex.unlock();
+    mutex().unlock();
     return ret == 1;
 }
 
 auto Pipeline::reconstruct_mesh() -> bool { 
     state = PipelineState::RECONSTRUCT_MESH;
     progress = (float) state / (float) PipelineState::NUM_PROCEDURES;
-    mutex.lock();
+    mutex().lock();
     RECON_LOG(PIPELINE) << "开始重建网格。";
-    mutex.unlock();
+    mutex().unlock();
     
     auto ret = invoke([&] (std::string) {
     }, mvs() / "ReconstructMesh", "products/mvs/scene_dense.mvs",
            "-w", ".");
     
-    mutex.lock();
+    mutex().lock();
     RECON_LOG(PIPELINE) << "重建网格完成。";
-    mutex.unlock();
+    mutex().unlock();
     return ret == 1;
 }
 
 auto Pipeline::refine_mesh() -> bool {
     state = PipelineState::REFINE_MESH;
     progress = (float) state / (float) PipelineState::NUM_PROCEDURES;
-    mutex.lock();
+    mutex().lock();
     RECON_LOG(PIPELINE) << "开始修正网格。迭代数：2";
-    mutex.unlock();
+    mutex().unlock();
     
     auto ret = invoke([&] (std::string) {
     }, mvs() / "RefineMesh", "products/mvs/scene_dense_mesh.mvs",
                       "--scales", "2",
                       "-w", ".");
 
-    mutex.lock();
+    mutex().lock();
     RECON_LOG(PIPELINE) << "网格修正完成。";
-    mutex.unlock();
+    mutex().unlock();
     return ret == 1;
 }
 
 auto Pipeline::texture_mesh() -> bool {
     state = PipelineState::TEXTURE_MESH;
     progress = (float) state / (float) PipelineState::NUM_PROCEDURES;
-    mutex.lock();
+    mutex().lock();
     RECON_LOG(PIPELINE) << "开始网格贴图。";
-    mutex.unlock();
+    mutex().unlock();
     
     auto ret = invoke([&] (std::string) {
     }, mvs() / "TextureMesh", "products/mvs/scene_dense_mesh_refine.mvs",
                       "--decimate", "0.5",
                       "-w", ".");
     
-    mutex.lock();
+    mutex().lock();
     RECON_LOG(PIPELINE) << "网格贴图完成。";
-    mutex.unlock();
+    mutex().unlock();
     return ret == 1;
 }
 
@@ -559,120 +557,119 @@ auto Pipeline::rm_if_exists(std::filesystem::path path) -> void {
 auto PipelineModule::update_ui() -> void { 
     ImGui::SetNextWindowPos({ 10, 220 }, ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowSize({ 300, 200 }, ImGuiCond_FirstUseEver);
-    if (ImGui::Begin("管线向导")) {
-        switch (state) {
-            case State::ASKING_FOR_INPUT:
-                if (ImGui::Button("选择输入文件夹...")) {
-                    state = State::CHOOSING_FILE;
-                }
-                break;
-                
-            case State::CHOOSING_FILE:
-                ImGui::TextWrapped("请选择文件");
-                break;
-                
-            case State::FOLDER_CHOSEN:
-                ImGui::TextWrapped("一切已经准备就绪。点击下一步开始。");
-                if (ImGui::Button("下一步")) {
-                    state = State::RUNNING;
-                    mesh_texture = GL_NONE; // Reset mesh_texture so we won't accidentally sample it
-                    std::thread pipeline_runner(run_pipeline, &pipeline);
-                    pipeline_runner.detach();
-                }
-                break;
-                
-            case State::RUNNING:
-                mutex.lock();
-                switch (pipeline.state) {
-                    case PipelineState::FINISHED_ERR:
-                        ImGui::TextWrapped("管线执行出错。检查错误记录获得更多信息。点击 “重试” 重新执行向导。");
-                        if (ImGui::Button("重试")) {
-                            state = State::ASKING_FOR_INPUT;
+    ImGui::Begin("管线向导");
+    switch (state) {
+        case State::ASKING_FOR_INPUT:
+            if (ImGui::Button("选择输入文件夹...")) {
+                state = State::CHOOSING_FILE;
+            }
+            break;
+            
+        case State::CHOOSING_FILE:
+            ImGui::TextWrapped("请选择文件");
+            break;
+            
+        case State::FOLDER_CHOSEN:
+            ImGui::TextWrapped("一切已经准备就绪。点击下一步开始。");
+            if (ImGui::Button("下一步")) {
+                state = State::RUNNING;
+                mesh_texture = GL_NONE; // Reset mesh_texture so we won't accidentally sample it
+                std::thread pipeline_runner(run_pipeline, &pipeline);
+                pipeline_runner.detach();
+            }
+            break;
+            
+        case State::RUNNING:
+            mutex().lock();
+            switch (pipeline.state) {
+                case PipelineState::FINISHED_ERR:
+                    ImGui::TextWrapped("管线执行出错。检查错误记录获得更多信息。点击 “重试” 重新执行向导。");
+                    if (ImGui::Button("重试")) {
+                        state = State::ASKING_FOR_INPUT;
+                    }
+                    break;
+                    
+                case PipelineState::FINISHED_SUCCESS:
+                    ImGui::TextWrapped("管线执行完毕。点击 “重试” 重新执行向导。点击 “保存” 保存到历史中。");
+                    ImGui::InputText("保存名称", session_name, sizeof(session_name));
+                    if (ImGui::Button("保存")) {
+                        RECON_LOG(PIPELINE) << "正在保存重建记录...";
+                        if (!pipeline.save_session(std::string(session_name))) {
+                            RECON_LOG(PIPELINE) << "记录保存失败。";
+                        } else {
+                            RECON_LOG(PIPELINE) << "记录保存完成。";
                         }
-                        break;
-                        
-                    case PipelineState::FINISHED_SUCCESS:
-                        ImGui::TextWrapped("管线执行完毕。点击 “重试” 重新执行向导。点击 “保存” 保存到历史中。");
-                        ImGui::InputText("保存名称", session_name, sizeof(session_name));
-                        if (ImGui::Button("保存")) {
-                            RECON_LOG(PIPELINE) << "正在保存重建记录...";
-                            if (!pipeline.save_session(std::string(session_name))) {
-                                RECON_LOG(PIPELINE) << "记录保存失败。";
-                            } else {
-                                RECON_LOG(PIPELINE) << "记录保存完成。";
-                            }
-                        }
-                        ImGui::SameLine();
-                        if (ImGui::Button("重试")) {
-                            state = State::ASKING_FOR_INPUT;
-                        }
-                        
-                        break;
-                        
-                    case PipelineState::INTRINSICS_ANALYSIS:
-                        ImGui::TextWrapped("正在检视相机内部参数...");
-                        break;
-                        
-                    case PipelineState::FEATURE_DETECTION:
-                        ImGui::TextWrapped("正在进行特征提取...");
-                        break;
-                        
-                    case PipelineState::MATCHING_FEATURES:
-                        ImGui::TextWrapped("正在两两匹配特征点...");
-                        break;
-                        
-                    case PipelineState::INCREMENTAL_SFM:
-                        ImGui::TextWrapped("正在进行初步 SfM 处理...");
-                        break;
-                        
-                    case PipelineState::GLOBAL_SFM:
-                        ImGui::TextWrapped("正在进行全局 SfM 处理...");
-                        break;
-                        
-                    case PipelineState::COLORIZING:
-                        ImGui::TextWrapped("正在对模型进行上色...");
-                        break;
-                        
-                    case PipelineState::STRUCTURE_FROM_KNOWN_POSES:
-                        ImGui::TextWrapped("正在从已知相机坐标构建结构...");
-                        break;
-                        
-                    case PipelineState::COLORIZED_ROBUST_TRIANGULATION:
-                        ImGui::TextWrapped("正在对鲁棒模型进行上色...");
-                        break;
-                        
-                    case PipelineState::MVG2MVS:
-                        ImGui::TextWrapped("正在从 OpenMVG 格式转换到 OpenMVS 格式...");
-                        break;
-                        
-                    case PipelineState::DENSIFY_PC:
-                        ImGui::TextWrapped("正在稠密化点云...");
-                        break;
-                        
-                    case PipelineState::RECONSTRUCT_MESH:
-                        ImGui::TextWrapped("正在重建网格模型...");
-                        break;
-                        
-                    case PipelineState::REFINE_MESH:
-                        ImGui::TextWrapped("正在修正网格...");
-                        break;
-                        
-                    case PipelineState::TEXTURE_MESH:
-                        ImGui::TextWrapped("正在对网格进行贴图...");
-                        break;
-                        
-                    default:
-                        break;
-                }
-                mutex.unlock();
-                if (pipeline.state != PipelineState::FINISHED_ERR &&
-                    pipeline.state != PipelineState::FINISHED_SUCCESS) {
-                    ImGui::ProgressBar(pipeline.progress);
-                }
-                break;
-        }
-        ImGui::End();
+                    }
+                    ImGui::SameLine();
+                    if (ImGui::Button("重试")) {
+                        state = State::ASKING_FOR_INPUT;
+                    }
+                    
+                    break;
+                    
+                case PipelineState::INTRINSICS_ANALYSIS:
+                    ImGui::TextWrapped("正在检视相机内部参数...");
+                    break;
+                    
+                case PipelineState::FEATURE_DETECTION:
+                    ImGui::TextWrapped("正在进行特征提取...");
+                    break;
+                    
+                case PipelineState::MATCHING_FEATURES:
+                    ImGui::TextWrapped("正在两两匹配特征点...");
+                    break;
+                    
+                case PipelineState::INCREMENTAL_SFM:
+                    ImGui::TextWrapped("正在进行初步 SfM 处理...");
+                    break;
+                    
+                case PipelineState::GLOBAL_SFM:
+                    ImGui::TextWrapped("正在进行全局 SfM 处理...");
+                    break;
+                    
+                case PipelineState::COLORIZING:
+                    ImGui::TextWrapped("正在对模型进行上色...");
+                    break;
+                    
+                case PipelineState::STRUCTURE_FROM_KNOWN_POSES:
+                    ImGui::TextWrapped("正在从已知相机坐标构建结构...");
+                    break;
+                    
+                case PipelineState::COLORIZED_ROBUST_TRIANGULATION:
+                    ImGui::TextWrapped("正在对鲁棒模型进行上色...");
+                    break;
+                    
+                case PipelineState::MVG2MVS:
+                    ImGui::TextWrapped("正在从 OpenMVG 格式转换到 OpenMVS 格式...");
+                    break;
+                    
+                case PipelineState::DENSIFY_PC:
+                    ImGui::TextWrapped("正在稠密化点云...");
+                    break;
+                    
+                case PipelineState::RECONSTRUCT_MESH:
+                    ImGui::TextWrapped("正在重建网格模型...");
+                    break;
+                    
+                case PipelineState::REFINE_MESH:
+                    ImGui::TextWrapped("正在修正网格...");
+                    break;
+                    
+                case PipelineState::TEXTURE_MESH:
+                    ImGui::TextWrapped("正在对网格进行贴图...");
+                    break;
+                    
+                default:
+                    break;
+            }
+            mutex().unlock();
+            if (pipeline.state != PipelineState::FINISHED_ERR &&
+                pipeline.state != PipelineState::FINISHED_SUCCESS) {
+                ImGui::ProgressBar(pipeline.progress);
+            }
+            break;
     }
+    ImGui::End();
     if (state == State::CHOOSING_FILE) {
         ImGuiFileDialog::Instance()->OpenDialog("Folder", "选择输入目录...", nullptr, ".");
         ImGui::SetNextWindowSize({ 500, 300 }, ImGuiCond_FirstUseEver);

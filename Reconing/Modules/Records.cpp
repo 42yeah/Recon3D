@@ -15,36 +15,35 @@
 auto RecordsModule::update_ui() -> void {
     ImGui::SetNextWindowPos({ 320, 10 }, ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowSize({ 200, 200 }, ImGuiCond_FirstUseEver);
-    if (ImGui::Begin("重建历史记录")) {
-        if (ImGui::Button("刷新")) {
-            records = read_recon_records("recons/records.bin");
-        }
-        if (records.size() > 0) {
-            ImGui::SameLine();
-            if (ImGui::Button("加载")) {
-                // Load module and display (render)
-                if (!load_record()) {
-                    RECON_LOG(RECORDS) << "加载重建记录失败。";
-                }
-            }
-        }
-        if (records.size() > 0 &&
-            ImGui::BeginListBox("recon list", ImVec2 { -FLT_MIN, 5 * ImGui::GetTextLineHeightWithSpacing() })) {
-            for (auto i = 0; i < records.size(); i++) {
-                const auto is_selected = current_selected_index == i;
-                if (ImGui::Selectable(records[i].name, is_selected)) {
-                    current_selected_index = i;
-                }
-                if (is_selected) {
-                    ImGui::SetItemDefaultFocus();
-                }
-            }
-            ImGui::EndListBox();
-        } else if (records.size() <= 0) {
-            ImGui::TextWrapped("现在还没有重建记录。");
-        }
-        ImGui::End();
+    ImGui::Begin("重建历史记录");
+    if (ImGui::Button("刷新")) {
+        records = read_recon_records("recons/records.bin");
     }
+    if (records.size() > 0) {
+        ImGui::SameLine();
+        if (ImGui::Button("加载")) {
+            // Load module and display (render)
+            if (!load_record()) {
+                RECON_LOG(RECORDS) << "加载重建记录失败。";
+            }
+        }
+    }
+    if (records.size() > 0 &&
+        ImGui::BeginListBox("recon list", ImVec2 { -FLT_MIN, 5 * ImGui::GetTextLineHeightWithSpacing() })) {
+        for (auto i = 0; i < records.size(); i++) {
+            const auto is_selected = current_selected_index == i;
+            if (ImGui::Selectable(records[i].name, is_selected)) {
+                current_selected_index = i;
+            }
+            if (is_selected) {
+                ImGui::SetItemDefaultFocus();
+            }
+        }
+        ImGui::EndListBox();
+    } else if (records.size() <= 0) {
+        ImGui::TextWrapped("现在还没有重建记录。");
+    }
+    ImGui::End();
 }
 
 auto RecordsModule::update(float delta_time) -> bool {

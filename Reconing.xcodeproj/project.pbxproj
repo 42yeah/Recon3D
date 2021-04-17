@@ -8,6 +8,14 @@
 
 /* Begin PBXBuildFile section */
 		1841B560262ADE7400A63B5B /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1841B55F262ADE7400A63B5B /* main.cpp */; };
+		1841B56C262AEB6C00A63B5B /* online.pb.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1841B56A262AEB6C00A63B5B /* online.pb.cc */; };
+		1841B573262AEBA600A63B5B /* libprotobuf.26.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1841B572262AEBA600A63B5B /* libprotobuf.26.dylib */; };
+		1841B574262AEBA600A63B5B /* libprotobuf.26.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 1841B572262AEBA600A63B5B /* libprotobuf.26.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1841B577262AEC4800A63B5B /* Server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1841B575262AEC4800A63B5B /* Server.cpp */; };
+		1841B57A262AF2A700A63B5B /* Online.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1841B578262AF2A700A63B5B /* Online.cpp */; };
+		1841B57B262B003500A63B5B /* online.pb.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1841B56A262AEB6C00A63B5B /* online.pb.cc */; };
+		1841B57C262B009A00A63B5B /* libprotobuf.26.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1841B572262AEBA600A63B5B /* libprotobuf.26.dylib */; };
+		1841B57D262B009A00A63B5B /* libprotobuf.26.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 1841B572262AEBA600A63B5B /* libprotobuf.26.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1848EF26262AA24D003619D6 /* Records.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1848EF24262AA24D003619D6 /* Records.cpp */; };
 		18B8F1F7262ABA3200BFD89D /* libglfw.3.3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 18EFFA56261DA7C3002011A2 /* libglfw.3.3.dylib */; };
 		18B8F1F8262ABA3200BFD89D /* libglfw.3.3.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 18EFFA56261DA7C3002011A2 /* libglfw.3.3.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -62,12 +70,24 @@
 			);
 			runOnlyForDeploymentPostprocessing = 1;
 		};
+		1841B571262AEB9000A63B5B /* Embed Libraries */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				1841B574262AEBA600A63B5B /* libprotobuf.26.dylib in Embed Libraries */,
+			);
+			name = "Embed Libraries";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		18B8F1F9262ABA3200BFD89D /* Embed Libraries */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				1841B57D262B009A00A63B5B /* libprotobuf.26.dylib in Embed Libraries */,
 				18B8F1F8262ABA3200BFD89D /* libglfw.3.3.dylib in Embed Libraries */,
 			);
 			name = "Embed Libraries";
@@ -118,6 +138,14 @@
 		1819D4912625AC5100C53EF4 /* tinyply.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = tinyply.h; sourceTree = "<group>"; };
 		1841B55D262ADE7400A63B5B /* Server */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Server; sourceTree = BUILT_PRODUCTS_DIR; };
 		1841B55F262ADE7400A63B5B /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		1841B56A262AEB6C00A63B5B /* online.pb.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = online.pb.cc; sourceTree = "<group>"; };
+		1841B56B262AEB6C00A63B5B /* online.pb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = online.pb.h; sourceTree = "<group>"; };
+		1841B56E262AEB9000A63B5B /* libprotobuf-c.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libprotobuf-c.1.dylib"; path = "../../../../usr/local/Cellar/protobuf-c/1.3.3_4/lib/libprotobuf-c.1.dylib"; sourceTree = "<group>"; };
+		1841B572262AEBA600A63B5B /* libprotobuf.26.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libprotobuf.26.dylib; path = ../../../../usr/local/Cellar/protobuf/3.15.7/lib/libprotobuf.26.dylib; sourceTree = "<group>"; };
+		1841B575262AEC4800A63B5B /* Server.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Server.cpp; sourceTree = "<group>"; };
+		1841B576262AEC4800A63B5B /* Server.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Server.hpp; sourceTree = "<group>"; };
+		1841B578262AF2A700A63B5B /* Online.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Online.cpp; sourceTree = "<group>"; };
+		1841B579262AF2A700A63B5B /* Online.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Online.hpp; sourceTree = "<group>"; };
 		1848EF24262AA24D003619D6 /* Records.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Records.cpp; sourceTree = "<group>"; };
 		1848EF25262AA24D003619D6 /* Records.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Records.hpp; sourceTree = "<group>"; };
 		18B5B3C92627E7060035C3A1 /* libIO.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libIO.a; path = ../openMVS/build/lib/libIO.a; sourceTree = "<group>"; };
@@ -393,6 +421,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1841B573262AEBA600A63B5B /* libprotobuf.26.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -400,6 +429,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1841B57C262B009A00A63B5B /* libprotobuf.26.dylib in Frameworks */,
 				18B8F1F7262ABA3200BFD89D /* libglfw.3.3.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -428,13 +458,25 @@
 			isa = PBXGroup;
 			children = (
 				1841B55F262ADE7400A63B5B /* main.cpp */,
+				1841B575262AEC4800A63B5B /* Server.cpp */,
+				1841B576262AEC4800A63B5B /* Server.hpp */,
 			);
 			path = Server;
+			sourceTree = "<group>";
+		};
+		1841B568262AEB2300A63B5B /* gen */ = {
+			isa = PBXGroup;
+			children = (
+				1841B56A262AEB6C00A63B5B /* online.pb.cc */,
+				1841B56B262AEB6C00A63B5B /* online.pb.h */,
+			);
+			path = gen;
 			sourceTree = "<group>";
 		};
 		18EFFA41261DA7A8002011A2 = {
 			isa = PBXGroup;
 			children = (
+				1841B568262AEB2300A63B5B /* gen */,
 				1819D48D262588C700C53EF4 /* shaders */,
 				18EFFB9326249018002011A2 /* samples */,
 				18EFFB782624713A002011A2 /* assets */,
@@ -473,6 +515,8 @@
 		18EFFA55261DA7C3002011A2 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				1841B572262AEBA600A63B5B /* libprotobuf.26.dylib */,
+				1841B56E262AEB9000A63B5B /* libprotobuf-c.1.dylib */,
 				18B5B3F2262830F60035C3A1 /* libgmp.10.dylib */,
 				18B5B3EC2627EFA60035C3A1 /* libopencv_highgui.4.5.2.dylib */,
 				18B5B3E92627EBCA0035C3A1 /* libboost_iostreams.dylib */,
@@ -1271,6 +1315,8 @@
 				18EFFB90262482BD002011A2 /* Pipeline.hpp */,
 				1848EF24262AA24D003619D6 /* Records.cpp */,
 				1848EF25262AA24D003619D6 /* Records.hpp */,
+				1841B578262AF2A700A63B5B /* Online.cpp */,
+				1841B579262AF2A700A63B5B /* Online.hpp */,
 			);
 			path = Modules;
 			sourceTree = "<group>";
@@ -1298,9 +1344,10 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 1841B566262ADE7400A63B5B /* Build configuration list for PBXNativeTarget "Server" */;
 			buildPhases = (
-				1841B559262ADE7400A63B5B /* Sources */,
 				1841B55A262ADE7400A63B5B /* Frameworks */,
 				1841B55B262ADE7400A63B5B /* CopyFiles */,
+				1841B571262AEB9000A63B5B /* Embed Libraries */,
+				1841B559262ADE7400A63B5B /* Sources */,
 			);
 			buildRules = (
 			);
@@ -1426,6 +1473,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				1841B560262ADE7400A63B5B /* main.cpp in Sources */,
+				1841B577262AEC4800A63B5B /* Server.cpp in Sources */,
+				1841B56C262AEB6C00A63B5B /* online.pb.cc in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1433,6 +1482,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1841B57B262B003500A63B5B /* online.pb.cc in Sources */,
+				1841B57A262AF2A700A63B5B /* Online.cpp in Sources */,
 				18EFFB9226248438002011A2 /* ImGuiFileDialog.cpp in Sources */,
 				18EFFB6E26246E75002011A2 /* imgui_widgets.cpp in Sources */,
 				18EFFB8A26247DB8002011A2 /* Module.cpp in Sources */,
@@ -1458,9 +1509,16 @@
 		1841B561262ADE7400A63B5B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = KL2JALR869;
 				ENABLE_HARDENED_RUNTIME = YES;
+				HEADER_SEARCH_PATHS = /usr/local/include;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"/usr/local/Cellar/protobuf-c/1.3.3_4/lib",
+					/usr/local/Cellar/protobuf/3.15.7/lib,
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -1468,9 +1526,16 @@
 		1841B562262ADE7400A63B5B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = KL2JALR869;
 				ENABLE_HARDENED_RUNTIME = YES;
+				HEADER_SEARCH_PATHS = /usr/local/include;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"/usr/local/Cellar/protobuf-c/1.3.3_4/lib",
+					/usr/local/Cellar/protobuf/3.15.7/lib,
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -1606,6 +1671,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					/usr/local/Cellar/glfw/3.3.2/lib,
+					/usr/local/Cellar/protobuf/3.15.7/lib,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -1631,6 +1697,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					/usr/local/Cellar/glfw/3.3.2/lib,
+					/usr/local/Cellar/protobuf/3.15.7/lib,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};

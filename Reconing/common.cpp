@@ -12,6 +12,8 @@
 
 std::stringstream log_stream;
 
+std::mutex _mutex;
+
 auto get_log_stream(std::string type) -> std::ostream & {
     if (log_stream.tellp() != log_stream.beg) {
         log_stream << std::endl;
@@ -22,6 +24,10 @@ auto get_log_stream(std::string type) -> std::ostream & {
 
 auto get_log() -> const std::stringstream & {
     return log_stream;
+}
+
+auto mutex() -> std::mutex & {
+    return _mutex;
 }
 
 auto compile(GLuint type, std::string path) -> GLuint {

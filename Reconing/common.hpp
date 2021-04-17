@@ -11,12 +11,15 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
+#include <mutex>
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 
 auto get_log_stream(std::string type) -> std::ostream &;
 
 auto get_log() -> const std::stringstream &;
+
+auto mutex() -> std::mutex &;
 
 #define RECON_LOG(MODULE) get_log_stream(MODULE)
 

@@ -16,12 +16,12 @@ auto Module::update_ui() -> void {
 
 }
 
-auto Module::update(float delta_time) -> void { 
-
+auto Module::update(float delta_time) -> bool {
+    return false;
 }
 
-auto Module::render() -> void { 
-    
+auto Module::render() -> void {
+
 }
 
 

@@ -179,6 +179,7 @@ auto Pipeline::export_to_ply(const std::string path, std::vector<glm::vec3> vert
 }
 
 auto Pipeline::run() -> bool {
+    cleanup();
     if (std::filesystem::exists("products")) {
         std::filesystem::remove_all("products");
     }
@@ -524,6 +525,35 @@ auto Pipeline::save_session(std::string name) -> bool {
     return true;
 }
 
+auto Pipeline::cleanup() -> void { 
+    rm_if_exists("densify.ini");
+    for (auto i = 0; i < image_listing.size(); i++) {
+        char name_raw[512] = { 0 };
+        sprintf(name_raw, "depth%04d", i);
+        std::string name(name_raw);
+        rm_if_exists(name + ".png");
+        rm_if_exists(name + ".conf.png");
+        rm_if_exists(name + ".dmap");
+        rm_if_exists(name + ".filtered.ply");
+        rm_if_exists(name + ".filtered.png");
+        rm_if_exists(name + ".ply");
+    }
+    rm_if_exists("MeshRefine0.ply");
+    rm_if_exists("MeshRefine1.ply");
+    rm_if_exists("MeshRefined1.ply");
+    for (auto &entry : std::filesystem::directory_iterator(".")) {
+        if (entry.path().extension() == ".log") {
+            rm_if_exists(entry.path());
+        }
+    }
+}
+
+auto Pipeline::rm_if_exists(std::filesystem::path path) -> void { 
+    if (std::filesystem::exists(path)) {
+        std::filesystem::remove(path);
+    }
+}
+
 
 
 // M O D U L E ///////////////////////////
@@ -664,7 +694,23 @@ auto PipelineModule::update_ui() -> void {
     }
 }
 
-auto PipelineModule::update(float delta_time) -> void {
+auto PipelineModule::update(float delta_time) -> bool {
+//    if (!opengl_ready) {
+//        program = link(compile(GL_VERTEX_SHADER, "shaders/vertex.glsl"),
+//                       compile(GL_FRAGMENT_SHADER, "shaders/fragment.glsl"));
+//
+//        load_ply_and_texture_map("products/mvs/scene_dense_mesh_refine_texture.ply",
+//                                 "products/mvs/scene_dense_mesh_refine_texture.png");
+//
+//        eye = glm::vec3(0.0f, 0.0f, 5.0f);
+//        center = glm::vec3(0.0f);
+//        perspective_mat = glm::perspective(glm::radians(45.0f), (float) window_size.x / window_size.y, 0.01f, 200.0f);
+//        view_mat = glm::lookAt(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+//        render_state = pipeline.state;
+//
+//        opengl_ready = true;
+//        time = 0.0f;
+//    }
     if (!opengl_ready && pipeline.state == PipelineState::GLOBAL_SFM) {
         program = link(compile(GL_VERTEX_SHADER, "shaders/vertex.glsl"),
                        compile(GL_FRAGMENT_SHADER, "shaders/fragment.glsl"));
@@ -738,6 +784,7 @@ auto PipelineModule::update(float delta_time) -> void {
     if (glfwGetKey(window, GLFW_KEY_DOWN)) {
         center -= glm::vec3(0.0f, 1.0f, 0.0f) * delta_time;
     }
+    return opengl_ready;
 }
 
 auto PipelineModule::list_images(std::filesystem::path path) -> int {
@@ -759,7 +806,7 @@ auto PipelineModule::list_images(std::filesystem::path path) -> int {
     return legit_image;
 }
 
-auto PipelineModule::render() -> void { 
+auto PipelineModule::render() -> void {
     if (!opengl_ready) {
         // Not ready yet
         return;

@@ -34,6 +34,10 @@ private:
     bool log_autoscroll;
     std::vector<Module *> modules;
     float last_instant;
+    
+    // R E N D E R S ///////////////////////////////
+    std::vector<int> available_renders;
+    int currently_selected_render;
 };
 
 #endif /* Engine_hpp */

@@ -19,7 +19,7 @@ public:
     
     Module() : name("未知") {}
     
-    virtual auto update(float delta_time) -> void;
+    virtual auto update(float delta_time) -> bool;
     
     virtual auto update_ui() -> void;
     

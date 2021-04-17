@@ -62,7 +62,7 @@ auto point_fetch(std::shared_ptr<tinyply::PlyData> ply_data, int offset) -> glm:
 
 class Pipeline {
 public:
-    Pipeline() : state(PipelineState::FINISHED_SUCCESS) {}
+    Pipeline() : state(PipelineState::INTRINSICS_ANALYSIS) {}
 
     Pipeline(std::vector<std::string> image_listing, std::filesystem::path base_path,
              std::string mvg_executable_path,
@@ -115,6 +115,10 @@ public:
 private:
     auto mkdir_if_not_exists(std::filesystem::path path) -> void;
     
+    auto rm_if_exists(std::filesystem::path path) -> void;
+    
+    auto cleanup() -> void;
+    
     auto mvg() -> std::filesystem::path;
     
     auto mvs() -> std::filesystem::path;
@@ -124,13 +128,6 @@ private:
     std::filesystem::path base_path;
     std::string mvg_executable_path;
     std::string mvs_executable_path;
-};
-
-struct Vertex {
-    glm::vec3 position;
-    glm::vec3 normal;
-    glm::vec2 tex_coord;
-    glm::vec3 color;
 };
 
 };
@@ -143,7 +140,7 @@ struct Vertex {
 class PipelineModule : public Module {
 public:
     PipelineModule() : Module(PIPELINE),
-        state(PipelineNS::State::RUNNING),
+        state(PipelineNS::State::ASKING_FOR_INPUT),
         image_listing(std::vector<std::string>()),
         VAO(0), VBO(0), program(0), opengl_ready(false), time(0.0f), radius(5.0f),
         horizontal_rotation_target(0.0f), horizontal_rotation(0.0f),
@@ -157,7 +154,7 @@ public:
             strftime(session_name, sizeof(session_name), "recon-at-%Y-%m-%d-%H-%M-%S", &t_struct);
         }
     
-    virtual auto update(float delta_time) -> void override;
+    virtual auto update(float delta_time) -> bool override;
     
     virtual auto update_ui() -> void override;
     
@@ -174,7 +171,7 @@ private:
     
     auto load_ply_and_texture_map(std::string path, std::string texture_path) -> void;
     
-    auto setup_render(std::vector<PipelineNS::Vertex> vertices, GLuint render_mode) -> void;
+    auto setup_render(std::vector<Vertex> vertices, GLuint render_mode) -> void;
 
     PipelineNS::PipelineState render_state;
     PipelineNS::State state;

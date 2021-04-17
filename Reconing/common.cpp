@@ -59,9 +59,9 @@ ReconRecord::ReconRecord(std::string name, std::string obj_file) {
     if (name.length() >= 512 || obj_file.length() >= 512) {
         RECON_LOG(RECON_RECORD) << "保存路径过长，会被截掉。";
     }
-    name = name.substr(std::min((int) name.length(), 511));
-    obj_file = obj_file.substr(std::min((int) obj_file.length(), 511));
-    
+    name = name.substr(0, std::min((int) name.length(), 511));
+    obj_file = obj_file.substr(0, std::min((int) obj_file.length(), 511));
+
     memcpy(this->name, name.c_str(), name.length());
     memcpy(this->obj_file, obj_file.c_str(), obj_file.length());
 }

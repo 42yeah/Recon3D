@@ -3,13 +3,14 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 52;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1848EF26262AA24D003619D6 /* Records.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1848EF24262AA24D003619D6 /* Records.cpp */; };
+		18B8F1F7262ABA3200BFD89D /* libglfw.3.3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 18EFFA56261DA7C3002011A2 /* libglfw.3.3.dylib */; };
+		18B8F1F8262ABA3200BFD89D /* libglfw.3.3.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 18EFFA56261DA7C3002011A2 /* libglfw.3.3.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		18EFFA4E261DA7A8002011A2 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18EFFA4D261DA7A8002011A2 /* main.cpp */; };
-		18EFFA57261DA7C3002011A2 /* libglfw.3.3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 18EFFA56261DA7C3002011A2 /* libglfw.3.3.dylib */; };
-		18EFFA58261DA7C3002011A2 /* libglfw.3.3.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 18EFFA56261DA7C3002011A2 /* libglfw.3.3.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		18EFFA63261DA7DE002011A2 /* glad.c in Sources */ = {isa = PBXBuildFile; fileRef = 18EFFA62261DA7DE002011A2 /* glad.c */; };
 		18EFFA66261DA987002011A2 /* Engine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18EFFA64261DA987002011A2 /* Engine.cpp */; };
 		18EFFB6E26246E75002011A2 /* imgui_widgets.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18EFFA8426246E4E002011A2 /* imgui_widgets.cpp */; };
@@ -51,6 +52,17 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		18B8F1F9262ABA3200BFD89D /* Embed Libraries */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				18B8F1F8262ABA3200BFD89D /* libglfw.3.3.dylib in Embed Libraries */,
+			);
+			name = "Embed Libraries";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		18EFFA48261DA7A8002011A2 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -59,17 +71,6 @@
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 1;
-		};
-		18EFFA59261DA7C3002011A2 /* Embed Libraries */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				18EFFA58261DA7C3002011A2 /* libglfw.3.3.dylib in Embed Libraries */,
-			);
-			name = "Embed Libraries";
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
@@ -105,6 +106,8 @@
 		1819D48E262588D200C53EF4 /* vertex.glsl */ = {isa = PBXFileReference; lastKnownFileType = text; path = vertex.glsl; sourceTree = "<group>"; };
 		1819D48F262588E900C53EF4 /* fragment.glsl */ = {isa = PBXFileReference; lastKnownFileType = text; path = fragment.glsl; sourceTree = "<group>"; };
 		1819D4912625AC5100C53EF4 /* tinyply.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = tinyply.h; sourceTree = "<group>"; };
+		1848EF24262AA24D003619D6 /* Records.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Records.cpp; sourceTree = "<group>"; };
+		1848EF25262AA24D003619D6 /* Records.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Records.hpp; sourceTree = "<group>"; };
 		18B5B3C92627E7060035C3A1 /* libIO.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libIO.a; path = ../openMVS/build/lib/libIO.a; sourceTree = "<group>"; };
 		18B5B3CD2627E7060035C3A1 /* libMVS.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libMVS.a; path = ../openMVS/build/lib/libMVS.a; sourceTree = "<group>"; };
 		18B5B3CE2627E7060035C3A1 /* libCommon.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libCommon.a; path = ../openMVS/build/lib/libCommon.a; sourceTree = "<group>"; };
@@ -378,7 +381,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				18EFFA57261DA7C3002011A2 /* libglfw.3.3.dylib in Frameworks */,
+				18B8F1F7262ABA3200BFD89D /* libglfw.3.3.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1237,6 +1240,8 @@
 				18EFFB8D26247EF8002011A2 /* ImGuiDemoWindow.hpp */,
 				18EFFB8F262482BD002011A2 /* Pipeline.cpp */,
 				18EFFB90262482BD002011A2 /* Pipeline.hpp */,
+				1848EF24262AA24D003619D6 /* Records.cpp */,
+				1848EF25262AA24D003619D6 /* Records.hpp */,
 			);
 			path = Modules;
 			sourceTree = "<group>";
@@ -1266,9 +1271,9 @@
 			buildPhases = (
 				18EFFA47261DA7A8002011A2 /* Frameworks */,
 				18EFFA48261DA7A8002011A2 /* CopyFiles */,
-				18EFFA59261DA7C3002011A2 /* Embed Libraries */,
-				18EFFA46261DA7A8002011A2 /* Sources */,
+				18B8F1F9262ABA3200BFD89D /* Embed Libraries */,
 				18EFFB792624713F002011A2 /* ShellScript */,
+				18EFFA46261DA7A8002011A2 /* Sources */,
 			);
 			buildRules = (
 			);
@@ -1347,8 +1352,8 @@
 /* Begin PBXShellScriptBuildPhase section */
 		18EFFB792624713F002011A2 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
-			dependencyFile = "$(DERIVED_FILES_DIR)/$(INPUT_FILE_PATH).d";
 			files = (
 			);
 			inputFileListPaths = (
@@ -1384,6 +1389,7 @@
 				18EFFA4E261DA7A8002011A2 /* main.cpp in Sources */,
 				18EFFA66261DA987002011A2 /* Engine.cpp in Sources */,
 				18EFFA63261DA7DE002011A2 /* glad.c in Sources */,
+				1848EF26262AA24D003619D6 /* Records.cpp in Sources */,
 				18EFFB8E26247EF8002011A2 /* ImGuiDemoWindow.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1515,15 +1521,9 @@
 					"$(SRCROOT)/deps/imgui",
 					/usr/local/include,
 					"$(SRCROOT)/deps/ImGuiFileDialog",
-					/Users/apple/Projects/openMVG/src,
-					/Users/apple/Projects/openMVS/libs,
-					/usr/local/include/eigen3,
-					/Users/apple/Projects/openMVG/src/dependencies/cereal/include/,
-					/Users/apple/Projects/openMVG/build/third_party/lemon,
-					/Users/apple/Projects/openMVG/src/third_party/lemon,
 					"$(SRCROOT)/deps/tinyply",
-					/usr/local/include/opencv4,
 					"$(SRCROOT)/deps/stb",
+					"$(SRCROOT)/deps/tinyobjloader",
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1546,15 +1546,9 @@
 					"$(SRCROOT)/deps/imgui",
 					/usr/local/include,
 					"$(SRCROOT)/deps/ImGuiFileDialog",
-					/Users/apple/Projects/openMVG/src,
-					/Users/apple/Projects/openMVS/libs,
-					/usr/local/include/eigen3,
-					/Users/apple/Projects/openMVG/src/dependencies/cereal/include/,
-					/Users/apple/Projects/openMVG/build/third_party/lemon,
-					/Users/apple/Projects/openMVG/src/third_party/lemon,
 					"$(SRCROOT)/deps/tinyply",
-					/usr/local/include/opencv4,
 					"$(SRCROOT)/deps/stb",
+					"$(SRCROOT)/deps/tinyobjloader",
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",

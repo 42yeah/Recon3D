@@ -12,6 +12,7 @@
 #include <sstream>
 #include <vector>
 #include <glad/glad.h>
+#include <glm/glm.hpp>
 
 auto get_log_stream(std::string type) -> std::ostream &;
 
@@ -40,6 +41,16 @@ struct ReconRecord {
 auto read_recon_records(std::string path) -> std::vector<ReconRecord>;
 
 auto write_recon_records(const std::vector<ReconRecord> &records, std::string path) -> bool;
+
+// R E N D E R S //////////////////////////////////////////
+struct Vertex {
+    glm::vec3 position;
+    glm::vec3 normal;
+    glm::vec2 tex_coord;
+    glm::vec3 color;
+};
+
+
 
 
 #endif /* common_hpp */

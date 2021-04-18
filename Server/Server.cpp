@@ -160,10 +160,14 @@ auto Server::receive(int sock) -> std::optional<T> {
     }
     
     char *packet = new char[request_size];
-    recv_len = recv(sock, packet, request_size, 0);
-    if (recv_len != request_size) {
-        delete[] packet;
-        return {};
+    auto left_to_receive = request_size;
+    while (left_to_receive != 0) {
+        recv_len = recv(sock, packet, left_to_receive, 0);
+        if (recv_len <= 0) {
+            delete[] packet;
+            return {};
+        }
+        left_to_receive -= recv_len;
     }
     
     T t;

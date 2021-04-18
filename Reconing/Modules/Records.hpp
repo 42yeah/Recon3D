@@ -20,7 +20,8 @@ class RecordsModule : public Module {
 public:
     RecordsModule() : Module(RECORDS), gl_ready(false),
         mesh_texture(GL_NONE),
-        current_selected_index(0) {
+        current_selected_index(0),
+        horizontal_rotation_target(0.0f) {
         records = read_recon_records("recons/records.bin");
     }
     

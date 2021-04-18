@@ -11,6 +11,7 @@
 #include <optional>
 #include "common.hpp"
 #include "Module.hpp"
+#include "online.pb.h"
 
 #define ONLINE "在线功能"
 #define ONLINE_REMOTE "127.0.0.1"
@@ -32,7 +33,7 @@ enum class State {
 
 class OnlineModule : public Module {
 public:
-    OnlineModule() : Module(ONLINE), state(OnlineNS::State::WELCOME), sock(-1) {
+    OnlineModule() : Module(ONLINE), state(OnlineNS::State::WELCOME), sock(-1), online_index(0) {
         std::memset(username, 0, sizeof(username));
         std::memset(password, 0, sizeof(password));
     }
@@ -50,6 +51,8 @@ public:
     
     auto upload() -> void;
     
+    auto update_online_list() -> void;
+    
     template<typename T>
     auto receive() -> std::optional<T>;
     
@@ -66,7 +69,9 @@ private:
     // O N L I N E /////////////////////////////////
     int sock;
     std::vector<ReconRecord> records;
+    online::ReconRecords online_records;
     int upload_index;
+    int online_index;
 };
 
 #endif /* Online_hpp */

@@ -134,8 +134,19 @@ auto Server::run() -> bool {
                         }
                         if (buffer->has_file_base() && buffer->has_obj_content() &&
                             buffer->has_mtl_content() && buffer->has_texture_content()) {
-                            auto base = user.username() + "-" + std::filesystem::path(buffer->file_base()).filename().string();
+                            auto base = user.username() + "/" + std::filesystem::path(buffer->file_base()).filename().string();
+                            online::ReconRecord * record = nullptr;
+                            for (auto i = 0; i < records.records_size(); i++) {
+                                if (records.records(i).name() == base) {
+                                    std::cerr << "用户尝试上传的记录已经存在。正在覆盖..." << std::endl;
+                                    record = records.mutable_records(i);
+                                }
+                            }
+                            if (record == nullptr) {
+                                record = records.add_records();
+                            }
                             mkdir_if_not_exists("uploads");
+                            mkdir_if_not_exists(std::string("uploads/") + user.username());
                             std::ofstream obj_writer(std::string("uploads/") + base + ".obj");
                             std::ofstream mtl_writer(std::string("uploads/") + base + ".mtl");
                             std::ofstream tex_writer(std::string("uploads/") + base + ".png");
@@ -162,10 +173,9 @@ auto Server::run() -> bool {
                             send(client_sock, make_request("success"));
                             std::cout << "文件上传成功。正在保存记录..." << std::endl;
 
-                            auto new_rec = records.add_records();
-                            new_rec->set_id(records.records_size());
-                            new_rec->set_name(base);
-                            new_rec->set_owner(user.username());
+                            record->set_id(records.records_size());
+                            record->set_name(base);
+                            record->set_owner(user.username());
                         } else {
                             std::cerr << "上传数据未齐全。";
                             send(client_sock, make_request("error", "buffer not complete"));
@@ -256,3 +266,4 @@ auto Server::mkdir_if_not_exists(std::filesystem::path path) -> void {
         std::filesystem::create_directory(path);
     }
 }
+

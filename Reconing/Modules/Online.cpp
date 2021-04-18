@@ -13,7 +13,6 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <unistd.h>
-#include "online.pb.h"
 
 using namespace OnlineNS;
 
@@ -87,14 +86,33 @@ auto OnlineModule::update_ui() -> void {
             break;
             
         case State::MAIN_INTERFACE:
-            ImGui::TextWrapped("在线功能：在这里，你可以选择你想上传到服务器与其他人分享的重建历史，也可以下载他人的重建历史来观赏。");
+            ImGui::TextWrapped("点击 “上传” 上传重建内容到服务端。选中列表中的内容，点击 “下载” 下载到本地重建历史。");
             if (ImGui::Button("上传")) {
                 state = State::UPLOAD;
                 mkdir_if_not_exists("recons");
                 records = read_recon_records("recons/records.bin");
                 upload_index = 0;
             }
-            
+            if (online_records.records_size() > 0) {
+                ImGui::TextWrapped("服务端内容");
+            }
+            if (online_records.records_size() > 0 &&
+                ImGui::BeginListBox("", ImVec2 { -FLT_MIN, 5 * ImGui::GetTextLineHeightWithSpacing() })) {
+                for (auto i = 0; i < online_records.records_size() ; i++) {
+                    const auto is_selected = online_index == i;
+                    const auto rec = online_records.records(i);
+                    if (ImGui::Selectable((rec.name() + " 由 " + rec.owner() + " 创作").c_str(), is_selected)) {
+                        online_index = i;
+                    }
+                    if (is_selected) {
+                        ImGui::SetItemDefaultFocus();
+                    }
+                }
+                ImGui::EndListBox();
+                if (ImGui::Button("下载")) {
+                    // TODO: download...
+                }
+            }
             break;
             
         case State::UPLOAD:
@@ -192,6 +210,7 @@ auto OnlineModule::login() -> void {
             RECON_LOG(ONLINE) << "登陆成功。";
             state = State::MAIN_INTERFACE;
             mutex().unlock();
+            update_online_list();
             return;
         }
         mutex().lock();
@@ -288,6 +307,7 @@ auto OnlineModule::upload() -> void {
             RECON_LOG(ONLINE) << "上传成功。";
             state = State::MAIN_INTERFACE;
             mutex().unlock();
+            update_online_list();
             return;
         }
         mutex().lock();
@@ -297,6 +317,25 @@ auto OnlineModule::upload() -> void {
     });
     thread.detach();
 }
+
+auto OnlineModule::update_online_list() -> void { 
+    std::thread thread([&] () {
+        mutex().lock();
+        RECON_LOG(ONLINE) << "正在获取服务器重建列表...";
+        mutex().unlock();
+        
+        if (!send(make_request("records"))) {
+            BAIL("指令发送失败。");
+        }
+        auto records_opt = receive<online::ReconRecords>();
+        if (!records_opt.has_value()) {
+            BAIL("获取重建列表失败。");
+        }
+        online_records = *records_opt;
+    });
+    thread.detach();
+}
+
 
 
 

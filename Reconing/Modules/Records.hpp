@@ -21,7 +21,7 @@ public:
     RecordsModule() : Module(RECORDS), gl_ready(false),
         mesh_texture(GL_NONE),
         current_selected_index(0),
-        horizontal_rotation_target(0.0f) {
+        horizontal_rotation_target(0.0f), horizontal_rotation(0.0f) {
         records = read_recon_records("recons/records.bin");
     }
     

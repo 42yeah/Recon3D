@@ -11,6 +11,7 @@
 #include <fstream>
 #include <mutex>
 #include <sstream>
+#include <fstream>
 
 template<typename T>
 auto request_append(online::Request &request, T last) -> void {
@@ -44,6 +45,18 @@ auto Server::init() -> bool {
     listen(server_sock, 5);
     std::cout << "Recon 服务器启动完毕，正在监听" << std::endl;
     ready = true;
+    
+    mkdir_if_not_exists("uploads");
+    std::ifstream records_reader("uploads/records.bin");
+    if (records_reader.good()) {
+        records.ParseFromIstream(&records_reader);
+        records_reader.close();
+    }
+    std::ifstream users_reader("uploads/users.bin");
+    if (users_reader.good()) {
+        users.ParseFromIstream(&users_reader);
+        users_reader.close();
+    }
     return true;
 }
 
@@ -93,12 +106,16 @@ auto Server::run() -> bool {
                         if (!credentials.has_value()) {
                             BAIL("用户信息接收异常，正在关闭连接。");
                         }
-                        auto located = std::find_if(users.begin(), users.end(), [&] (auto &u) {
-                            return u.username() == credentials->username() &&
-                            u.password() == credentials->password();
-                        });
-                        if (located != users.end()) {
-                            user = *located;
+                        auto located = -1;
+                        for (auto i = 0; i < users.users_size(); i++) {
+                            if (users.users(i).username() == credentials->username() &&
+                                users.users(i).password() == credentials->password()) {
+                                located = true;
+                                break;
+                            }
+                        }
+                        if (located != -1) {
+                            user = users.users(located);
                             logged_in = true;
                             std::cout << "用户成功证明自己是 " << user.username() << std::endl;
                             send(client_sock, make_request("success"));
@@ -115,15 +132,28 @@ auto Server::run() -> bool {
                             send(client_sock, make_request("error", "not enough credentials"));
                             continue;
                         }
-                        if (std::find_if(users.begin(), users.end(), [&] (auto &u) {
-                            return u.username() == user->username();
-                        }) != users.end()) {
+                        bool found = false;
+                        for (auto i = 0; i < users.users_size(); i++) {
+                            if (users.users(i).username() == user->username()) {
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (found) {
                             send(client_sock, make_request("error", "user exist"));
                             continue;
                         }
-                        user->set_id((int) users.size());
-                        users.push_back(*user);
+                        auto *new_user = users.add_users();
+                        new_user->set_id((int) users.users_size() - 1);
+                        new_user->set_username(user->username());
+                        new_user->set_password(user->password());
+                        
                         send(client_sock, make_request("success"));
+                        std::ofstream users_writer("uploads/users.bin");
+                        if (users_writer.good()) {
+                            users.SerializeToOstream(&users_writer);
+                            users_writer.close();
+                        }
                     } else if (logged_in && cmd == "records") {
                         std::cout << user.username() << " 正在访问重建记录" << std::endl;
                         send(client_sock, records);
@@ -177,6 +207,12 @@ auto Server::run() -> bool {
                             record->set_id(records.records_size());
                             record->set_name(base);
                             record->set_owner(user.username());
+                            
+                            std::ofstream records_writer("uploads/records.bin");
+                            if (records_writer.good()) {
+                                records.SerializeToOstream(&records_writer);
+                                records_writer.close();
+                            }
                         } else {
                             std::cerr << "上传数据未齐全。";
                             send(client_sock, make_request("error", "buffer not complete"));

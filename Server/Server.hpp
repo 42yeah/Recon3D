@@ -42,7 +42,7 @@ private:
     std::set<int> sockets;
     bool ready;
     int server_sock;
-    std::vector<online::User> users;
+    online::Users users;
     online::ReconRecords records;
 };
 

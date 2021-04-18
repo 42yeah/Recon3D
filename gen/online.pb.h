@@ -46,7 +46,7 @@ struct TableStruct_online_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[5]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[6]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -70,6 +70,9 @@ extern RequestDefaultTypeInternal _Request_default_instance_;
 class User;
 struct UserDefaultTypeInternal;
 extern UserDefaultTypeInternal _User_default_instance_;
+class Users;
+struct UsersDefaultTypeInternal;
+extern UsersDefaultTypeInternal _Users_default_instance_;
 }  // namespace online
 PROTOBUF_NAMESPACE_OPEN
 template<> ::online::ReconBuffer* Arena::CreateMaybeMessage<::online::ReconBuffer>(Arena*);
@@ -77,6 +80,7 @@ template<> ::online::ReconRecord* Arena::CreateMaybeMessage<::online::ReconRecor
 template<> ::online::ReconRecords* Arena::CreateMaybeMessage<::online::ReconRecords>(Arena*);
 template<> ::online::Request* Arena::CreateMaybeMessage<::online::Request>(Arena*);
 template<> ::online::User* Arena::CreateMaybeMessage<::online::User>(Arena*);
+template<> ::online::Users* Arena::CreateMaybeMessage<::online::Users>(Arena*);
 PROTOBUF_NAMESPACE_CLOSE
 namespace online {
 
@@ -268,6 +272,152 @@ class User PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
+class Users PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:online.Users) */ {
+ public:
+  inline Users() : Users(nullptr) {}
+  virtual ~Users();
+  explicit constexpr Users(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  Users(const Users& from);
+  Users(Users&& from) noexcept
+    : Users() {
+    *this = ::std::move(from);
+  }
+
+  inline Users& operator=(const Users& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline Users& operator=(Users&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const Users& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const Users* internal_default_instance() {
+    return reinterpret_cast<const Users*>(
+               &_Users_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    1;
+
+  friend void swap(Users& a, Users& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(Users* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(Users* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline Users* New() const final {
+    return CreateMaybeMessage<Users>(nullptr);
+  }
+
+  Users* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<Users>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const Users& from);
+  void MergeFrom(const Users& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(Users* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "online.Users";
+  }
+  protected:
+  explicit Users(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_online_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kUsersFieldNumber = 1,
+  };
+  // repeated .online.User users = 1;
+  int users_size() const;
+  private:
+  int _internal_users_size() const;
+  public:
+  void clear_users();
+  ::online::User* mutable_users(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::online::User >*
+      mutable_users();
+  private:
+  const ::online::User& _internal_users(int index) const;
+  ::online::User* _internal_add_users();
+  public:
+  const ::online::User& users(int index) const;
+  ::online::User* add_users();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::online::User >&
+      users() const;
+
+  // @@protoc_insertion_point(class_scope:online.Users)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::online::User > users_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_online_2eproto;
+};
+// -------------------------------------------------------------------
+
 class Request PROTOBUF_FINAL :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:online.Request) */ {
  public:
@@ -311,7 +461,7 @@ class Request PROTOBUF_FINAL :
                &_Request_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    1;
+    2;
 
   friend void swap(Request& a, Request& b) {
     a.Swap(&b);
@@ -463,7 +613,7 @@ class ReconRecord PROTOBUF_FINAL :
                &_ReconRecord_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    2;
+    3;
 
   friend void swap(ReconRecord& a, ReconRecord& b) {
     a.Swap(&b);
@@ -649,7 +799,7 @@ class ReconRecords PROTOBUF_FINAL :
                &_ReconRecords_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    3;
+    4;
 
   friend void swap(ReconRecords& a, ReconRecords& b) {
     a.Swap(&b);
@@ -795,7 +945,7 @@ class ReconBuffer PROTOBUF_FINAL :
                &_ReconBuffer_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    4;
+    5;
 
   friend void swap(ReconBuffer& a, ReconBuffer& b) {
     a.Swap(&b);
@@ -1148,6 +1298,49 @@ inline void User::set_allocated_password(std::string* password) {
   password_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), password,
       GetArena());
   // @@protoc_insertion_point(field_set_allocated:online.User.password)
+}
+
+// -------------------------------------------------------------------
+
+// Users
+
+// repeated .online.User users = 1;
+inline int Users::_internal_users_size() const {
+  return users_.size();
+}
+inline int Users::users_size() const {
+  return _internal_users_size();
+}
+inline void Users::clear_users() {
+  users_.Clear();
+}
+inline ::online::User* Users::mutable_users(int index) {
+  // @@protoc_insertion_point(field_mutable:online.Users.users)
+  return users_.Mutable(index);
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::online::User >*
+Users::mutable_users() {
+  // @@protoc_insertion_point(field_mutable_list:online.Users.users)
+  return &users_;
+}
+inline const ::online::User& Users::_internal_users(int index) const {
+  return users_.Get(index);
+}
+inline const ::online::User& Users::users(int index) const {
+  // @@protoc_insertion_point(field_get:online.Users.users)
+  return _internal_users(index);
+}
+inline ::online::User* Users::_internal_add_users() {
+  return users_.Add();
+}
+inline ::online::User* Users::add_users() {
+  // @@protoc_insertion_point(field_add:online.Users.users)
+  return _internal_add_users();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::online::User >&
+Users::users() const {
+  // @@protoc_insertion_point(field_list:online.Users.users)
+  return users_;
 }
 
 // -------------------------------------------------------------------
@@ -1748,6 +1941,8 @@ inline void ReconBuffer::set_allocated_texture_content(std::string* texture_cont
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

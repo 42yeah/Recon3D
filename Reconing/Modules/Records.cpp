@@ -14,7 +14,7 @@
 
 auto RecordsModule::update_ui() -> void {
     ImGui::SetNextWindowPos({ 320, 10 }, ImGuiCond_FirstUseEver);
-    ImGui::SetNextWindowSize({ 200, 200 }, ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize({ 200, 300 }, ImGuiCond_FirstUseEver);
     ImGui::Begin("重建历史记录");
     if (ImGui::Button("刷新")) {
         records = read_recon_records("recons/records.bin");
@@ -26,6 +26,13 @@ auto RecordsModule::update_ui() -> void {
             if (!load_record()) {
                 RECON_LOG(RECORDS) << "加载重建记录失败。";
             }
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("删除")) {
+            records.erase(records.begin() + current_selected_index,
+                          records.begin() + current_selected_index + 1);
+            write_recon_records(records, "recons/records.bin");
+            current_selected_index = 0;
         }
     }
     if (records.size() > 0 &&

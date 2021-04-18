@@ -383,7 +383,7 @@ auto OnlineModule::download() -> void {
             mutex().lock();
             records = read_recon_records("recons/records.bin");
             auto file_name = base.filename().string();
-            auto name = record.owner() + " 创作的 " + base.string();
+            auto name = record.owner() + " 创作的 " + base.filename().string();
             auto record_in_db = std::find_if(records.begin(), records.end(), [&] (auto &r) {
                 return std::string(r.name) == name;
             });

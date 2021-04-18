@@ -104,9 +104,10 @@ auto RecordsModule::load_record() -> bool {
         view_mat = glm::lookAt(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     }
     
+    std::filesystem::path obj_path = std::string("recons/") + records[current_selected_index].obj_file;
     auto ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err,
-                                (std::string("recons/") + records[current_selected_index].obj_file).c_str(),
-                                "recons/");
+                                obj_path.c_str(),
+                                obj_path.parent_path().c_str());
     if (!ret) {
         RECON_LOG(RECORDS) << "obj 模型加载失败。警告：" << warn << "，错误：" << err;
         return false;
@@ -182,7 +183,7 @@ auto RecordsModule::load_record() -> bool {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     stbi_set_flip_vertically_on_load(true);
     int width, height, channels;
-    std::string path = std::string("recons/") + materials[0].diffuse_texname;
+    std::string path = (obj_path.parent_path() / materials[0].diffuse_texname).string();
     auto *data = stbi_load(path.c_str(), &width, &height, &channels, 0);
     if (!data) {
         RECON_LOG(RECORDS) << "加载材质失败：" << path << " 未找到或无权限";

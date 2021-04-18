@@ -10,6 +10,7 @@
 #include <thread>
 #include <fstream>
 #include <mutex>
+#include <sstream>
 
 template<typename T>
 auto request_append(online::Request &request, T last) -> void {
@@ -192,6 +193,54 @@ auto Server::run() -> bool {
                             send(client_sock, make_request("hello"));
                             std::cout << "与新连接成功互相打招呼。连接已经稳定。" << std::endl;
                         }
+                    } else if (logged_in && cmd == "download") {
+                        std::cout << "用户正在尝试下载数据" << std::endl;
+                        auto id = std::stoi(request.arg(1));
+                        const online::ReconRecord *record = nullptr;
+                        for (auto i = 0; i < records.records_size(); i++) {
+                            if (records.records(i).id() == id) {
+                                record = &records.records(i);
+                                break;
+                            }
+                        }
+                        if (record == nullptr) {
+                            std::cerr << "记录条未找到：" << id << std::endl;
+                            send(client_sock, make_request("error", "record not found"));
+                            continue;
+                        }
+                        // U P L O A D ////////////////////////////////////////
+                        std::stringstream obj_stream, mtl_stream, tex_stream;
+                        std::string base = "uploads/" + record->name();
+                        std::ifstream obj_reader(base + ".obj"), mtl_reader(base + ".mtl"), tex_reader(base + ".png");
+                        if (!obj_reader.good() || !mtl_reader.good() || !tex_reader.good()) {
+                            if (obj_reader.good()) {
+                                obj_reader.close();
+                            }
+                            if (mtl_reader.good()) {
+                                mtl_reader.close();
+                            }
+                            if (tex_reader.good()) {
+                                tex_reader.close();
+                            }
+                            std::cerr << "文件未找到：" << base << std::endl;
+                            send(client_sock, make_request("error", "file not found"));
+                            continue;
+                        }
+                        obj_stream << obj_reader.rdbuf();
+                        mtl_stream << mtl_reader.rdbuf();
+                        tex_stream << tex_reader.rdbuf();
+                        obj_reader.close();
+                        mtl_reader.close();
+                        tex_reader.close();
+                        online::ReconBuffer buffer;
+                        buffer.set_file_base(record->name());
+                        buffer.set_obj_content(obj_stream.str());
+                        buffer.set_mtl_content(mtl_stream.str());
+                        buffer.set_texture_content(tex_stream.str());
+                        if (!send(client_sock, buffer)) {
+                            BAIL("发送重建包给客户端失败。");
+                        }
+                        std::cout << "文件发送成功。" << std::endl;
                     }
                 } else {
                     send(client_sock, make_request("error", "unknown request"));

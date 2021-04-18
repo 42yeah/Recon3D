@@ -53,6 +53,8 @@ public:
     
     auto update_online_list() -> void;
     
+    auto download() -> void;
+    
     template<typename T>
     auto receive() -> std::optional<T>;
     

@@ -110,7 +110,7 @@ auto OnlineModule::update_ui() -> void {
                 }
                 ImGui::EndListBox();
                 if (ImGui::Button("下载")) {
-                    // TODO: download...
+                    download();
                 }
             }
             break;
@@ -335,6 +335,76 @@ auto OnlineModule::update_online_list() -> void {
     });
     thread.detach();
 }
+
+auto OnlineModule::download() -> void {
+    std::thread thread([&] () {
+        mutex().lock();
+        RECON_LOG(ONLINE) << "正在下载选定记录到本地...";
+        state = State::CONNECTING;
+        mutex().unlock();
+        
+        const auto &record = online_records.records(online_index);
+        if (!send(make_request("download", std::to_string(record.id())))) {
+            BAIL("无法发送下载指令到服务器。");
+        }
+        auto buffer = receive<online::ReconBuffer>();
+        if (!buffer.has_value()) {
+            BAIL("接受下载信息失败。");
+        }
+        
+        if (buffer->has_file_base() && buffer->has_obj_content() &&
+            buffer->has_mtl_content() && buffer->has_texture_content()) {
+            mkdir_if_not_exists("recons");
+            mkdir_if_not_exists("recons/" + record.owner());
+            auto base = std::filesystem::path("recons") / buffer->file_base();
+            std::ofstream obj_writer(base.string() + ".obj");
+            std::ofstream mtl_writer(base.string() + ".mtl");
+            std::ofstream tex_writer(base.string() + ".png");
+            if (!obj_writer.good() || !mtl_writer.good() || !tex_writer.good()) {
+                if (obj_writer.good()) {
+                    obj_writer.close();
+                }
+                if (mtl_writer.good()) {
+                    mtl_writer.close();
+                }
+                if (tex_writer.good()) {
+                    tex_writer.close();
+                }
+                BAIL("尝试文件写入失败。");
+                return;
+            }
+            obj_writer << buffer->obj_content();
+            mtl_writer << buffer->mtl_content();
+            tex_writer << buffer->texture_content();
+            obj_writer.close();
+            mtl_writer.close();
+            tex_writer.close();
+            
+            mutex().lock();
+            records = read_recon_records("recons/records.bin");
+            auto file_name = base.filename().string();
+            auto name = record.owner() + " 创作的 " + base.string();
+            auto record_in_db = std::find_if(records.begin(), records.end(), [&] (auto &r) {
+                return std::string(r.name) == name;
+            });
+            if (record_in_db == records.end()) {
+                records.push_back(ReconRecord(name,
+                                              record.owner() + "/" + file_name + ".obj"));
+                write_recon_records(records, "recons/records.bin");
+            }
+            RECON_LOG(ONLINE) << "文件下载结束。";
+            state = State::MAIN_INTERFACE;
+            mutex().unlock();
+        } else {
+            mutex().lock();
+            RECON_LOG(ONLINE) << "错误！服务端传输信息未齐全。";
+            state = State::MAIN_INTERFACE;
+            mutex().unlock();
+        }
+    });
+    thread.detach();
+}
+
 
 
 

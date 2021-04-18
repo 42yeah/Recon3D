@@ -62,6 +62,11 @@ auto link(GLuint vertex_shader, GLuint fragment_shader) -> GLuint {
     return program;
 }
 
+auto mkdir_if_not_exists(std::filesystem::path path) -> void {
+    if (!std::filesystem::exists(path)) {
+        std::filesystem::create_directory(path);
+    }
+}
 
 ReconRecord::ReconRecord(std::string name, std::string obj_file) {
     if (name.length() >= 512 || obj_file.length() >= 512) {

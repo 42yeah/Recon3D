@@ -8,6 +8,7 @@
 #include "Online.hpp"
 #include <imgui.h>
 #include <thread>
+#include <fstream>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
@@ -88,9 +89,41 @@ auto OnlineModule::update_ui() -> void {
         case State::MAIN_INTERFACE:
             ImGui::TextWrapped("在线功能：在这里，你可以选择你想上传到服务器与其他人分享的重建历史，也可以下载他人的重建历史来观赏。");
             if (ImGui::Button("上传")) {
-                // TODO: upload
+                state = State::UPLOAD;
+                mkdir_if_not_exists("recons");
+                records = read_recon_records("recons/records.bin");
+                upload_index = 0;
             }
             
+            break;
+            
+        case State::UPLOAD:
+            ImGui::TextWrapped("选择想上传的记录。");
+            if (records.size() > 0) {
+                ImGui::SameLine();
+                if (ImGui::Button("上传")) {
+                    upload();
+                }
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("返回")) {
+                state = State::MAIN_INTERFACE;
+            }
+            if (records.size() > 0 &&
+                ImGui::BeginListBox("", ImVec2 { -FLT_MIN, 5 * ImGui::GetTextLineHeightWithSpacing() })) {
+                for (auto i = 0; i < records.size(); i++) {
+                    const auto is_selected = upload_index == i;
+                    if (ImGui::Selectable(records[i].name, is_selected)) {
+                        upload_index = i;
+                    }
+                    if (is_selected) {
+                        ImGui::SetItemDefaultFocus();
+                    }
+                }
+                ImGui::EndListBox();
+            } else if (records.size() <= 0) {
+                ImGui::TextWrapped("现在还没有重建记录。在管线内进行重建吧。");
+            }
             break;
     }
 
@@ -202,6 +235,70 @@ auto OnlineModule::register_account() -> void {
     thread.detach();
 }
 
+auto OnlineModule::upload() -> void { 
+    std::thread thread([&] () {
+        mutex().lock();
+        RECON_LOG(ONLINE) << "正在上传记录到服务端...";
+        state = State::CONNECTING;
+        mutex().unlock();
+        
+        const auto &selected = records[upload_index];
+        std::filesystem::path path = std::filesystem::path("recons") / selected.obj_file;
+        std::stringstream obj_stream, mtl_stream, tex_stream;
+        std::ifstream obj_reader(path), mtl_reader(path.replace_extension(".mtl")), tex_reader(path.replace_extension(".png"));
+        if (!obj_reader.good() || !mtl_reader.good() || !tex_reader.good()) {
+            if (obj_reader.good()) {
+                obj_reader.close();
+            }
+            if (mtl_reader.good()) {
+                mtl_reader.close();
+            }
+            if (tex_reader.good()) {
+                tex_reader.close();
+            }
+            mutex().lock();
+            RECON_LOG(ONLINE) << "无法打开 obj 文件。";
+            state = State::UPLOAD;
+            mutex().unlock();
+            return;
+        }
+        obj_stream << obj_reader.rdbuf();
+        mtl_stream << mtl_reader.rdbuf();
+        tex_stream << tex_reader.rdbuf();
+        obj_reader.close();
+        mtl_reader.close();
+        tex_reader.close();
+        online::ReconBuffer buffer;
+        buffer.set_file_base(path.replace_extension("").filename().string());
+        buffer.set_obj_content(obj_stream.str());
+        buffer.set_mtl_content(mtl_stream.str());
+        buffer.set_texture_content(tex_stream.str());
+        if (!send(make_request("upload"))) {
+            BAIL("无法发送指令给服务器。");
+        }
+        if (!send(buffer)) {
+            BAIL("无法发送数据给服务器。");
+        }
+        auto response = receive<online::Request>();
+        if (!response.has_value()) {
+            BAIL("服务端未发回有效数据。");
+        }
+        if (response->arg_size() == 1 && response->arg(0) == "success") {
+            mutex().lock();
+            RECON_LOG(ONLINE) << "上传成功。";
+            state = State::MAIN_INTERFACE;
+            mutex().unlock();
+            return;
+        }
+        mutex().lock();
+        RECON_LOG(ONLINE) << "上传失败。";
+        state = State::UPLOAD;
+        mutex().unlock();
+    });
+    thread.detach();
+}
+
+
 
 
 template<typename T>
@@ -215,12 +312,14 @@ auto OnlineModule::receive() -> std::optional<T> {
     
     char *packet = new char[request_size];
     auto left_to_receive = request_size;
+    auto offset = 0;
     while (left_to_receive != 0) {
-        recv_len = recv(sock, packet, left_to_receive, 0);
+        recv_len = recv(sock, packet + offset, left_to_receive, 0);
         if (recv_len <= 0) {
             delete[] packet;
             return {};
         }
+        offset += recv_len;
         left_to_receive -= recv_len;
     }
     

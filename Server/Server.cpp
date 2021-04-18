@@ -8,6 +8,7 @@
 #include "Server.hpp"
 #include <unistd.h>
 #include <thread>
+#include <fstream>
 #include <mutex>
 
 template<typename T>
@@ -100,7 +101,7 @@ auto Server::run() -> bool {
                             logged_in = true;
                             std::cout << "用户成功证明自己是 " << user.username() << std::endl;
                             send(client_sock, make_request("success"));
-                            return;
+                            continue;
                         }
                         send(client_sock, make_request("error", "wrong credentials"));
                     } else if (cmd == "register") {
@@ -111,13 +112,13 @@ auto Server::run() -> bool {
                         }
                         if (!user->has_username() || !user->has_password()) {
                             send(client_sock, make_request("error", "not enough credentials"));
-                            return;
+                            continue;
                         }
                         if (std::find_if(users.begin(), users.end(), [&] (auto &u) {
                             return u.username() == user->username();
                         }) != users.end()) {
                             send(client_sock, make_request("error", "user exist"));
-                            return;
+                            continue;
                         }
                         user->set_id((int) users.size());
                         users.push_back(*user);
@@ -126,7 +127,49 @@ auto Server::run() -> bool {
                         std::cout << user.username() << " 正在访问重建记录" << std::endl;
                         send(client_sock, records);
                     } else if (logged_in && cmd == "upload") {
-                        // TODO: ACTUALLY UPLOAD STUFFS TO THE SERVER
+                        std::cout << "用户正在尝试上传" << std::endl;
+                        auto buffer = receive<online::ReconBuffer>(client_sock);
+                        if (!buffer.has_value()) {
+                            BAIL("用户上传数据失败，正在关闭连接。");
+                        }
+                        if (buffer->has_file_base() && buffer->has_obj_content() &&
+                            buffer->has_mtl_content() && buffer->has_texture_content()) {
+                            auto base = user.username() + "-" + std::filesystem::path(buffer->file_base()).filename().string();
+                            mkdir_if_not_exists("uploads");
+                            std::ofstream obj_writer(std::string("uploads/") + base + ".obj");
+                            std::ofstream mtl_writer(std::string("uploads/") + base + ".mtl");
+                            std::ofstream tex_writer(std::string("uploads/") + base + ".png");
+                            if (!obj_writer.good() || !mtl_writer.good() || !tex_writer.good()) {
+                                std::cerr << "尝试写入文件失败：" << base << std::endl;
+                                if (obj_writer.good()) {
+                                    obj_writer.close();
+                                }
+                                if (mtl_writer.good()) {
+                                    mtl_writer.close();
+                                }
+                                if (tex_writer.good()) {
+                                    tex_writer.close();
+                                }
+                                send(client_sock, make_request("error", "failed to open file"));
+                                continue;
+                            }
+                            obj_writer << buffer->obj_content();
+                            mtl_writer << buffer->mtl_content();
+                            tex_writer << buffer->texture_content();
+                            obj_writer.close();
+                            mtl_writer.close();
+                            tex_writer.close();
+                            send(client_sock, make_request("success"));
+                            std::cout << "文件上传成功。正在保存记录..." << std::endl;
+
+                            auto new_rec = records.add_records();
+                            new_rec->set_id(records.records_size());
+                            new_rec->set_name(base);
+                            new_rec->set_owner(user.username());
+                        } else {
+                            std::cerr << "上传数据未齐全。";
+                            send(client_sock, make_request("error", "buffer not complete"));
+                        }
                     }
                 } else if (request.arg_size() == 2) {
                     const auto &cmd = request.arg(0);
@@ -161,12 +204,14 @@ auto Server::receive(int sock) -> std::optional<T> {
     
     char *packet = new char[request_size];
     auto left_to_receive = request_size;
+    auto offset = 0;
     while (left_to_receive != 0) {
-        recv_len = recv(sock, packet, left_to_receive, 0);
+        recv_len = recv(sock, packet + offset, left_to_receive, 0);
         if (recv_len <= 0) {
             delete[] packet;
             return {};
         }
+        offset += recv_len;
         left_to_receive -= recv_len;
     }
     
@@ -206,4 +251,8 @@ Server::~Server() {
     }
 }
 
-
+auto Server::mkdir_if_not_exists(std::filesystem::path path) -> void { 
+    if (!std::filesystem::exists(path)) {
+        std::filesystem::create_directory(path);
+    }
+}

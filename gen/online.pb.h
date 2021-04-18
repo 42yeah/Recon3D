@@ -46,7 +46,7 @@ struct TableStruct_online_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[4]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[5]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -55,6 +55,9 @@ struct TableStruct_online_2eproto {
 extern const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_online_2eproto;
 ::PROTOBUF_NAMESPACE_ID::Metadata descriptor_table_online_2eproto_metadata_getter(int index);
 namespace online {
+class ReconBuffer;
+struct ReconBufferDefaultTypeInternal;
+extern ReconBufferDefaultTypeInternal _ReconBuffer_default_instance_;
 class ReconRecord;
 struct ReconRecordDefaultTypeInternal;
 extern ReconRecordDefaultTypeInternal _ReconRecord_default_instance_;
@@ -69,6 +72,7 @@ struct UserDefaultTypeInternal;
 extern UserDefaultTypeInternal _User_default_instance_;
 }  // namespace online
 PROTOBUF_NAMESPACE_OPEN
+template<> ::online::ReconBuffer* Arena::CreateMaybeMessage<::online::ReconBuffer>(Arena*);
 template<> ::online::ReconRecord* Arena::CreateMaybeMessage<::online::ReconRecord>(Arena*);
 template<> ::online::ReconRecords* Arena::CreateMaybeMessage<::online::ReconRecords>(Arena*);
 template<> ::online::Request* Arena::CreateMaybeMessage<::online::Request>(Arena*);
@@ -532,9 +536,6 @@ class ReconRecord PROTOBUF_FINAL :
     kOwnerFieldNumber = 2,
     kNameFieldNumber = 3,
     kIdFieldNumber = 1,
-    kObjIdFieldNumber = 4,
-    kMtlIdFieldNumber = 5,
-    kTexIdFieldNumber = 6,
   };
   // string owner = 2;
   bool has_owner() const;
@@ -589,45 +590,6 @@ class ReconRecord PROTOBUF_FINAL :
   void _internal_set_id(::PROTOBUF_NAMESPACE_ID::int32 value);
   public:
 
-  // int32 obj_id = 4;
-  bool has_obj_id() const;
-  private:
-  bool _internal_has_obj_id() const;
-  public:
-  void clear_obj_id();
-  ::PROTOBUF_NAMESPACE_ID::int32 obj_id() const;
-  void set_obj_id(::PROTOBUF_NAMESPACE_ID::int32 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int32 _internal_obj_id() const;
-  void _internal_set_obj_id(::PROTOBUF_NAMESPACE_ID::int32 value);
-  public:
-
-  // int32 mtl_id = 5;
-  bool has_mtl_id() const;
-  private:
-  bool _internal_has_mtl_id() const;
-  public:
-  void clear_mtl_id();
-  ::PROTOBUF_NAMESPACE_ID::int32 mtl_id() const;
-  void set_mtl_id(::PROTOBUF_NAMESPACE_ID::int32 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int32 _internal_mtl_id() const;
-  void _internal_set_mtl_id(::PROTOBUF_NAMESPACE_ID::int32 value);
-  public:
-
-  // int32 tex_id = 6;
-  bool has_tex_id() const;
-  private:
-  bool _internal_has_tex_id() const;
-  public:
-  void clear_tex_id();
-  ::PROTOBUF_NAMESPACE_ID::int32 tex_id() const;
-  void set_tex_id(::PROTOBUF_NAMESPACE_ID::int32 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int32 _internal_tex_id() const;
-  void _internal_set_tex_id(::PROTOBUF_NAMESPACE_ID::int32 value);
-  public:
-
   // @@protoc_insertion_point(class_scope:online.ReconRecord)
  private:
   class _Internal;
@@ -640,9 +602,6 @@ class ReconRecord PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr owner_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr name_;
   ::PROTOBUF_NAMESPACE_ID::int32 id_;
-  ::PROTOBUF_NAMESPACE_ID::int32 obj_id_;
-  ::PROTOBUF_NAMESPACE_ID::int32 mtl_id_;
-  ::PROTOBUF_NAMESPACE_ID::int32 tex_id_;
   friend struct ::TableStruct_online_2eproto;
 };
 // -------------------------------------------------------------------
@@ -789,6 +748,221 @@ class ReconRecords PROTOBUF_FINAL :
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::online::ReconRecord > records_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_online_2eproto;
+};
+// -------------------------------------------------------------------
+
+class ReconBuffer PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:online.ReconBuffer) */ {
+ public:
+  inline ReconBuffer() : ReconBuffer(nullptr) {}
+  virtual ~ReconBuffer();
+  explicit constexpr ReconBuffer(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  ReconBuffer(const ReconBuffer& from);
+  ReconBuffer(ReconBuffer&& from) noexcept
+    : ReconBuffer() {
+    *this = ::std::move(from);
+  }
+
+  inline ReconBuffer& operator=(const ReconBuffer& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline ReconBuffer& operator=(ReconBuffer&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const ReconBuffer& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const ReconBuffer* internal_default_instance() {
+    return reinterpret_cast<const ReconBuffer*>(
+               &_ReconBuffer_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    4;
+
+  friend void swap(ReconBuffer& a, ReconBuffer& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(ReconBuffer* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(ReconBuffer* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline ReconBuffer* New() const final {
+    return CreateMaybeMessage<ReconBuffer>(nullptr);
+  }
+
+  ReconBuffer* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<ReconBuffer>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const ReconBuffer& from);
+  void MergeFrom(const ReconBuffer& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(ReconBuffer* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "online.ReconBuffer";
+  }
+  protected:
+  explicit ReconBuffer(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_online_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kFileBaseFieldNumber = 1,
+    kObjContentFieldNumber = 2,
+    kMtlContentFieldNumber = 3,
+    kTextureContentFieldNumber = 4,
+  };
+  // string file_base = 1;
+  bool has_file_base() const;
+  private:
+  bool _internal_has_file_base() const;
+  public:
+  void clear_file_base();
+  const std::string& file_base() const;
+  void set_file_base(const std::string& value);
+  void set_file_base(std::string&& value);
+  void set_file_base(const char* value);
+  void set_file_base(const char* value, size_t size);
+  std::string* mutable_file_base();
+  std::string* release_file_base();
+  void set_allocated_file_base(std::string* file_base);
+  private:
+  const std::string& _internal_file_base() const;
+  void _internal_set_file_base(const std::string& value);
+  std::string* _internal_mutable_file_base();
+  public:
+
+  // bytes obj_content = 2;
+  bool has_obj_content() const;
+  private:
+  bool _internal_has_obj_content() const;
+  public:
+  void clear_obj_content();
+  const std::string& obj_content() const;
+  void set_obj_content(const std::string& value);
+  void set_obj_content(std::string&& value);
+  void set_obj_content(const char* value);
+  void set_obj_content(const void* value, size_t size);
+  std::string* mutable_obj_content();
+  std::string* release_obj_content();
+  void set_allocated_obj_content(std::string* obj_content);
+  private:
+  const std::string& _internal_obj_content() const;
+  void _internal_set_obj_content(const std::string& value);
+  std::string* _internal_mutable_obj_content();
+  public:
+
+  // bytes mtl_content = 3;
+  bool has_mtl_content() const;
+  private:
+  bool _internal_has_mtl_content() const;
+  public:
+  void clear_mtl_content();
+  const std::string& mtl_content() const;
+  void set_mtl_content(const std::string& value);
+  void set_mtl_content(std::string&& value);
+  void set_mtl_content(const char* value);
+  void set_mtl_content(const void* value, size_t size);
+  std::string* mutable_mtl_content();
+  std::string* release_mtl_content();
+  void set_allocated_mtl_content(std::string* mtl_content);
+  private:
+  const std::string& _internal_mtl_content() const;
+  void _internal_set_mtl_content(const std::string& value);
+  std::string* _internal_mutable_mtl_content();
+  public:
+
+  // bytes texture_content = 4;
+  bool has_texture_content() const;
+  private:
+  bool _internal_has_texture_content() const;
+  public:
+  void clear_texture_content();
+  const std::string& texture_content() const;
+  void set_texture_content(const std::string& value);
+  void set_texture_content(std::string&& value);
+  void set_texture_content(const char* value);
+  void set_texture_content(const void* value, size_t size);
+  std::string* mutable_texture_content();
+  std::string* release_texture_content();
+  void set_allocated_texture_content(std::string* texture_content);
+  private:
+  const std::string& _internal_texture_content() const;
+  void _internal_set_texture_content(const std::string& value);
+  std::string* _internal_mutable_texture_content();
+  public:
+
+  // @@protoc_insertion_point(class_scope:online.ReconBuffer)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr file_base_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr obj_content_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr mtl_content_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr texture_content_;
   friend struct ::TableStruct_online_2eproto;
 };
 // ===================================================================
@@ -1232,90 +1406,6 @@ inline void ReconRecord::set_allocated_name(std::string* name) {
   // @@protoc_insertion_point(field_set_allocated:online.ReconRecord.name)
 }
 
-// int32 obj_id = 4;
-inline bool ReconRecord::_internal_has_obj_id() const {
-  bool value = (_has_bits_[0] & 0x00000008u) != 0;
-  return value;
-}
-inline bool ReconRecord::has_obj_id() const {
-  return _internal_has_obj_id();
-}
-inline void ReconRecord::clear_obj_id() {
-  obj_id_ = 0;
-  _has_bits_[0] &= ~0x00000008u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 ReconRecord::_internal_obj_id() const {
-  return obj_id_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 ReconRecord::obj_id() const {
-  // @@protoc_insertion_point(field_get:online.ReconRecord.obj_id)
-  return _internal_obj_id();
-}
-inline void ReconRecord::_internal_set_obj_id(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000008u;
-  obj_id_ = value;
-}
-inline void ReconRecord::set_obj_id(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _internal_set_obj_id(value);
-  // @@protoc_insertion_point(field_set:online.ReconRecord.obj_id)
-}
-
-// int32 mtl_id = 5;
-inline bool ReconRecord::_internal_has_mtl_id() const {
-  bool value = (_has_bits_[0] & 0x00000010u) != 0;
-  return value;
-}
-inline bool ReconRecord::has_mtl_id() const {
-  return _internal_has_mtl_id();
-}
-inline void ReconRecord::clear_mtl_id() {
-  mtl_id_ = 0;
-  _has_bits_[0] &= ~0x00000010u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 ReconRecord::_internal_mtl_id() const {
-  return mtl_id_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 ReconRecord::mtl_id() const {
-  // @@protoc_insertion_point(field_get:online.ReconRecord.mtl_id)
-  return _internal_mtl_id();
-}
-inline void ReconRecord::_internal_set_mtl_id(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000010u;
-  mtl_id_ = value;
-}
-inline void ReconRecord::set_mtl_id(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _internal_set_mtl_id(value);
-  // @@protoc_insertion_point(field_set:online.ReconRecord.mtl_id)
-}
-
-// int32 tex_id = 6;
-inline bool ReconRecord::_internal_has_tex_id() const {
-  bool value = (_has_bits_[0] & 0x00000020u) != 0;
-  return value;
-}
-inline bool ReconRecord::has_tex_id() const {
-  return _internal_has_tex_id();
-}
-inline void ReconRecord::clear_tex_id() {
-  tex_id_ = 0;
-  _has_bits_[0] &= ~0x00000020u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 ReconRecord::_internal_tex_id() const {
-  return tex_id_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 ReconRecord::tex_id() const {
-  // @@protoc_insertion_point(field_get:online.ReconRecord.tex_id)
-  return _internal_tex_id();
-}
-inline void ReconRecord::_internal_set_tex_id(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000020u;
-  tex_id_ = value;
-}
-inline void ReconRecord::set_tex_id(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _internal_set_tex_id(value);
-  // @@protoc_insertion_point(field_set:online.ReconRecord.tex_id)
-}
-
 // -------------------------------------------------------------------
 
 // ReconRecords
@@ -1359,9 +1449,307 @@ ReconRecords::records() const {
   return records_;
 }
 
+// -------------------------------------------------------------------
+
+// ReconBuffer
+
+// string file_base = 1;
+inline bool ReconBuffer::_internal_has_file_base() const {
+  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool ReconBuffer::has_file_base() const {
+  return _internal_has_file_base();
+}
+inline void ReconBuffer::clear_file_base() {
+  file_base_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline const std::string& ReconBuffer::file_base() const {
+  // @@protoc_insertion_point(field_get:online.ReconBuffer.file_base)
+  return _internal_file_base();
+}
+inline void ReconBuffer::set_file_base(const std::string& value) {
+  _internal_set_file_base(value);
+  // @@protoc_insertion_point(field_set:online.ReconBuffer.file_base)
+}
+inline std::string* ReconBuffer::mutable_file_base() {
+  // @@protoc_insertion_point(field_mutable:online.ReconBuffer.file_base)
+  return _internal_mutable_file_base();
+}
+inline const std::string& ReconBuffer::_internal_file_base() const {
+  return file_base_.Get();
+}
+inline void ReconBuffer::_internal_set_file_base(const std::string& value) {
+  _has_bits_[0] |= 0x00000001u;
+  file_base_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void ReconBuffer::set_file_base(std::string&& value) {
+  _has_bits_[0] |= 0x00000001u;
+  file_base_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:online.ReconBuffer.file_base)
+}
+inline void ReconBuffer::set_file_base(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000001u;
+  file_base_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:online.ReconBuffer.file_base)
+}
+inline void ReconBuffer::set_file_base(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000001u;
+  file_base_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:online.ReconBuffer.file_base)
+}
+inline std::string* ReconBuffer::_internal_mutable_file_base() {
+  _has_bits_[0] |= 0x00000001u;
+  return file_base_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* ReconBuffer::release_file_base() {
+  // @@protoc_insertion_point(field_release:online.ReconBuffer.file_base)
+  if (!_internal_has_file_base()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000001u;
+  return file_base_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void ReconBuffer::set_allocated_file_base(std::string* file_base) {
+  if (file_base != nullptr) {
+    _has_bits_[0] |= 0x00000001u;
+  } else {
+    _has_bits_[0] &= ~0x00000001u;
+  }
+  file_base_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), file_base,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:online.ReconBuffer.file_base)
+}
+
+// bytes obj_content = 2;
+inline bool ReconBuffer::_internal_has_obj_content() const {
+  bool value = (_has_bits_[0] & 0x00000002u) != 0;
+  return value;
+}
+inline bool ReconBuffer::has_obj_content() const {
+  return _internal_has_obj_content();
+}
+inline void ReconBuffer::clear_obj_content() {
+  obj_content_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline const std::string& ReconBuffer::obj_content() const {
+  // @@protoc_insertion_point(field_get:online.ReconBuffer.obj_content)
+  return _internal_obj_content();
+}
+inline void ReconBuffer::set_obj_content(const std::string& value) {
+  _internal_set_obj_content(value);
+  // @@protoc_insertion_point(field_set:online.ReconBuffer.obj_content)
+}
+inline std::string* ReconBuffer::mutable_obj_content() {
+  // @@protoc_insertion_point(field_mutable:online.ReconBuffer.obj_content)
+  return _internal_mutable_obj_content();
+}
+inline const std::string& ReconBuffer::_internal_obj_content() const {
+  return obj_content_.Get();
+}
+inline void ReconBuffer::_internal_set_obj_content(const std::string& value) {
+  _has_bits_[0] |= 0x00000002u;
+  obj_content_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void ReconBuffer::set_obj_content(std::string&& value) {
+  _has_bits_[0] |= 0x00000002u;
+  obj_content_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:online.ReconBuffer.obj_content)
+}
+inline void ReconBuffer::set_obj_content(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000002u;
+  obj_content_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:online.ReconBuffer.obj_content)
+}
+inline void ReconBuffer::set_obj_content(const void* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000002u;
+  obj_content_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:online.ReconBuffer.obj_content)
+}
+inline std::string* ReconBuffer::_internal_mutable_obj_content() {
+  _has_bits_[0] |= 0x00000002u;
+  return obj_content_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* ReconBuffer::release_obj_content() {
+  // @@protoc_insertion_point(field_release:online.ReconBuffer.obj_content)
+  if (!_internal_has_obj_content()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000002u;
+  return obj_content_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void ReconBuffer::set_allocated_obj_content(std::string* obj_content) {
+  if (obj_content != nullptr) {
+    _has_bits_[0] |= 0x00000002u;
+  } else {
+    _has_bits_[0] &= ~0x00000002u;
+  }
+  obj_content_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), obj_content,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:online.ReconBuffer.obj_content)
+}
+
+// bytes mtl_content = 3;
+inline bool ReconBuffer::_internal_has_mtl_content() const {
+  bool value = (_has_bits_[0] & 0x00000004u) != 0;
+  return value;
+}
+inline bool ReconBuffer::has_mtl_content() const {
+  return _internal_has_mtl_content();
+}
+inline void ReconBuffer::clear_mtl_content() {
+  mtl_content_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline const std::string& ReconBuffer::mtl_content() const {
+  // @@protoc_insertion_point(field_get:online.ReconBuffer.mtl_content)
+  return _internal_mtl_content();
+}
+inline void ReconBuffer::set_mtl_content(const std::string& value) {
+  _internal_set_mtl_content(value);
+  // @@protoc_insertion_point(field_set:online.ReconBuffer.mtl_content)
+}
+inline std::string* ReconBuffer::mutable_mtl_content() {
+  // @@protoc_insertion_point(field_mutable:online.ReconBuffer.mtl_content)
+  return _internal_mutable_mtl_content();
+}
+inline const std::string& ReconBuffer::_internal_mtl_content() const {
+  return mtl_content_.Get();
+}
+inline void ReconBuffer::_internal_set_mtl_content(const std::string& value) {
+  _has_bits_[0] |= 0x00000004u;
+  mtl_content_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void ReconBuffer::set_mtl_content(std::string&& value) {
+  _has_bits_[0] |= 0x00000004u;
+  mtl_content_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:online.ReconBuffer.mtl_content)
+}
+inline void ReconBuffer::set_mtl_content(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000004u;
+  mtl_content_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:online.ReconBuffer.mtl_content)
+}
+inline void ReconBuffer::set_mtl_content(const void* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000004u;
+  mtl_content_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:online.ReconBuffer.mtl_content)
+}
+inline std::string* ReconBuffer::_internal_mutable_mtl_content() {
+  _has_bits_[0] |= 0x00000004u;
+  return mtl_content_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* ReconBuffer::release_mtl_content() {
+  // @@protoc_insertion_point(field_release:online.ReconBuffer.mtl_content)
+  if (!_internal_has_mtl_content()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000004u;
+  return mtl_content_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void ReconBuffer::set_allocated_mtl_content(std::string* mtl_content) {
+  if (mtl_content != nullptr) {
+    _has_bits_[0] |= 0x00000004u;
+  } else {
+    _has_bits_[0] &= ~0x00000004u;
+  }
+  mtl_content_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), mtl_content,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:online.ReconBuffer.mtl_content)
+}
+
+// bytes texture_content = 4;
+inline bool ReconBuffer::_internal_has_texture_content() const {
+  bool value = (_has_bits_[0] & 0x00000008u) != 0;
+  return value;
+}
+inline bool ReconBuffer::has_texture_content() const {
+  return _internal_has_texture_content();
+}
+inline void ReconBuffer::clear_texture_content() {
+  texture_content_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline const std::string& ReconBuffer::texture_content() const {
+  // @@protoc_insertion_point(field_get:online.ReconBuffer.texture_content)
+  return _internal_texture_content();
+}
+inline void ReconBuffer::set_texture_content(const std::string& value) {
+  _internal_set_texture_content(value);
+  // @@protoc_insertion_point(field_set:online.ReconBuffer.texture_content)
+}
+inline std::string* ReconBuffer::mutable_texture_content() {
+  // @@protoc_insertion_point(field_mutable:online.ReconBuffer.texture_content)
+  return _internal_mutable_texture_content();
+}
+inline const std::string& ReconBuffer::_internal_texture_content() const {
+  return texture_content_.Get();
+}
+inline void ReconBuffer::_internal_set_texture_content(const std::string& value) {
+  _has_bits_[0] |= 0x00000008u;
+  texture_content_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void ReconBuffer::set_texture_content(std::string&& value) {
+  _has_bits_[0] |= 0x00000008u;
+  texture_content_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:online.ReconBuffer.texture_content)
+}
+inline void ReconBuffer::set_texture_content(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000008u;
+  texture_content_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:online.ReconBuffer.texture_content)
+}
+inline void ReconBuffer::set_texture_content(const void* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000008u;
+  texture_content_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:online.ReconBuffer.texture_content)
+}
+inline std::string* ReconBuffer::_internal_mutable_texture_content() {
+  _has_bits_[0] |= 0x00000008u;
+  return texture_content_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* ReconBuffer::release_texture_content() {
+  // @@protoc_insertion_point(field_release:online.ReconBuffer.texture_content)
+  if (!_internal_has_texture_content()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000008u;
+  return texture_content_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void ReconBuffer::set_allocated_texture_content(std::string* texture_content) {
+  if (texture_content != nullptr) {
+    _has_bits_[0] |= 0x00000008u;
+  } else {
+    _has_bits_[0] &= ~0x00000008u;
+  }
+  texture_content_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), texture_content,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:online.ReconBuffer.texture_content)
+}
+
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

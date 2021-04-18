@@ -29,7 +29,7 @@ auto RecordsModule::update_ui() -> void {
         }
     }
     if (records.size() > 0 &&
-        ImGui::BeginListBox("recon list", ImVec2 { -FLT_MIN, 5 * ImGui::GetTextLineHeightWithSpacing() })) {
+        ImGui::BeginListBox("", ImVec2 { -FLT_MIN, 5 * ImGui::GetTextLineHeightWithSpacing() })) {
         for (auto i = 0; i < records.size(); i++) {
             const auto is_selected = current_selected_index == i;
             if (ImGui::Selectable(records[i].name, is_selected)) {

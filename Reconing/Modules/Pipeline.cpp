@@ -109,13 +109,6 @@ auto Pipeline::mvg() -> std::filesystem::path {
     return mvg_executable_path;
 }
 
-
-auto Pipeline::mkdir_if_not_exists(std::filesystem::path path) -> void {
-    if (!std::filesystem::exists(path)) {
-        std::filesystem::create_directory(path);
-    }
-}
-
 auto Pipeline::export_to_ply(const std::string path, std::vector<glm::vec3> vertices, std::vector<glm::vec3> camera_poses, std::vector<glm::vec3> colored_points) -> bool {
     mutex().lock();
     RECON_LOG(PIPELINE) << "正在导出模型到 " << path;
@@ -473,6 +466,7 @@ auto Pipeline::save_session(std::string name) -> bool {
     reader.close();
     
     RECON_LOG(PIPELINE) << "ply 读取结束。开始转存为 .obj...";
+    mkdir_if_not_exists("recons");
     std::ofstream obj_writer("recons/" + name + ".obj");
     std::ofstream mtl_writer("recons/" + name + ".mtl");
     if (!obj_writer.good() || !mtl_writer.good()) {

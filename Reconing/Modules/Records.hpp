@@ -22,6 +22,7 @@ public:
         mesh_texture(GL_NONE),
         current_selected_index(0),
         horizontal_rotation_target(0.0f), horizontal_rotation(0.0f) {
+        mkdir_if_not_exists("recons");
         records = read_recon_records("recons/records.bin");
     }
     

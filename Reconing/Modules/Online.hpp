@@ -23,7 +23,8 @@ enum class State {
     CONNECTING = 1,
     LOGIN = 2,
     REGISTER = 3,
-    MAIN_INTERFACE = 4
+    MAIN_INTERFACE = 4,
+    UPLOAD = 5
 };
 
 };
@@ -47,6 +48,8 @@ public:
     
     auto register_account() -> void;
     
+    auto upload() -> void;
+    
     template<typename T>
     auto receive() -> std::optional<T>;
     
@@ -62,6 +65,8 @@ private:
 
     // O N L I N E /////////////////////////////////
     int sock;
+    std::vector<ReconRecord> records;
+    int upload_index;
 };
 
 #endif /* Online_hpp */

@@ -113,8 +113,6 @@ public:
     float progress;
 
 private:
-    auto mkdir_if_not_exists(std::filesystem::path path) -> void;
-    
     auto rm_if_exists(std::filesystem::path path) -> void;
     
     auto cleanup() -> void;

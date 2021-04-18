@@ -47,10 +47,7 @@ constexpr ReconRecord::ReconRecord(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : owner_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , name_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , id_(0)
-  , obj_id_(0)
-  , mtl_id_(0)
-  , tex_id_(0){}
+  , id_(0){}
 struct ReconRecordDefaultTypeInternal {
   constexpr ReconRecordDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
@@ -72,8 +69,23 @@ struct ReconRecordsDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT ReconRecordsDefaultTypeInternal _ReconRecords_default_instance_;
+constexpr ReconBuffer::ReconBuffer(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : file_base_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , obj_content_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , mtl_content_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , texture_content_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string){}
+struct ReconBufferDefaultTypeInternal {
+  constexpr ReconBufferDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~ReconBufferDefaultTypeInternal() {}
+  union {
+    ReconBuffer _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT ReconBufferDefaultTypeInternal _ReconBuffer_default_instance_;
 }  // namespace online
-static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_online_2eproto[4];
+static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_online_2eproto[5];
 static constexpr ::PROTOBUF_NAMESPACE_ID::EnumDescriptor const** file_level_enum_descriptors_online_2eproto = nullptr;
 static constexpr ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor const** file_level_service_descriptors_online_2eproto = nullptr;
 
@@ -103,27 +115,35 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_online_2eproto::offsets[] PROT
   PROTOBUF_FIELD_OFFSET(::online::ReconRecord, id_),
   PROTOBUF_FIELD_OFFSET(::online::ReconRecord, owner_),
   PROTOBUF_FIELD_OFFSET(::online::ReconRecord, name_),
-  PROTOBUF_FIELD_OFFSET(::online::ReconRecord, obj_id_),
-  PROTOBUF_FIELD_OFFSET(::online::ReconRecord, mtl_id_),
-  PROTOBUF_FIELD_OFFSET(::online::ReconRecord, tex_id_),
   2,
   0,
   1,
-  3,
-  4,
-  5,
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::online::ReconRecords, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   PROTOBUF_FIELD_OFFSET(::online::ReconRecords, records_),
+  PROTOBUF_FIELD_OFFSET(::online::ReconBuffer, _has_bits_),
+  PROTOBUF_FIELD_OFFSET(::online::ReconBuffer, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  PROTOBUF_FIELD_OFFSET(::online::ReconBuffer, file_base_),
+  PROTOBUF_FIELD_OFFSET(::online::ReconBuffer, obj_content_),
+  PROTOBUF_FIELD_OFFSET(::online::ReconBuffer, mtl_content_),
+  PROTOBUF_FIELD_OFFSET(::online::ReconBuffer, texture_content_),
+  0,
+  1,
+  2,
+  3,
 };
 static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, 8, sizeof(::online::User)},
   { 11, -1, sizeof(::online::Request)},
-  { 17, 28, sizeof(::online::ReconRecord)},
-  { 34, -1, sizeof(::online::ReconRecords)},
+  { 17, 25, sizeof(::online::ReconRecord)},
+  { 28, -1, sizeof(::online::ReconRecords)},
+  { 34, 43, sizeof(::online::ReconBuffer)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -131,25 +151,28 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::online::_Request_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::online::_ReconRecord_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::online::_ReconRecords_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::online::_ReconBuffer_default_instance_),
 };
 
 const char descriptor_table_protodef_online_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
   "\n\014online.proto\022\006online\"f\n\004User\022\017\n\002id\030\001 \001"
   "(\005H\000\210\001\001\022\025\n\010username\030\002 \001(\tH\001\210\001\001\022\025\n\010passwo"
   "rd\030\003 \001(\tH\002\210\001\001B\005\n\003_idB\013\n\t_usernameB\013\n\t_pa"
-  "ssword\"\026\n\007Request\022\013\n\003arg\030\001 \003(\t\"\277\001\n\013Recon"
-  "Record\022\017\n\002id\030\001 \001(\005H\000\210\001\001\022\022\n\005owner\030\002 \001(\tH\001"
-  "\210\001\001\022\021\n\004name\030\003 \001(\tH\002\210\001\001\022\023\n\006obj_id\030\004 \001(\005H\003"
-  "\210\001\001\022\023\n\006mtl_id\030\005 \001(\005H\004\210\001\001\022\023\n\006tex_id\030\006 \001(\005"
-  "H\005\210\001\001B\005\n\003_idB\010\n\006_ownerB\007\n\005_nameB\t\n\007_obj_"
-  "idB\t\n\007_mtl_idB\t\n\007_tex_id\"4\n\014ReconRecords"
-  "\022$\n\007records\030\001 \003(\0132\023.online.ReconRecordb\006"
-  "proto3"
+  "ssword\"\026\n\007Request\022\013\n\003arg\030\001 \003(\t\"_\n\013ReconR"
+  "ecord\022\017\n\002id\030\001 \001(\005H\000\210\001\001\022\022\n\005owner\030\002 \001(\tH\001\210"
+  "\001\001\022\021\n\004name\030\003 \001(\tH\002\210\001\001B\005\n\003_idB\010\n\006_ownerB\007"
+  "\n\005_name\"4\n\014ReconRecords\022$\n\007records\030\001 \003(\013"
+  "2\023.online.ReconRecord\"\271\001\n\013ReconBuffer\022\026\n"
+  "\tfile_base\030\001 \001(\tH\000\210\001\001\022\030\n\013obj_content\030\002 \001"
+  "(\014H\001\210\001\001\022\030\n\013mtl_content\030\003 \001(\014H\002\210\001\001\022\034\n\017tex"
+  "ture_content\030\004 \001(\014H\003\210\001\001B\014\n\n_file_baseB\016\n"
+  "\014_obj_contentB\016\n\014_mtl_contentB\022\n\020_textur"
+  "e_contentb\006proto3"
   ;
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_online_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_online_2eproto = {
-  false, false, 406, descriptor_table_protodef_online_2eproto, "online.proto", 
-  &descriptor_table_online_2eproto_once, nullptr, 0, 4,
+  false, false, 497, descriptor_table_protodef_online_2eproto, "online.proto", 
+  &descriptor_table_online_2eproto_once, nullptr, 0, 5,
   schemas, file_default_instances, TableStruct_online_2eproto::offsets,
   file_level_metadata_online_2eproto, file_level_enum_descriptors_online_2eproto, file_level_service_descriptors_online_2eproto,
 };
@@ -671,15 +694,6 @@ class ReconRecord::_Internal {
   static void set_has_name(HasBits* has_bits) {
     (*has_bits)[0] |= 2u;
   }
-  static void set_has_obj_id(HasBits* has_bits) {
-    (*has_bits)[0] |= 8u;
-  }
-  static void set_has_mtl_id(HasBits* has_bits) {
-    (*has_bits)[0] |= 16u;
-  }
-  static void set_has_tex_id(HasBits* has_bits) {
-    (*has_bits)[0] |= 32u;
-  }
 };
 
 ReconRecord::ReconRecord(::PROTOBUF_NAMESPACE_ID::Arena* arena)
@@ -702,19 +716,14 @@ ReconRecord::ReconRecord(const ReconRecord& from)
     name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_name(), 
       GetArena());
   }
-  ::memcpy(&id_, &from.id_,
-    static_cast<size_t>(reinterpret_cast<char*>(&tex_id_) -
-    reinterpret_cast<char*>(&id_)) + sizeof(tex_id_));
+  id_ = from.id_;
   // @@protoc_insertion_point(copy_constructor:online.ReconRecord)
 }
 
 void ReconRecord::SharedCtor() {
 owner_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 name_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
-    reinterpret_cast<char*>(&id_) - reinterpret_cast<char*>(this)),
-    0, static_cast<size_t>(reinterpret_cast<char*>(&tex_id_) -
-    reinterpret_cast<char*>(&id_)) + sizeof(tex_id_));
+id_ = 0;
 }
 
 ReconRecord::~ReconRecord() {
@@ -754,11 +763,7 @@ void ReconRecord::Clear() {
       name_.ClearNonDefaultToEmpty();
     }
   }
-  if (cached_has_bits & 0x0000003cu) {
-    ::memset(&id_, 0, static_cast<size_t>(
-        reinterpret_cast<char*>(&tex_id_) -
-        reinterpret_cast<char*>(&id_)) + sizeof(tex_id_));
-  }
+  id_ = 0;
   _has_bits_.Clear();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
@@ -794,30 +799,6 @@ const char* ReconRecord::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID
           auto str = _internal_mutable_name();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "online.ReconRecord.name"));
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // int32 obj_id = 4;
-      case 4:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 32)) {
-          _Internal::set_has_obj_id(&has_bits);
-          obj_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // int32 mtl_id = 5;
-      case 5:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 40)) {
-          _Internal::set_has_mtl_id(&has_bits);
-          mtl_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // int32 tex_id = 6;
-      case 6:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 48)) {
-          _Internal::set_has_tex_id(&has_bits);
-          tex_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -876,24 +857,6 @@ failure:
         3, this->_internal_name(), target);
   }
 
-  // int32 obj_id = 4;
-  if (_internal_has_obj_id()) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(4, this->_internal_obj_id(), target);
-  }
-
-  // int32 mtl_id = 5;
-  if (_internal_has_mtl_id()) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(5, this->_internal_mtl_id(), target);
-  }
-
-  // int32 tex_id = 6;
-  if (_internal_has_tex_id()) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(6, this->_internal_tex_id(), target);
-  }
-
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
@@ -911,7 +874,7 @@ size_t ReconRecord::ByteSizeLong() const {
   (void) cached_has_bits;
 
   cached_has_bits = _has_bits_[0];
-  if (cached_has_bits & 0x0000003fu) {
+  if (cached_has_bits & 0x00000007u) {
     // string owner = 2;
     if (cached_has_bits & 0x00000001u) {
       total_size += 1 +
@@ -931,27 +894,6 @@ size_t ReconRecord::ByteSizeLong() const {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
           this->_internal_id());
-    }
-
-    // int32 obj_id = 4;
-    if (cached_has_bits & 0x00000008u) {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
-          this->_internal_obj_id());
-    }
-
-    // int32 mtl_id = 5;
-    if (cached_has_bits & 0x00000010u) {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
-          this->_internal_mtl_id());
-    }
-
-    // int32 tex_id = 6;
-    if (cached_has_bits & 0x00000020u) {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
-          this->_internal_tex_id());
     }
 
   }
@@ -987,7 +929,7 @@ void ReconRecord::MergeFrom(const ReconRecord& from) {
   (void) cached_has_bits;
 
   cached_has_bits = from._has_bits_[0];
-  if (cached_has_bits & 0x0000003fu) {
+  if (cached_has_bits & 0x00000007u) {
     if (cached_has_bits & 0x00000001u) {
       _internal_set_owner(from._internal_owner());
     }
@@ -996,15 +938,6 @@ void ReconRecord::MergeFrom(const ReconRecord& from) {
     }
     if (cached_has_bits & 0x00000004u) {
       id_ = from.id_;
-    }
-    if (cached_has_bits & 0x00000008u) {
-      obj_id_ = from.obj_id_;
-    }
-    if (cached_has_bits & 0x00000010u) {
-      mtl_id_ = from.mtl_id_;
-    }
-    if (cached_has_bits & 0x00000020u) {
-      tex_id_ = from.tex_id_;
     }
     _has_bits_[0] |= cached_has_bits;
   }
@@ -1034,12 +967,7 @@ void ReconRecord::InternalSwap(ReconRecord* other) {
   swap(_has_bits_[0], other->_has_bits_[0]);
   owner_.Swap(&other->owner_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   name_.Swap(&other->name_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(ReconRecord, tex_id_)
-      + sizeof(ReconRecord::tex_id_)
-      - PROTOBUF_FIELD_OFFSET(ReconRecord, id_)>(
-          reinterpret_cast<char*>(&id_),
-          reinterpret_cast<char*>(&other->id_));
+  swap(id_, other->id_);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata ReconRecord::GetMetadata() const {
@@ -1241,6 +1169,340 @@ void ReconRecords::InternalSwap(ReconRecords* other) {
 }
 
 
+// ===================================================================
+
+class ReconBuffer::_Internal {
+ public:
+  using HasBits = decltype(std::declval<ReconBuffer>()._has_bits_);
+  static void set_has_file_base(HasBits* has_bits) {
+    (*has_bits)[0] |= 1u;
+  }
+  static void set_has_obj_content(HasBits* has_bits) {
+    (*has_bits)[0] |= 2u;
+  }
+  static void set_has_mtl_content(HasBits* has_bits) {
+    (*has_bits)[0] |= 4u;
+  }
+  static void set_has_texture_content(HasBits* has_bits) {
+    (*has_bits)[0] |= 8u;
+  }
+};
+
+ReconBuffer::ReconBuffer(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor();
+  RegisterArenaDtor(arena);
+  // @@protoc_insertion_point(arena_constructor:online.ReconBuffer)
+}
+ReconBuffer::ReconBuffer(const ReconBuffer& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message(),
+      _has_bits_(from._has_bits_) {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  file_base_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (from._internal_has_file_base()) {
+    file_base_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_file_base(), 
+      GetArena());
+  }
+  obj_content_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (from._internal_has_obj_content()) {
+    obj_content_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_obj_content(), 
+      GetArena());
+  }
+  mtl_content_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (from._internal_has_mtl_content()) {
+    mtl_content_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_mtl_content(), 
+      GetArena());
+  }
+  texture_content_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (from._internal_has_texture_content()) {
+    texture_content_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_texture_content(), 
+      GetArena());
+  }
+  // @@protoc_insertion_point(copy_constructor:online.ReconBuffer)
+}
+
+void ReconBuffer::SharedCtor() {
+file_base_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+obj_content_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+mtl_content_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+texture_content_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+}
+
+ReconBuffer::~ReconBuffer() {
+  // @@protoc_insertion_point(destructor:online.ReconBuffer)
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+void ReconBuffer::SharedDtor() {
+  GOOGLE_DCHECK(GetArena() == nullptr);
+  file_base_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  obj_content_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  mtl_content_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  texture_content_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+}
+
+void ReconBuffer::ArenaDtor(void* object) {
+  ReconBuffer* _this = reinterpret_cast< ReconBuffer* >(object);
+  (void)_this;
+}
+void ReconBuffer::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void ReconBuffer::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+
+void ReconBuffer::Clear() {
+// @@protoc_insertion_point(message_clear_start:online.ReconBuffer)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  cached_has_bits = _has_bits_[0];
+  if (cached_has_bits & 0x0000000fu) {
+    if (cached_has_bits & 0x00000001u) {
+      file_base_.ClearNonDefaultToEmpty();
+    }
+    if (cached_has_bits & 0x00000002u) {
+      obj_content_.ClearNonDefaultToEmpty();
+    }
+    if (cached_has_bits & 0x00000004u) {
+      mtl_content_.ClearNonDefaultToEmpty();
+    }
+    if (cached_has_bits & 0x00000008u) {
+      texture_content_.ClearNonDefaultToEmpty();
+    }
+  }
+  _has_bits_.Clear();
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* ReconBuffer::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  _Internal::HasBits has_bits{};
+  while (!ctx->Done(&ptr)) {
+    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    CHK_(ptr);
+    switch (tag >> 3) {
+      // string file_base = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
+          auto str = _internal_mutable_file_base();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "online.ReconBuffer.file_base"));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // bytes obj_content = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
+          auto str = _internal_mutable_obj_content();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // bytes mtl_content = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 26)) {
+          auto str = _internal_mutable_mtl_content();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // bytes texture_content = 4;
+      case 4:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 34)) {
+          auto str = _internal_mutable_texture_content();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      default: {
+      handle_unusual:
+        if ((tag & 7) == 4 || tag == 0) {
+          ctx->SetLastTag(tag);
+          goto success;
+        }
+        ptr = UnknownFieldParse(tag,
+            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+            ptr, ctx);
+        CHK_(ptr != nullptr);
+        continue;
+      }
+    }  // switch
+  }  // while
+success:
+  _has_bits_.Or(has_bits);
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto success;
+#undef CHK_
+}
+
+::PROTOBUF_NAMESPACE_ID::uint8* ReconBuffer::_InternalSerialize(
+    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:online.ReconBuffer)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // string file_base = 1;
+  if (_internal_has_file_base()) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_file_base().data(), static_cast<int>(this->_internal_file_base().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "online.ReconBuffer.file_base");
+    target = stream->WriteStringMaybeAliased(
+        1, this->_internal_file_base(), target);
+  }
+
+  // bytes obj_content = 2;
+  if (_internal_has_obj_content()) {
+    target = stream->WriteBytesMaybeAliased(
+        2, this->_internal_obj_content(), target);
+  }
+
+  // bytes mtl_content = 3;
+  if (_internal_has_mtl_content()) {
+    target = stream->WriteBytesMaybeAliased(
+        3, this->_internal_mtl_content(), target);
+  }
+
+  // bytes texture_content = 4;
+  if (_internal_has_texture_content()) {
+    target = stream->WriteBytesMaybeAliased(
+        4, this->_internal_texture_content(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:online.ReconBuffer)
+  return target;
+}
+
+size_t ReconBuffer::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:online.ReconBuffer)
+  size_t total_size = 0;
+
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  cached_has_bits = _has_bits_[0];
+  if (cached_has_bits & 0x0000000fu) {
+    // string file_base = 1;
+    if (cached_has_bits & 0x00000001u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+          this->_internal_file_base());
+    }
+
+    // bytes obj_content = 2;
+    if (cached_has_bits & 0x00000002u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
+          this->_internal_obj_content());
+    }
+
+    // bytes mtl_content = 3;
+    if (cached_has_bits & 0x00000004u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
+          this->_internal_mtl_content());
+    }
+
+    // bytes texture_content = 4;
+    if (cached_has_bits & 0x00000008u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
+          this->_internal_texture_content());
+    }
+
+  }
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
+        _internal_metadata_, total_size, &_cached_size_);
+  }
+  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
+  SetCachedSize(cached_size);
+  return total_size;
+}
+
+void ReconBuffer::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:online.ReconBuffer)
+  GOOGLE_DCHECK_NE(&from, this);
+  const ReconBuffer* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<ReconBuffer>(
+          &from);
+  if (source == nullptr) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:online.ReconBuffer)
+    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:online.ReconBuffer)
+    MergeFrom(*source);
+  }
+}
+
+void ReconBuffer::MergeFrom(const ReconBuffer& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:online.ReconBuffer)
+  GOOGLE_DCHECK_NE(&from, this);
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  cached_has_bits = from._has_bits_[0];
+  if (cached_has_bits & 0x0000000fu) {
+    if (cached_has_bits & 0x00000001u) {
+      _internal_set_file_base(from._internal_file_base());
+    }
+    if (cached_has_bits & 0x00000002u) {
+      _internal_set_obj_content(from._internal_obj_content());
+    }
+    if (cached_has_bits & 0x00000004u) {
+      _internal_set_mtl_content(from._internal_mtl_content());
+    }
+    if (cached_has_bits & 0x00000008u) {
+      _internal_set_texture_content(from._internal_texture_content());
+    }
+  }
+}
+
+void ReconBuffer::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:online.ReconBuffer)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void ReconBuffer::CopyFrom(const ReconBuffer& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:online.ReconBuffer)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool ReconBuffer::IsInitialized() const {
+  return true;
+}
+
+void ReconBuffer::InternalSwap(ReconBuffer* other) {
+  using std::swap;
+  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  swap(_has_bits_[0], other->_has_bits_[0]);
+  file_base_.Swap(&other->file_base_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  obj_content_.Swap(&other->obj_content_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  mtl_content_.Swap(&other->mtl_content_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  texture_content_.Swap(&other->texture_content_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata ReconBuffer::GetMetadata() const {
+  return GetMetadataStatic();
+}
+
+
 // @@protoc_insertion_point(namespace_scope)
 }  // namespace online
 PROTOBUF_NAMESPACE_OPEN
@@ -1255,6 +1517,9 @@ template<> PROTOBUF_NOINLINE ::online::ReconRecord* Arena::CreateMaybeMessage< :
 }
 template<> PROTOBUF_NOINLINE ::online::ReconRecords* Arena::CreateMaybeMessage< ::online::ReconRecords >(Arena* arena) {
   return Arena::CreateMessageInternal< ::online::ReconRecords >(arena);
+}
+template<> PROTOBUF_NOINLINE ::online::ReconBuffer* Arena::CreateMaybeMessage< ::online::ReconBuffer >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::online::ReconBuffer >(arena);
 }
 PROTOBUF_NAMESPACE_CLOSE
 

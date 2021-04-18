@@ -1463,7 +1463,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "cp -r ${SRCROOT}/assets ${BUILT_PRODUCTS_DIR}\ncp -r ${SRCROOT}/samples ${BUILT_PRODUCTS_DIR}\ncp -r ${SRCROOT}/shaders ${BUILT_PRODUCTS_DIR}\nmkdir -p ${BUILT_PRODUCTS_DIR}/recons\n";
+			shellScript = "cp -r ${SRCROOT}/assets ${BUILT_PRODUCTS_DIR}\ncp -r ${SRCROOT}/samples ${BUILT_PRODUCTS_DIR}\ncp -r ${SRCROOT}/shaders ${BUILT_PRODUCTS_DIR}\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 

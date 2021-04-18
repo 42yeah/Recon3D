@@ -12,6 +12,7 @@
 #include <sstream>
 #include <vector>
 #include <mutex>
+#include <filesystem>
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 
@@ -40,6 +41,8 @@ struct ReconRecord {
     char name[512] = { 0 };
     char obj_file[512] = { 0 };
 };
+
+auto mkdir_if_not_exists(std::filesystem::path path) -> void;
 
 auto read_recon_records(std::string path) -> std::vector<ReconRecord>;
 

@@ -12,6 +12,7 @@
 #include <set>
 #include <optional>
 #include <vector>
+#include <filesystem>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
@@ -36,6 +37,8 @@ public:
     auto send(int sock, T what) -> bool;
     
 private:
+    auto mkdir_if_not_exists(std::filesystem::path path) -> void;
+
     std::set<int> sockets;
     bool ready;
     int server_sock;
